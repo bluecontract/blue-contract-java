@@ -1,0 +1,18 @@
+name: Sample Contract
+type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+properties:
+  x: 1
+workflows:
+  - name: Simple
+    trigger:
+      name: Event 1
+      event:
+        type: Contract Initialized
+    steps:
+      - name: InitializeContract
+        type: Trigger Event Step
+        event:
+          type:
+            name: My Name
+          abc: 1
+          def: 2

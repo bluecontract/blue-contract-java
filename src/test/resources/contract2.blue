@@ -1,0 +1,40 @@
+name: Sample Contract
+type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+properties:
+  x: 1
+workflows:
+  - name: Simple
+    trigger:
+      name: Event 1
+      event:
+        type: Contract Initialized
+    steps:
+      - name: InitializeContract
+        type: Initialize Local Contract Step
+        contract:
+          name: My Local Contract
+          type:
+            blueId: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+          properties:
+            yourProperty: ca-boom!
+          workflows:
+            - name: Expect Event
+              trigger:
+                name: Event 3
+                event:
+                  type:
+                    name: Hello Event 4
+              steps:
+                - name: UpdateStep
+                  type: Update Step
+                  changeset:
+                    - op: add
+                      path: /properties/y
+                      val: 1
+
+      - name: UpdateStep
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/myLocalContract
+            val: ${steps.InitializeContract.localContract}

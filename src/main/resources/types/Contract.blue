@@ -1,0 +1,8 @@
+name: Contract
+description: (full documentation goes here)
+participants:
+  description: participants part
+properties:
+  description: properties part
+workflows:
+  description: workflows part

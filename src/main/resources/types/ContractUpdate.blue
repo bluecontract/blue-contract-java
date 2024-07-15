@@ -1,0 +1,10 @@
+name: Contract Update
+description: ...
+contractInstance:
+  description: ...
+contractInstancePrev:
+  description: ...
+emittedEvents:
+  - contractInstance: 1
+    workflowInstance: 43
+    

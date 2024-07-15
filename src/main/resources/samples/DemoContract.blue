@@ -1,0 +1,37 @@
+name: Demo Contract
+type:
+  blueId: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+properties:
+  myProperty: HM5xSf98Hq37GYe1zu5Mgy4u3tMWYsZ7EcyyenKDCRWL
+  yourProperty:
+    description: Put your property here
+    type: Text
+workflows:
+  - name: Workflow 1
+    description: Sample Workflow
+    trigger:
+      name: Event 1
+      event:
+        type: Contract Initialized
+    steps:
+      - name: JSStep2
+        type: JavaScript Code Step
+        code: |
+          z = contract("/properties/myProperty/products/0");
+          ({ result: z });   
+
+      - name: UpdateStep
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/joinedProperty
+            val: ${contract("/properties/myProperty/products/0") + " and " + contract("/properties/yourProperty")}
+
+      - name: Event 2
+        type: Expect Event Step
+        event:
+          type: Hello Event
+          message: Good.
+      - name: Code 3
+        type: Dummy Code
+        abc: 123
