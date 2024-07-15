@@ -38,7 +38,10 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
 
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
         ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider());
-        ContractInstance instance = contractProcessor.initiate(contractToInitialize).getContractInstance();
+        ContractInstance instance = contractProcessor
+                .initiate(contractToInitialize, contractProcessingContext.getInitiateContractEntryBlueId(),
+                        contractProcessingContext.getInitiateContractProcessingEntryBlueId())
+                .getContractInstance();
 
         int nextNumber = contractProcessingContext.getStartedLocalContracts() + 1;
         contractProcessingContext.startedLocalContracts(nextNumber);

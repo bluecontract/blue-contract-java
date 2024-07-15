@@ -21,17 +21,19 @@ public class Sample {
         Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract3.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         List<Node> emittedEvents = new ArrayList<>();
+        String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
+        String initiateContractProcessingEntryBlueId = "BeTSqC2nC2jmUNSKJJQxrNzUcVc2P674Bi637bsBTy1";
 
         StandardProcessorsProvider provider = new StandardProcessorsProvider();
         ContractProcessor contractProcessor = new ContractProcessor(provider);
-        ContractUpdate update = contractProcessor.initiate(contract);
+        ContractUpdate update = contractProcessor.initiate(contract, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
         save(update, 1);
         if (update.getEmittedEvents() != null) {
             emittedEvents.addAll(update.getEmittedEvents());
         }
 
         ContractInstance instance = load(1);
-        update = contractProcessor.processEvent(event, instance);
+        update = contractProcessor.processEvent(event, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
         save(update, 2);
         if (update.getEmittedEvents() != null) {
             emittedEvents.addAll(update.getEmittedEvents());
@@ -40,7 +42,7 @@ public class Sample {
         int fileId = 3;
         while (!emittedEvents.isEmpty()) {
             Node emittedEvent = emittedEvents.remove(0);
-            update = contractProcessor.processEvent(emittedEvent, instance);
+            update = contractProcessor.processEvent(emittedEvent, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
             save(update, fileId++);
             if (update.getEmittedEvents() != null) {
                 emittedEvents.addAll(update.getEmittedEvents());

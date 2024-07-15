@@ -2,6 +2,12 @@ name: Sample Contract
 type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
 properties:
   x: 1
+externalContracts:
+  someContract:
+    type:
+      name: External Contract
+    initialContractEntry:
+      value: DsFL7JSJooSmhhtHV4ixwo3CAVMbGABYSAkTFoZ9sSbP
 workflows:
   - name: Simple
     trigger:

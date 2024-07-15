@@ -13,24 +13,34 @@ import java.util.Map;
 
 public class ContractProcessingContext {
     private Node contract;
+    private int contractInstanceId;
     private List<Node> emittedEvents;
     private List<ContractInstance> contractInstances;
     private int startedLocalContracts;
+    private String initiateContractEntryBlueId;
+    private String initiateContractProcessingEntryBlueId;
     private StepProcessorProvider stepProcessorProvider;
     private Blue blue;
 
     public ContractProcessingContext(Node contract, List<ContractInstance> contractInstances, int startedLocalContracts,
+                                     String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId,
                                      StepProcessorProvider stepProcessorProvider, Blue blue) {
         this.contract = contract;
         this.emittedEvents = new ArrayList<>();
         this.contractInstances = contractInstances;
         this.startedLocalContracts = startedLocalContracts;
+        this.initiateContractEntryBlueId = initiateContractEntryBlueId;
+        this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
         this.stepProcessorProvider = stepProcessorProvider;
         this.blue = blue;
     }
 
     public Node getContract() {
         return contract;
+    }
+
+    public int getContractInstanceId() {
+        return contractInstanceId;
     }
 
     public List<Node> getEmittedEvents() {
@@ -43,6 +53,14 @@ public class ContractProcessingContext {
 
     public int getStartedLocalContracts() {
         return startedLocalContracts;
+    }
+
+    public String getInitiateContractEntryBlueId() {
+        return initiateContractEntryBlueId;
+    }
+
+    public String getInitiateContractProcessingEntryBlueId() {
+        return initiateContractProcessingEntryBlueId;
     }
 
     public StepProcessorProvider getStepProcessorProvider() {
@@ -58,6 +76,11 @@ public class ContractProcessingContext {
         return this;
     }
 
+    public ContractProcessingContext contractInstanceId(int contractInstanceId) {
+        this.contractInstanceId = contractInstanceId;
+        return this;
+    }
+
     public ContractProcessingContext emittedEvents(List<Node> emittedEvents) {
         this.emittedEvents = emittedEvents;
         return this;
@@ -70,6 +93,16 @@ public class ContractProcessingContext {
 
     public ContractProcessingContext contractInstances(List<ContractInstance> contractInstances) {
         this.contractInstances = contractInstances;
+        return this;
+    }
+
+    public ContractProcessingContext initiateContractEntryBlueId(String initiateContractEntryBlueId) {
+        this.initiateContractEntryBlueId = initiateContractEntryBlueId;
+        return this;
+    }
+
+    public ContractProcessingContext initiateContractProcessingEntry(String initiateContractProcessingEntryBlueId) {
+        this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
         return this;
     }
 

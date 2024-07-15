@@ -16,6 +16,9 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
 
+        if (event.getType() == null || event.getType().getName() == null)
+            return Optional.empty();
+        
         String stepTypeName = step.getProperties().get("event").getType().getName();
         String eventTypeName = event.getType().getName();
         if (eventTypeName.equals(stepTypeName))
