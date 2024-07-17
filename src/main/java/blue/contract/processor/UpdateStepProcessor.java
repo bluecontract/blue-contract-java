@@ -1,8 +1,10 @@
 package blue.contract.processor;
 
 import blue.contract.AbstractStepProcessor;
-import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.model.WorkflowProcessingContext;
+import blue.contract.utils.ExpressionEvaluator;
+import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,8 +24,8 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
 
     private List<Map<String, Object>> rawChangeset;
 
-    public UpdateStepProcessor(Node step) {
-        super(step);
+    public UpdateStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
+        super(step, expressionEvaluator);
         prepareChangeset();
     }
 
@@ -51,13 +53,13 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
         return finalizeNextStepByOrder(event, context);
     }
 
-    private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
-        Object obj = NodeToObject.get(workflowProcessingContext.getContractProcessingContext().getContract(), SIMPLE);
+    private void processEvent(Node event, WorkflowProcessingContext context) {
+        Object obj = NodeToObject.get(context.getContractProcessingContext().getContract(), SIMPLE);
         JsonNode objNode = JSON_MAPPER.convertValue(obj, JsonNode.class);
 
         try {
             List<Map<String, Object>> evaluatedChangeset = rawChangeset.stream()
-                    .map(change -> evaluateChange(change, event, workflowProcessingContext))
+                    .map(change -> evaluateChange(change, context))
                     .collect(Collectors.toList());
 
             JsonNode patchNode = JSON_MAPPER.convertValue(evaluatedChangeset, JsonNode.class);
@@ -65,28 +67,18 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
 
             JsonNode result = patch.apply(objNode);
             Node updatedContract = JSON_MAPPER.convertValue(result, Node.class);
-            workflowProcessingContext.getContractProcessingContext().contract(updatedContract);
+            context.getContractProcessingContext().contract(updatedContract);
         } catch (IOException | JsonPatchException e) {
             throw new IllegalArgumentException("Applying JSON Patch failed", e);
         }
     }
 
-    private Map<String, Object> evaluateChange(Map<String, Object> change, Node event, WorkflowProcessingContext context) {
+    private Map<String, Object> evaluateChange(Map<String, Object> change, WorkflowProcessingContext context) {
         return change.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> evaluateExpression(entry.getValue(), event, context)
+                        entry -> evaluateExpression(entry.getValue(), context)
                 ));
     }
-
-    private Object evaluateExpression(Object expression, Node event, WorkflowProcessingContext context) {
-        if (expression instanceof String && ((String) expression).contains("${")) {
-            String expr = (String) expression;
-            Object result = context.getContractProcessingContext().executeExpression(expr, context);
-//            return new JSExecutor(context.getContractProcessingContext()).toJsonCompatibleStructure(result);
-            return result;
-        }
-        return expression;
-    }
-
+    
 }

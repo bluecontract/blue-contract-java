@@ -2,6 +2,8 @@ package blue.contract.processor;
 
 import blue.contract.StepProcessor;
 import blue.contract.StepProcessorProvider;
+import blue.contract.utils.ExpressionEvaluator;
+import blue.contract.utils.JSExecutor;
 import blue.language.model.Node;
 
 import java.io.IOException;
@@ -17,20 +19,17 @@ public class StandardProcessorsProvider implements StepProcessorProvider {
             return Optional.empty();
         }
 
+        JSExecutor jsExecutor = new JSExecutor();
+        ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(jsExecutor);
+
         Map<String, Function<Node, StepProcessor>> processorMap = new HashMap<>();
-        processorMap.put("Hello Event", HelloEventProcessor::new);
-        processorMap.put("Expect Event Step", ExpectEventStepProcessor::new);
-        processorMap.put("Trigger Event Step", TriggerEventStepProcessor::new);
-        processorMap.put("Update Step", UpdateStepProcessor::new);
-        processorMap.put("Dummy Code", DummyCodeStepProcessor::new);
-        processorMap.put("Initialize Local Contract Step", InitializeLocalContractStepProcessor::new);
-        processorMap.put("JavaScript Code Step", node -> {
-            try {
-                return new JSCodeStepProcessor(node);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        processorMap.put("Hello Event", node -> new HelloEventProcessor(node, expressionEvaluator));
+        processorMap.put("Expect Event Step", node -> new ExpectEventStepProcessor(node, expressionEvaluator));
+        processorMap.put("Trigger Event Step", node -> new TriggerEventStepProcessor(node, expressionEvaluator));
+        processorMap.put("Update Step", node -> new UpdateStepProcessor(node, expressionEvaluator));
+        processorMap.put("Dummy Code", node -> new DummyCodeStepProcessor(node, expressionEvaluator));
+        processorMap.put("Initialize Local Contract Step", node -> new InitializeLocalContractStepProcessor(node, expressionEvaluator));
+        processorMap.put("JavaScript Code Step", node -> new JSCodeStepProcessor(node, expressionEvaluator, jsExecutor));
 
         return Optional.ofNullable(processorMap.get(step.getType().getName())).map(func -> func.apply(step));
     }

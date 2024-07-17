@@ -1,15 +1,21 @@
 package blue.contract.model;
 
 import blue.contract.StepProcessorProvider;
-import blue.contract.utils.JSExecutor;
 import blue.language.Blue;
 import blue.language.model.Node;
+import blue.language.utils.BlueIds;
+import blue.language.utils.NodeToObject;
+import jdk.vm.ci.meta.Local;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
+import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 
 public class ContractProcessingContext {
     private Node contract;
@@ -116,21 +122,29 @@ public class ContractProcessingContext {
         return this;
     }
 
-    public Object executeExpression(String value, WorkflowProcessingContext context) {
-        String expr = value.replaceAll("^\\$\\{(.*)\\}$", "$1");
-        try {
-            Map<String, Object> bindings = new HashMap<>();
-            // Add the contract function to the bindings
-            bindings.put("contract", (java.util.function.Function<String, Object>) this::contractFunction);
-            bindings.put("steps", context.getWorkflowInstance().getStepResults());
-
-            return new JSExecutor(this).executeScript(expr, bindings);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Error executing JS expression", e);
+    public Object accessContract(String path, boolean useGlobalScope) {
+        Function<Node, Node> linkingProvider = useGlobalScope ? this::linkingProviderImplementation : null;
+        Object result = contract.get(path, linkingProvider);
+        if (result instanceof Node) {
+            result = NodeToObject.get((Node) result, SIMPLE);
         }
+        return result;
     }
 
-    private Object contractFunction(String path) {
-        return new JSExecutor(this).contract(path);
+    private Node linkingProviderImplementation(Node node) {
+        if (node.getType() != null) {
+            String localContractBlueId = BlueIds.getBlueId(LocalContract.class)
+                    .orElseThrow(() -> new IllegalStateException("LocalContract class must have @BlueId annotation properly set."));
+            if (localContractBlueId.equals(node.getType().get("/blueId"))) {
+                BigInteger id = (BigInteger) node.getProperties().get("id").getValue();
+                return contractInstances.stream()
+                        .filter(instance -> instance.getId() == id.intValue())
+                        .findFirst()
+                        .map(ContractInstance::getContract)
+                        .orElse(null);
+            }
+        }
+        return null;
     }
+
 }

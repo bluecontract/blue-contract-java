@@ -15,10 +15,28 @@ workflows:
       event:
         type: Contract Initialized
     steps:
-      - name: InitializeContract
+      - name: TriggerEvent
         type: Trigger Event Step
         event:
-          type:
-            name: My Name
-          abc: 1
-          def: 2
+          type: 7r9eeARFL6wpNtC2zSvENFiDpiU8KrhpTgMJfwt8C1cH
+          abc: ${contract("/properties/x")}
+          def: ${contract("/name")}
+          x:
+            a: ${contract("/name")}
+            b:
+              c: ${contract("/name")}
+
+  - name: Simple 2
+    trigger:
+      name: Event 1
+      event:
+        type: Contract Initialized
+      contract:
+        
+    steps:
+      - name: UpdateStep
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/y
+            val: 1

@@ -38,3 +38,10 @@ workflows:
           - op: add
             path: /properties/myLocalContract
             val: ${steps.InitializeContract.localContract}
+
+      - name: UpdateStep2
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/myLocalContractProperty
+            val: ${contract("/properties/myLocalContract/properties/yourProperty")}

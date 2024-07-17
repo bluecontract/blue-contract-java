@@ -3,6 +3,7 @@ package blue.contract.processor;
 import blue.contract.AbstractStepProcessor;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.utils.ExpressionEvaluator;
 import blue.language.model.Node;
 
 import java.util.Optional;
@@ -12,8 +13,8 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
 public class HelloEventProcessor extends AbstractStepProcessor {
 
-    public HelloEventProcessor(Node step) {
-        super(step);
+    public HelloEventProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
+        super(step, expressionEvaluator);
     }
 
     @Override

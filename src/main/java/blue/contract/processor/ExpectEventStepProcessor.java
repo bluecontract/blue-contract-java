@@ -3,25 +3,26 @@ package blue.contract.processor;
 import blue.contract.AbstractStepProcessor;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.utils.ExpressionEvaluator;
+import blue.language.Blue;
 import blue.language.model.Node;
+import blue.language.utils.limits.Limits;
+import blue.language.utils.limits.PathLimits;
 
 import java.util.Optional;
 
 public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
-    public ExpectEventStepProcessor(Node step) {
-        super(step);
+    public ExpectEventStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
+        super(step, expressionEvaluator);
     }
 
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+        Node expectedEventNode = step.getProperties().get("event").clone();
+        expectedEventNode = evaluateExpressionsRecursively(expectedEventNode, context);
 
-        if (event.getType() == null || event.getType().getName() == null)
-            return Optional.empty();
-        
-        String stepTypeName = step.getProperties().get("event").getType().getName();
-        String eventTypeName = event.getType().getName();
-        if (eventTypeName.equals(stepTypeName))
+        if (context.getContractProcessingContext().getBlue().nodeMatchesType(event, expectedEventNode))
             return finalizeNextStepByOrder(event, context);
         else
             return Optional.empty();

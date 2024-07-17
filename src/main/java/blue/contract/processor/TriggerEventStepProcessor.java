@@ -5,6 +5,7 @@ import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.event.ContractProcessingEvent;
+import blue.contract.utils.ExpressionEvaluator;
 import blue.language.model.Node;
 
 import java.util.Optional;
@@ -13,8 +14,8 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class TriggerEventStepProcessor extends AbstractStepProcessor {
 
-    public TriggerEventStepProcessor(Node step) {
-        super(step);
+    public TriggerEventStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
+        super(step, expressionEvaluator);
     }
 
     @Override
@@ -31,6 +32,7 @@ public class TriggerEventStepProcessor extends AbstractStepProcessor {
 
     private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
         Node eventNode = step.getProperties().get("event").clone();
+        eventNode = evaluateExpressionsRecursively(eventNode, workflowProcessingContext);
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
         ContractProcessingEvent processingEvent = new ContractProcessingEvent()
                 .contractInstance(contractProcessingContext.getContractInstanceId())

@@ -1,0 +1,20 @@
+name: Contract Processing Event
+description: Represents an event that occurs during the processing of a contract instance, capturing the state and context of the workflow and contract steps involved.
+contractInstance:
+  type: Integer
+  description: Identifier for the contract instance where the event occurred.
+workflowInstance:
+  type: Integer
+  description: Identifier for the workflow instance where the event occurred.
+workflowStepName:
+  type: Text
+  description: The name of the workflow step where the event occurred.
+initiateContractEntry:
+  type: Node
+  description: Entry for initiating the contract.
+initiateContractProcessingEntry:
+  type: Node
+  description: Entry for initiating the processing of the contract.
+event:
+  type: Node
+  description: The actual event that was triggered when processing the contract.

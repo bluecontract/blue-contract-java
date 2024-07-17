@@ -2,10 +2,9 @@ package blue.contract.processor;
 
 import blue.contract.AbstractStepProcessor;
 import blue.contract.ContractProcessor;
-import blue.contract.model.ContractInstance;
-import blue.contract.model.ContractProcessingContext;
-import blue.contract.model.WorkflowInstance;
-import blue.contract.model.WorkflowProcessingContext;
+import blue.contract.model.*;
+import blue.contract.utils.ExpressionEvaluator;
+import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
 
@@ -17,8 +16,8 @@ import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 
 public class InitializeLocalContractStepProcessor extends AbstractStepProcessor {
 
-    public InitializeLocalContractStepProcessor(Node step) {
-        super(step);
+    public InitializeLocalContractStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
+        super(step, expressionEvaluator);
     }
 
     @Override
@@ -34,6 +33,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
     }
 
     private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
+        Blue blue = workflowProcessingContext.getContractProcessingContext().getBlue();
         Node contractToInitialize = step.getProperties().get("contract");
 
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
@@ -50,11 +50,10 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         contractProcessingContext.getContractInstances().add(instance);
         Optional<String> stepName = getStepName();
         if (stepName.isPresent()) {
-            Node result = new Node().type(new Node().name("Local Contract")).properties(
-                    "id", new Node().value(instance.getId())
-            );
+            LocalContract result = new LocalContract()
+                    .id(instance.getId());
             Map<String, Object> map = new HashMap<>();
-            map.put("localContract", NodeToObject.get(result, SIMPLE));
+            map.put("localContract", NodeToObject.get(blue.objectToNode(result), SIMPLE));
             workflowProcessingContext.getWorkflowInstance().getStepResults().put(stepName.get(), map);
         }
 

@@ -2,6 +2,8 @@ package blue.contract;
 
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.utils.ExpressionEvaluator;
+import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.contract.utils.Workflows;
 import blue.language.model.Node;
 
@@ -14,9 +16,11 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 public abstract class AbstractStepProcessor implements StepProcessor {
 
     protected Node step;
+    protected final ExpressionEvaluator expressionEvaluator;
 
-    public AbstractStepProcessor(Node step) {
+    public AbstractStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
         this.step = step;
+        this.expressionEvaluator = expressionEvaluator;
     }
 
     protected Optional<WorkflowInstance> handleNextStepByOrder(Node event, WorkflowProcessingContext context) {
@@ -52,6 +56,22 @@ public abstract class AbstractStepProcessor implements StepProcessor {
 
     public Optional<String> getStepName() {
         return Optional.ofNullable(step.getName());
+    }
+
+    protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context) {
+        return evaluateExpression(potentialExpression, context, ExpressionScope.GLOBAL);
+    }
+
+    protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope) {
+        return expressionEvaluator.evaluateIfExpression(potentialExpression, context, scope);
+    }
+
+    protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context) {
+        return evaluateExpressionsRecursively(node, context, ExpressionScope.GLOBAL);
+    }
+
+    protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context, ExpressionScope scope) {
+        return expressionEvaluator.processNodeRecursively(node, context, scope);
     }
 
 }

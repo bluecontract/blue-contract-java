@@ -3,6 +3,7 @@ package blue.contract.processor;
 import blue.contract.AbstractStepProcessor;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
+import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
@@ -17,10 +18,12 @@ import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 public class JSCodeStepProcessor extends AbstractStepProcessor {
 
     private final String code;
+    private final JSExecutor jsExecutor;
 
-    public JSCodeStepProcessor(Node step) throws IOException {
-        super(step);
+    public JSCodeStepProcessor(Node step, ExpressionEvaluator expressionEvaluator, JSExecutor jsExecutor) {
+        super(step, expressionEvaluator);
         this.code = (String) step.getProperties().get("code").getValue();
+        this.jsExecutor = jsExecutor;
     }
 
     @Override
@@ -35,13 +38,12 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
         return finalizeNextStepByOrder(event, context);
     }
 
-    private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
-        JSExecutor jsExecutor = new JSExecutor(workflowProcessingContext.getContractProcessingContext());
-
+    private void processEvent(Node event, WorkflowProcessingContext context) {
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("event", NodeToObject.get(event, SIMPLE));
-        bindings.put("steps", workflowProcessingContext.getWorkflowInstance().getStepResults());
-        bindings.put("contract", new ContractFunction(jsExecutor));
+        bindings.put("steps", context.getWorkflowInstance().getStepResults());
+        bindings.put("contract", (java.util.function.Function<String, Object>) path ->
+                context.getContractProcessingContext().accessContract(path, true));
 
         try {
             Object result = jsExecutor.executeScript(code, bindings);
@@ -51,11 +53,11 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
                 if (result instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> resultMap = (Map<String, Object>) result;
-                    workflowProcessingContext.getWorkflowInstance().getStepResults().put(stepName.get(), resultMap);
+                    context.getWorkflowInstance().getStepResults().put(stepName.get(), resultMap);
                 } else {
-                    throw new IllegalArgumentException("Unexpected result type from JavaScript execution");
+                    throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
                 }
-            }
+            } 
         } catch (IOException e) {
             throw new IllegalArgumentException("Error executing JS script", e);
         }

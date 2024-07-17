@@ -1,0 +1,5 @@
+name: My Sample Event
+abc:
+  type: Text
+def:
+  type: Text
