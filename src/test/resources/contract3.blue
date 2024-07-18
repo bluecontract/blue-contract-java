@@ -31,8 +31,7 @@ workflows:
       name: Event 1
       event:
         type: Contract Initialized
-      contract:
-        
+
     steps:
       - name: UpdateStep
         type: Update Step

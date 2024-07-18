@@ -1,9 +1,9 @@
 name: Contract Processing Event
 description: Represents an event that occurs during the processing of a contract instance, capturing the state and context of the workflow and contract steps involved.
-contractInstance:
+contractInstanceId:
   type: Integer
   description: Identifier for the contract instance where the event occurred.
-workflowInstance:
+workflowInstanceId:
   type: Integer
   description: Identifier for the workflow instance where the event occurred.
 workflowStepName:

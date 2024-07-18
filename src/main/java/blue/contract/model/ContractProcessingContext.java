@@ -4,6 +4,7 @@ import blue.contract.StepProcessorProvider;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.BlueIds;
+import blue.language.utils.NodePathAccessor;
 import blue.language.utils.NodeToObject;
 import jdk.vm.ci.meta.Local;
 
@@ -122,9 +123,9 @@ public class ContractProcessingContext {
         return this;
     }
 
-    public Object accessContract(String path, boolean useGlobalScope) {
+    public Object accessContract(String path, boolean useGlobalScope, boolean resolveFinalLink) {
         Function<Node, Node> linkingProvider = useGlobalScope ? this::linkingProviderImplementation : null;
-        Object result = contract.get(path, linkingProvider);
+        Object result = NodePathAccessor.get(contract, path, linkingProvider, resolveFinalLink);
         if (result instanceof Node) {
             result = NodeToObject.get((Node) result, SIMPLE);
         }

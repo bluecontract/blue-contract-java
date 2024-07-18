@@ -35,8 +35,8 @@ public class TriggerEventStepProcessor extends AbstractStepProcessor {
         eventNode = evaluateExpressionsRecursively(eventNode, workflowProcessingContext);
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
         ContractProcessingEvent processingEvent = new ContractProcessingEvent()
-                .contractInstance(contractProcessingContext.getContractInstanceId())
-                .workflowInstance(workflowProcessingContext.getWorkflowInstance().getId())
+                .contractInstanceId(contractProcessingContext.getContractInstanceId())
+                .workflowInstanceId(workflowProcessingContext.getWorkflowInstance().getId())
                 .workflowStepName(step.getName())
                 .initiateContractEntry(contractProcessingContext.getInitiateContractEntryBlueId())
                 .initiateContractProcessingEntry(contractProcessingContext.getInitiateContractProcessingEntryBlueId())

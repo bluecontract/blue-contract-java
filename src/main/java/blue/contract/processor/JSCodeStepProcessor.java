@@ -43,7 +43,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
         bindings.put("event", NodeToObject.get(event, SIMPLE));
         bindings.put("steps", context.getWorkflowInstance().getStepResults());
         bindings.put("contract", (java.util.function.Function<String, Object>) path ->
-                context.getContractProcessingContext().accessContract(path, true));
+                context.getContractProcessingContext().accessContract(path, true, true));
 
         try {
             Object result = jsExecutor.executeScript(code, bindings);

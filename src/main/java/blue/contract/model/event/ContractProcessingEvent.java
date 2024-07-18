@@ -3,10 +3,10 @@ package blue.contract.model.event;
 import blue.language.model.BlueId;
 import blue.language.model.Node;
 
-@BlueId("33GxuLuMoMRWNJuaNt5D2zrGHJHcAD7RpMchumKe7aus")
+@BlueId("D3qPzjYFEqit1SVgUM8fKzaVrjgmNgZr2WikLDvCdwBM")
 public class ContractProcessingEvent {
-    private Integer contractInstance;
-    private Integer workflowInstance;
+    private Integer contractInstanceId;
+    private Integer workflowInstanceId;
     private String workflowStepName;
     private Node initiateContractEntry;
     private Node initiateContractProcessingEntry;
@@ -15,12 +15,12 @@ public class ContractProcessingEvent {
     public ContractProcessingEvent() {
     }
 
-    public Integer getContractInstance() {
-        return contractInstance;
+    public Integer getContractInstanceId() {
+        return contractInstanceId;
     }
 
-    public Integer getWorkflowInstance() {
-        return workflowInstance;
+    public Integer getWorkflowInstanceId() {
+        return workflowInstanceId;
     }
 
     public String getWorkflowStepName() {
@@ -39,13 +39,13 @@ public class ContractProcessingEvent {
         return event;
     }
 
-    public ContractProcessingEvent contractInstance(Integer contractInstance) {
-        this.contractInstance = contractInstance;
+    public ContractProcessingEvent contractInstanceId(Integer contractInstanceId) {
+        this.contractInstanceId = contractInstanceId;
         return this;
     }
 
-    public ContractProcessingEvent workflowInstance(Integer workflowInstance) {
-        this.workflowInstance = workflowInstance;
+    public ContractProcessingEvent workflowInstanceId(Integer workflowInstanceId) {
+        this.workflowInstanceId = workflowInstanceId;
         return this;
     }
 

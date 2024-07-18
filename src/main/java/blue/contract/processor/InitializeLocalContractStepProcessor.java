@@ -37,17 +37,25 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         Node contractToInitialize = step.getProperties().get("contract");
 
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
-        ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider());
-        ContractInstance instance = contractProcessor
-                .initiate(contractToInitialize, contractProcessingContext.getInitiateContractEntryBlueId(),
-                        contractProcessingContext.getInitiateContractProcessingEntryBlueId())
-                .getContractInstance();
+        int instanceId = contractProcessingContext.getStartedLocalContracts() + 1;
+        int currentContractInstanceId = contractProcessingContext.getContractInstanceId();
+        Node currentContract = contractProcessingContext.getContract();
+        contractProcessingContext.contractInstanceId(instanceId);
+        contractProcessingContext.contract(contractToInitialize);
 
-        int nextNumber = contractProcessingContext.getStartedLocalContracts() + 1;
-        contractProcessingContext.startedLocalContracts(nextNumber);
-        instance.id(nextNumber);
+        ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider());
+        ContractUpdate update = contractProcessor
+                .initiate(contractToInitialize,
+                        contractProcessingContext,
+                        contractProcessingContext.getInitiateContractEntryBlueId(),
+                        contractProcessingContext.getInitiateContractProcessingEntryBlueId());
+        ContractInstance instance = update.getContractInstance();
+        instance.id(instanceId);
 
         contractProcessingContext.getContractInstances().add(instance);
+        contractProcessingContext.contractInstanceId(currentContractInstanceId);
+        contractProcessingContext.contract(currentContract);
+
         Optional<String> stepName = getStepName();
         if (stepName.isPresent()) {
             LocalContract result = new LocalContract()
