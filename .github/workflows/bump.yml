@@ -15,7 +15,6 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check if branch is master
         run: |
           if [[ "${GITHUB_REF##*/}" != "master" ]]; then
@@ -26,6 +25,6 @@ jobs:
         name: Create bump and changelog
         uses: commitizen-tools/commitizen-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_TOKEN }}
       - name: Print Version
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
