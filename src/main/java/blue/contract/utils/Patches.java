@@ -24,11 +24,4 @@ public class Patches {
         return patch.apply(target);
     }
 
-    public static void main(String[] args) throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract.blue"), Node.class);
-        Node contract2 = YAML_MAPPER.readValue(new File("src/test/resources/contract2.blue"), Node.class);
-
-        System.out.println(YAML_MAPPER.writeValueAsString(generatePatch(contract, contract2)));
-    }
-
 }

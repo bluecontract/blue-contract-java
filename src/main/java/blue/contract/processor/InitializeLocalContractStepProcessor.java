@@ -43,7 +43,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         contractProcessingContext.contractInstanceId(instanceId);
         contractProcessingContext.contract(contractToInitialize);
 
-        ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider());
+        ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider(), blue);
         ContractUpdate update = contractProcessor
                 .initiate(contractToInitialize,
                         contractProcessingContext,

@@ -40,6 +40,12 @@ workflows:
           type:
             name: Hello Event 2
           message: Good.
+
       - name: Code 3
         type: Dummy Code
         abc: 123
+
+      - type: Update Properties Step
+        myProperty1: false
+        myProperty2: 1
+        myProperty3: ${contract.properties.x + 1}

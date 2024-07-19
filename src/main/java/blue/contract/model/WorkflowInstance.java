@@ -11,6 +11,7 @@ public class WorkflowInstance {
     private String currentStepName;
     private Map<String, Object> stepResults;
     private boolean finished;
+    private WorkflowInstance nestedWorkflowInstance;
 
     public WorkflowInstance() {
     }
@@ -40,6 +41,10 @@ public class WorkflowInstance {
         return finished;
     }
 
+    public WorkflowInstance getNestedWorkflowInstance() {
+        return nestedWorkflowInstance;
+    }
+
     public WorkflowInstance id(int id) {
         this.id = id;
         return this;
@@ -63,6 +68,15 @@ public class WorkflowInstance {
     public WorkflowInstance finished(boolean finished) {
         this.finished = finished;
         return this;
+    }
+
+    public WorkflowInstance nestedWorkflowInstance(WorkflowInstance nestedWorkflowInstance) {
+        this.nestedWorkflowInstance = nestedWorkflowInstance;
+        return this;
+    }
+
+    public boolean hasNestedWorkflowInstance() {
+        return nestedWorkflowInstance != null;
     }
 
 }

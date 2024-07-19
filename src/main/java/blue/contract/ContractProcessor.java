@@ -30,10 +30,6 @@ public class ContractProcessor {
     private WorkflowProcessor workflowProcessor;
     private Blue blue;
 
-    public ContractProcessor(StepProcessorProvider stepProcessorProvider) {
-        this(stepProcessorProvider, defaultBlue());
-    }
-
     public ContractProcessor(StepProcessorProvider stepProcessorProvider, Blue blue) {
         this.blue = blue;
         this.stepProcessorProvider = stepProcessorProvider;
@@ -79,11 +75,6 @@ public class ContractProcessor {
                 .addPath("/modules/*/*")
                 .build();
         blue.extend(contract, contractLimits);
-        Node type = contract.getType();
-        while (type != null) {
-            blue.extend(type, contractLimits);
-            type = type.getType();
-        }
 
         return blue.resolve(contract);
     }
@@ -171,22 +162,6 @@ public class ContractProcessor {
     private String calculateBlueId(ContractInstance contractInstance) {
         Node node = YAML_MAPPER.convertValue(contractInstance, Node.class);
         return BlueIdCalculator.calculateBlueId(node);
-    }
-
-    private static Blue defaultBlue() {
-        NodeProvider directoryBasedNodeProvider = null;
-        try {
-            directoryBasedNodeProvider = new DirectoryBasedNodeProvider("types", "samples");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return new Blue(
-                new SequentialNodeProvider(
-                        directoryBasedNodeProvider,
-                        new IPFSNodeProvider()
-                ),
-                new TypeClassResolver( "blue.contract.model")
-        );
     }
 
 }
