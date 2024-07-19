@@ -56,7 +56,7 @@ dependencies {
     implementation("com.github.java-json-tools:json-patch:1.13")
 
     // Blue Language
-    implementation("blue.language:blue-language-java:0.2.0")
+    implementation("blue.language:blue-language-java:0.3.0")
 
 }
 
