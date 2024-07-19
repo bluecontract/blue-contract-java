@@ -1,0 +1,34 @@
+name: Gateway Function
+type: 66oteHvnKcpRvS1ty6qND1keob9PJVakKxjTQPQY8YFA
+initiateStepsCode: |
+  function evaluateCondition(condition) {
+    return new Function('contract', `return ${condition}`)(contract);
+  }
+
+  let steps = [];
+  const conditions = functionStep.conditions || [];
+
+  for (let condition of conditions) {
+    if (condition.if) {
+      console.log(`Evaluating condition: ${condition.if}`);
+      if (evaluateCondition(condition.if)) {
+        console.log('Condition matched');
+        steps = condition.steps;
+        break;
+      } else {
+        console.log('Condition did not match');
+      }
+    } else if (condition.else) {
+      console.log('Using else condition');
+      steps = condition.else;
+      break;
+    }
+  }
+
+  if (steps.length === 0 && conditions.length > 0) {
+    console.warn('No condition matched and no else clause found in Gateway Function');
+  }
+
+  console.log(`Selected steps: ${JSON.stringify(steps)}`);
+  ({ steps: steps });
+x: 1

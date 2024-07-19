@@ -14,40 +14,56 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
 public class WorkflowProcessor {
 
+    public enum ProcessingMode {
+        HANDLE, FINALIZE
+    }
+
     private StepProcessorProvider stepProcessorProvider;
 
     public WorkflowProcessor(StepProcessorProvider stepProcessorProvider) {
         this.stepProcessorProvider = stepProcessorProvider;
     }
 
-    Optional<WorkflowInstance> processEvent(Node event, Node workflow, ContractProcessingContext contractProcessingContext) {
+    public Optional<WorkflowInstance> processEvent(Node event, Node workflow, ContractProcessingContext contractProcessingContext) {
+        return processEvent(event, workflow, contractProcessingContext, ProcessingMode.HANDLE);
+    }
+
+    public Optional<WorkflowInstance> processEvent(Node event, Node workflow, ContractProcessingContext contractProcessingContext, ProcessingMode mode) {
         WorkflowInstance workflowInstance = new WorkflowInstance(workflow);
         WorkflowProcessingContext context = new WorkflowProcessingContext(workflowInstance, contractProcessingContext, stepProcessorProvider);
         Node step = workflow.getProperties().get("trigger");
         if (step.getType() == null)
             step.type(new Node().name("Expect Event Step"));
 
-        return handleEvent(event, step, context);
+        return handleEvent(event, step, context, mode);
 
     }
 
-    Optional<WorkflowInstance> processEvent(Node event, WorkflowInstance workflowInstance, ContractProcessingContext contractProcessingContext) {
+    public Optional<WorkflowInstance> processEvent(Node event, WorkflowInstance workflowInstance, ContractProcessingContext contractProcessingContext) {
+        return processEvent(event, workflowInstance, contractProcessingContext, ProcessingMode.HANDLE);
+    }
+
+    public Optional<WorkflowInstance> processEvent(Node event, WorkflowInstance workflowInstance,
+                                                   ContractProcessingContext contractProcessingContext, ProcessingMode mode) {
         WorkflowProcessingContext context = new WorkflowProcessingContext(workflowInstance, contractProcessingContext, stepProcessorProvider);
         Optional<Node> step = Workflows.getStepByName(workflowInstance.getCurrentStepName(), workflowInstance.getWorkflow());
 
         if (!step.isPresent())
             throw new IllegalArgumentException("No step found with name '" + workflowInstance.getCurrentStepName() + "' in the workflow.");
 
-        return handleEvent(event, step.get(), context);
+        return handleEvent(event, step.get(), context, mode);
     }
 
-    private Optional<WorkflowInstance> handleEvent(Node event, Node step, WorkflowProcessingContext context) {
+    private Optional<WorkflowInstance> handleEvent(Node event, Node step, WorkflowProcessingContext context, ProcessingMode mode) {
         Optional<StepProcessor> stepProcessor = stepProcessorProvider.getProcessor(step);
         if (!stepProcessor.isPresent())
             throw new IllegalArgumentException("No StepProcessor found for event: " +
                     JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
 
-        return stepProcessor.get().handleEvent(event, context);
+        if (mode == ProcessingMode.HANDLE)
+            return stepProcessor.get().handleEvent(event, context);
+        else
+            return stepProcessor.get().finalizeEvent(event, context);
     }
 
 }

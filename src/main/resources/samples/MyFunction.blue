@@ -1,0 +1,27 @@
+name: My Function
+type: 66oteHvnKcpRvS1ty6qND1keob9PJVakKxjTQPQY8YFA
+initiateStepsCode: |
+  const value = contract("/name") + " - " + functionStep.abc;
+  
+  const steps = [
+    {
+      name: 'UpdateStep3',
+      type: 'Update Step',
+      changeset: [
+        {
+          op: 'add',
+          path: '/properties/iDidIt',
+          val: value
+        }
+      ]
+    },
+    {
+      name: 'Event 2',
+      type: 'Expect Event Step',
+      event: {
+        type: '5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2'
+      }
+    }
+  ];
+  ({ steps: steps });
+a: 1
