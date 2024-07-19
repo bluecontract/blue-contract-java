@@ -120,6 +120,10 @@ publishing {
       maven {
           url = layout.buildDirectory.dir('staging-deploy')
       }
+    //   maven {
+    //       name = 'local'
+    //       url = uri('file:///' + new File(System.getProperty("user.home"), ".m2/repository").absolutePath)
+    //   }
   }
 }
 
