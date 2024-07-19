@@ -40,7 +40,7 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         Optional<StepProcessor> stepProcessor = context.getStepProcessorProvider().getProcessor(nextStep.get());
         if (!stepProcessor.isPresent())
             throw new IllegalArgumentException("No StepProcessor found for event: " +
-                    JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
+                                               JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
 
         return stepFunction.apply(stepProcessor.get(), event);
     }
@@ -58,20 +58,39 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         return Optional.ofNullable(step.getName());
     }
 
-    protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context) {
-        return evaluateExpression(potentialExpression, context, ExpressionScope.GLOBAL);
+    protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+        if (potentialExpression instanceof String) {
+            return expressionEvaluator.evaluate((String) potentialExpression, context, scope, resolveFinalLink);
+        }
+        return potentialExpression;
     }
 
     protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope) {
-        return expressionEvaluator.evaluateIfExpression(potentialExpression, context, scope);
+        return evaluateExpression(potentialExpression, context, scope, true);
     }
 
-    protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context) {
-        return evaluateExpressionsRecursively(node, context, ExpressionScope.GLOBAL);
+    protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context) {
+        return evaluateExpression(potentialExpression, context, ExpressionScope.GLOBAL, true);
+    }
+
+    protected Object evaluateExpressionWithoutFinalLink(Object potentialExpression, WorkflowProcessingContext context) {
+        return evaluateExpression(potentialExpression, context, ExpressionScope.GLOBAL, false);
+    }
+
+    protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+        return expressionEvaluator.processNodeRecursively(node, context, scope, resolveFinalLink);
     }
 
     protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context, ExpressionScope scope) {
-        return expressionEvaluator.processNodeRecursively(node, context, scope);
+        return evaluateExpressionsRecursively(node, context, scope, true);
     }
 
+    protected Node evaluateExpressionsRecursively(Node node, WorkflowProcessingContext context) {
+        return evaluateExpressionsRecursively(node, context, ExpressionScope.GLOBAL, true);
+    }
+
+    protected Node evaluateExpressionsRecursivelyWithoutFinalLink(Node node, WorkflowProcessingContext context) {
+        return evaluateExpressionsRecursively(node, context, ExpressionScope.GLOBAL, false);
+    }
+    
 }

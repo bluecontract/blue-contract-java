@@ -10,6 +10,7 @@ import blue.language.model.Node;
 import blue.language.utils.BlueIdCalculator;
 import blue.language.utils.DirectoryBasedNodeProvider;
 import blue.language.utils.SequentialNodeProvider;
+import blue.language.utils.TypeClassResolver;
 import blue.language.utils.ipfs.IPFSNodeProvider;
 import blue.language.utils.limits.Limits;
 import blue.language.utils.limits.PathLimits;
@@ -41,9 +42,14 @@ public class ContractProcessor {
 
     public ContractUpdate initiate(Node contract,
                                    String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
+        return initiate(contract, null, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+    }
+
+    public ContractUpdate initiate(Node contract, ContractProcessingContext initiatedContext,
+                                   String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
         Node event = initializationEvent();
         Node preprocessedContract = preprocess(contract);
-        ContractProcessingContext context =
+        ContractProcessingContext context = initiatedContext != null ? initiatedContext :
                 new ContractProcessingContext(preprocessedContract, new ArrayList<>(), 0,
                         initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, stepProcessorProvider, blue);
         List<WorkflowInstance> workflowInstances = processWorkflows(event, context, 0);
@@ -136,6 +142,7 @@ public class ContractProcessor {
         updatedWorkflowInstances.removeIf(WorkflowInstance::isFinished);
 
         contractInstance
+                .contract(context.getContract())
                 .startedWorkflowsCount(startedWorkflows)
                 .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances);
     }
@@ -177,7 +184,9 @@ public class ContractProcessor {
                 new SequentialNodeProvider(
                         directoryBasedNodeProvider,
                         new IPFSNodeProvider()
-                ));
+                ),
+                new TypeClassResolver( "blue.contract.model")
+        );
     }
 
 }

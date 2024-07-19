@@ -1,0 +1,7 @@
+name: External Contract
+description: Represents an external contract that can be used within another contract.
+initiateContractEntry:
+  description: The entry which initiated this contract.
+localContractInstanceId:
+  description: The ID of the local contract instance within this contract.
+  type: Integer

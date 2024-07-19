@@ -3,7 +3,8 @@ type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
 properties:
   x: 1
 workflows:
-  - name: Simple
+
+  - name: StartLocalContract
     trigger:
       name: Event 1
       event:
@@ -18,19 +19,25 @@ workflows:
           properties:
             yourProperty: ca-boom!
           workflows:
-            - name: Expect Event
+            - name: Initial
               trigger:
-                name: Event 3
                 event:
-                  type:
-                    name: Hello Event 4
+                  type: Contract Initialized
               steps:
-                - name: UpdateStep
-                  type: Update Step
-                  changeset:
-                    - op: add
-                      path: /properties/y
-                      val: 1
+                - name: TriggerEvent
+                  type: Trigger Event Step
+                  event:
+                    type: 6ZekovRNmg5PPy6Y4yATmnWqNDUoFhT5LowxAtkP7mta
+                    abc: ${contract("/properties/yourProperty")}
+                    def: ${contract("/name")}
+                    zz: 12
+                    x:
+                      a: ${contract("/name")}
+                      b:
+                        c: ${contract("/name")}
+                      c:
+                        type: 6ZekovRNmg5PPy6Y4yATmnWqNDUoFhT5LowxAtkP7mta
+                        a: 15
 
       - name: UpdateStep
         type: Update Step
@@ -45,3 +52,33 @@ workflows:
           - op: add
             path: /properties/myLocalContractProperty
             val: ${contract("/properties/myLocalContract/properties/yourProperty")}
+
+
+      - name: JSStep2
+        type: JavaScript Code Step
+        code: |
+          const z = {
+            type: 'GGo3aanJBb5DdzXovf7ibiBs3bZkXzHeizTCgYFhLWpQ',
+            id: 1
+          };
+          ({ result: z });  
+
+      - name: Event 2
+        type: Expect Event Step
+        event:
+          type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+          abc: ca-boom!
+          zz: 12
+          x:
+            c:
+              type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+        contract:
+          type: GGo3aanJBb5DdzXovf7ibiBs3bZkXzHeizTCgYFhLWpQ
+          id: ${steps.JSStep2.result.id}
+
+      - name: UpdateStep
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/eventArrived
+            val: true

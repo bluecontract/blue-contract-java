@@ -10,7 +10,7 @@ public class LocalContract {
         return id;
     }
 
-    public LocalContract id(int id) {
+    public LocalContract id(Integer id) {
         this.id = id;
         return this;
     }

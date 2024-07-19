@@ -16,7 +16,7 @@ public class ExpressionEvaluator {
         GLOBAL,
         CURRENT_CONTRACT
     }
-    
+
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("^\\$\\{(.+)\\}$");
 
     private final JSExecutor jsExecutor;
@@ -25,17 +25,17 @@ public class ExpressionEvaluator {
         this.jsExecutor = jsExecutor;
     }
 
-    public Object evaluate(String expression, WorkflowProcessingContext context, ExpressionScope scope) {
+    public Object evaluate(String expression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
         if (matcher.matches()) {
             String jsExpression = matcher.group(1);
-            return evaluateJSExpression(jsExpression, context, scope);
+            return evaluateJSExpression(jsExpression, context, scope, resolveFinalLink);
         }
         return expression;
     }
 
-    private Object evaluateJSExpression(String jsExpression, WorkflowProcessingContext context, ExpressionScope scope) {
-        Map<String, Object> bindings = createBindings(context, scope);
+    private Object evaluateJSExpression(String jsExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+        Map<String, Object> bindings = createBindings(context, scope, resolveFinalLink);
 
         try {
             return jsExecutor.executeScript(jsExpression, bindings);
@@ -44,31 +44,31 @@ public class ExpressionEvaluator {
         }
     }
 
-    public Object evaluateIfExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope) {
+    public Object evaluateIfExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         if (potentialExpression instanceof String) {
             String strExpression = (String) potentialExpression;
             Matcher matcher = EXPRESSION_PATTERN.matcher(strExpression);
             if (matcher.matches()) {
                 String jsExpression = matcher.group(1);
-                return evaluateJSExpression(jsExpression, context, scope);
+                return evaluateJSExpression(jsExpression, context, scope, resolveFinalLink);
             }
         }
         return potentialExpression;
     }
 
-    public Node processNodeRecursively(Node node, WorkflowProcessingContext context, ExpressionScope scope) {
+    public Node processNodeRecursively(Node node, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         if (node == null) {
             return null;
         }
 
         Node processedNode = node.clone();
 
-        Object evaluatedValue = evaluateIfExpression(node.getValue(), context, scope);
+        Object evaluatedValue = evaluateIfExpression(node.getValue(), context, scope, resolveFinalLink);
         processedNode.value(evaluatedValue);
 
         if (node.getItems() != null) {
             List<Node> processedItems = node.getItems().stream()
-                    .map(item -> processNodeRecursively(item, context, scope))
+                    .map(item -> processNodeRecursively(item, context, scope, resolveFinalLink))
                     .collect(Collectors.toList());
             processedNode.items(processedItems);
         }
@@ -76,8 +76,8 @@ public class ExpressionEvaluator {
         if (node.getProperties() != null) {
             Map<String, Node> processedProperties = new HashMap<>();
             for (Map.Entry<String, Node> entry : node.getProperties().entrySet()) {
-                String key = (String) evaluateIfExpression(entry.getKey(), context, scope);
-                Node value = processNodeRecursively(entry.getValue(), context, scope);
+                String key = (String) evaluateIfExpression(entry.getKey(), context, scope, resolveFinalLink);
+                Node value = processNodeRecursively(entry.getValue(), context, scope, resolveFinalLink);
                 processedProperties.put(key, value);
             }
             processedNode.properties(processedProperties);
@@ -86,16 +86,16 @@ public class ExpressionEvaluator {
         return processedNode;
     }
 
-    private Map<String, Object> createBindings(WorkflowProcessingContext context, ExpressionScope scope) {
+    private Map<String, Object> createBindings(WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("steps", context.getWorkflowInstance().getStepResults());
 
         if (scope == ExpressionScope.GLOBAL) {
             bindings.put("contract", (java.util.function.Function<String, Object>) path ->
-                    context.getContractProcessingContext().accessContract(path, true));
+                    context.getContractProcessingContext().accessContract(path, true, resolveFinalLink));
         } else {
             bindings.put("contract", (java.util.function.Function<String, Object>) path ->
-                    context.getContractProcessingContext().accessContract(path, false));
+                    context.getContractProcessingContext().accessContract(path, false, resolveFinalLink));
         }
 
         return bindings;

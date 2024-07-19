@@ -18,7 +18,7 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 public class Sample {
 
     public static void main(String[] args) throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract3.blue"), Node.class);
+        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract2.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         List<Node> emittedEvents = new ArrayList<>();
         String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
@@ -32,16 +32,17 @@ public class Sample {
             emittedEvents.addAll(update.getEmittedEvents());
         }
 
-        ContractInstance instance = load(1);
-        update = contractProcessor.processEvent(event, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-        save(update, 2);
-        if (update.getEmittedEvents() != null) {
-            emittedEvents.addAll(update.getEmittedEvents());
-        }
+//        ContractInstance instance = load(1);
+//        update = contractProcessor.processEvent(event, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+//        save(update, 2);
+//        if (update.getEmittedEvents() != null) {
+//            emittedEvents.addAll(update.getEmittedEvents());
+//        }
 
-        int fileId = 3;
+        int fileId = 2;
         while (!emittedEvents.isEmpty()) {
             Node emittedEvent = emittedEvents.remove(0);
+            ContractInstance instance = load(fileId - 1);
             update = contractProcessor.processEvent(emittedEvent, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
             save(update, fileId++);
             if (update.getEmittedEvents() != null) {
