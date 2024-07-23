@@ -8,11 +8,14 @@ public class ContractInstance {
 
     private int id;
     private Node contract;
+    private int epoch;
+    private Node previousContractInstance;
+    private Node lastChangeContractInstance;
+    private Node lastContractChangeContractInstance;
     private int startedWorkflowCount;
     private int startedLocalContractCount;
     private List<WorkflowInstance> workflowInstances;
     private List<ContractInstance> localContractInstances;
-
 
     public int getId() {
         return id;
@@ -20,6 +23,22 @@ public class ContractInstance {
 
     public Node getContract() {
         return contract;
+    }
+
+    public int getEpoch() {
+        return epoch;
+    }
+
+    public Node getPreviousContractInstance() {
+        return previousContractInstance;
+    }
+
+    public Node getLastChangeContractInstance() {
+        return lastChangeContractInstance;
+    }
+
+    public Node getLastContractChangeContractInstance() {
+        return lastContractChangeContractInstance;
     }
 
     public int getStartedWorkflowCount() {
@@ -48,13 +67,33 @@ public class ContractInstance {
         return this;
     }
 
-    public ContractInstance startedWorkflowsCount(int startedWorkflowsCount) {
-        this.startedWorkflowCount = startedWorkflowsCount;
+    public ContractInstance epoch(int epoch) {
+        this.epoch = epoch;
         return this;
     }
 
-    public ContractInstance startedLocalContractsCount(int startedLocalContractsCount) {
-        this.startedLocalContractCount = startedLocalContractsCount;
+    public ContractInstance previousContractInstance(Node previousContractInstance) {
+        this.previousContractInstance = previousContractInstance;
+        return this;
+    }
+
+    public ContractInstance lastChangeContractInstance(Node lastChangeContractInstance) {
+        this.lastChangeContractInstance = lastChangeContractInstance;
+        return this;
+    }
+
+    public ContractInstance lastContractChangeContractInstance(Node lastContractChangeContractInstance) {
+        this.lastContractChangeContractInstance = lastContractChangeContractInstance;
+        return this;
+    }
+
+    public ContractInstance startedWorkflowsCount(int startedWorkflowCount) {
+        this.startedWorkflowCount = startedWorkflowCount;
+        return this;
+    }
+
+    public ContractInstance startedLocalContractsCount(int startedLocalContractCount) {
+        this.startedLocalContractCount = startedLocalContractCount;
         return this;
     }
 
@@ -67,5 +106,4 @@ public class ContractInstance {
         this.localContractInstances = localContractInstances;
         return this;
     }
-
 }

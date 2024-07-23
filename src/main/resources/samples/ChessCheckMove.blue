@@ -1,0 +1,25 @@
+name: Check Chess Move Function
+type: 66oteHvnKcpRvS1ty6qND1keob9PJVakKxjTQPQY8YFA
+initiateStepsCode: |
+  const value = contract("/name") + " - " + functionStep.abc;
+  
+  const steps = [
+    {
+      name: 'CheckMoveJSStep',
+      type: 'JavaScript Code Step',
+      code: 'C92MNRS3xXHKfULUXzuxTX8oqcQi64CA1FcdaE77thD'
+    },
+    {
+      name: 'UpdateStep',
+      type: 'Update Step',
+      changeset: [
+        {
+          op: 'add',
+          path: '/properties/position',
+          val: '${steps.CheckMoveJSStep.lastResult}'
+        }
+      ]
+    }
+  ];
+  ({ steps: steps });
+a: 1

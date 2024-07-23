@@ -1,0 +1,14 @@
+name: Chess Game
+type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+properties:
+  position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+workflows:
+  - name: Make Move
+    trigger:
+      name: Event 1
+      event:
+        type: Contract Initialized
+    steps:
+
+      - name: FunctionCall
+        type: FNVBZFui5gpVq2Rhe7t12Qu5pYYwp86jmwYTQd8GeBUP

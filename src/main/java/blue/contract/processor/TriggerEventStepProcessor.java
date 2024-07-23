@@ -5,6 +5,7 @@ import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.event.ContractProcessingEvent;
+import blue.contract.utils.Events;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.language.model.Node;
 
@@ -33,14 +34,7 @@ public class TriggerEventStepProcessor extends AbstractStepProcessor {
     private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
         Node eventNode = step.getProperties().get("event").clone();
         eventNode = evaluateExpressionsRecursively(eventNode, workflowProcessingContext);
-        ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
-        ContractProcessingEvent processingEvent = new ContractProcessingEvent()
-                .contractInstanceId(contractProcessingContext.getContractInstanceId())
-                .workflowInstanceId(workflowProcessingContext.getWorkflowInstance().getId())
-                .workflowStepName(step.getName())
-                .initiateContractEntry(contractProcessingContext.getInitiateContractEntryBlueId())
-                .initiateContractProcessingEntry(contractProcessingContext.getInitiateContractProcessingEntryBlueId())
-                .event(eventNode);
+        ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(eventNode, step.getName(), workflowProcessingContext);
         Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);
         workflowProcessingContext.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
     }

@@ -20,26 +20,15 @@ import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 public class ContractProcessingContext {
     private Node contract;
     private int contractInstanceId;
-    private List<Node> emittedEvents;
+    private int epoch;
+    private List<Node> emittedEvents = new ArrayList<>();;
     private List<ContractInstance> contractInstances;
     private int startedLocalContracts;
     private String initiateContractEntryBlueId;
     private String initiateContractProcessingEntryBlueId;
+    private Node previousContractInstance;
     private StepProcessorProvider stepProcessorProvider;
     private Blue blue;
-
-    public ContractProcessingContext(Node contract, List<ContractInstance> contractInstances, int startedLocalContracts,
-                                     String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId,
-                                     StepProcessorProvider stepProcessorProvider, Blue blue) {
-        this.contract = contract;
-        this.emittedEvents = new ArrayList<>();
-        this.contractInstances = contractInstances;
-        this.startedLocalContracts = startedLocalContracts;
-        this.initiateContractEntryBlueId = initiateContractEntryBlueId;
-        this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
-        this.stepProcessorProvider = stepProcessorProvider;
-        this.blue = blue;
-    }
 
     public Node getContract() {
         return contract;
@@ -47,6 +36,10 @@ public class ContractProcessingContext {
 
     public int getContractInstanceId() {
         return contractInstanceId;
+    }
+
+    public int getEpoch() {
+        return epoch;
     }
 
     public List<Node> getEmittedEvents() {
@@ -69,6 +62,10 @@ public class ContractProcessingContext {
         return initiateContractProcessingEntryBlueId;
     }
 
+    public Node getPreviousContractInstance() {
+        return previousContractInstance;
+    }
+
     public StepProcessorProvider getStepProcessorProvider() {
         return stepProcessorProvider;
     }
@@ -84,6 +81,11 @@ public class ContractProcessingContext {
 
     public ContractProcessingContext contractInstanceId(int contractInstanceId) {
         this.contractInstanceId = contractInstanceId;
+        return this;
+    }
+
+    public ContractProcessingContext epoch(int epoch) {
+        this.epoch = epoch;
         return this;
     }
 
@@ -107,8 +109,13 @@ public class ContractProcessingContext {
         return this;
     }
 
-    public ContractProcessingContext initiateContractProcessingEntry(String initiateContractProcessingEntryBlueId) {
+    public ContractProcessingContext initiateContractProcessingEntryBlueId(String initiateContractProcessingEntryBlueId) {
         this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
+        return this;
+    }
+
+    public ContractProcessingContext previousContractInstance(Node previousContractInstance) {
+        this.previousContractInstance = previousContractInstance;
         return this;
     }
 
@@ -127,6 +134,9 @@ public class ContractProcessingContext {
         Object result = NodePathAccessor.get(contract, path, linkingProvider, resolveFinalLink);
         if (result instanceof Node) {
             result = NodeToObject.get((Node) result, SIMPLE);
+        } else if (result instanceof BigInteger) {
+            BigInteger bigInt = (BigInteger) result;
+            return isInJavaScriptSafeRange(bigInt) ? bigInt.longValue() : bigInt;
         }
         return result;
     }
@@ -145,6 +155,13 @@ public class ContractProcessingContext {
             }
         }
         return null;
+    }
+
+    private boolean isInJavaScriptSafeRange(BigInteger number) {
+        BigInteger min = new BigInteger("-9007199254740991");
+        BigInteger max = new BigInteger("9007199254740991");
+
+        return (number.compareTo(min) >= 0) && (number.compareTo(max) <= 0);
     }
 
 }

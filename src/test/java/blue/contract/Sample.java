@@ -6,8 +6,9 @@ import blue.contract.model.ContractUpdate;
 import blue.language.Blue;
 import blue.language.NodeProvider;
 import blue.language.model.Node;
+import blue.language.provider.DirectoryBasedNodeProvider;
+import blue.language.provider.ipfs.IPFSNodeProvider;
 import blue.language.utils.*;
-import blue.language.utils.ipfs.IPFSNodeProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +22,12 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 public class Sample {
 
     public static void main(String[] args) throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract4.blue"), Node.class);
+        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract6.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         List<Node> emittedEvents = new ArrayList<>();
         String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
         String initiateContractProcessingEntryBlueId = "BeTSqC2nC2jmUNSKJJQxrNzUcVc2P674Bi637bsBTy1";
+
 
         Blue blue = defaultBlue();
         StandardProcessorsProvider provider = new StandardProcessorsProvider(blue);

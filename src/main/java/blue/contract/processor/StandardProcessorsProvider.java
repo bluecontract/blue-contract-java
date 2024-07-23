@@ -46,7 +46,7 @@ public class StandardProcessorsProvider implements StepProcessorProvider {
         processorMap.put("Dummy Code", node -> new DummyCodeStepProcessor(node, expressionEvaluator));
         processorMap.put("Initialize Local Contract Step", node -> new InitializeLocalContractStepProcessor(node, expressionEvaluator));
         processorMap.put("Workflow Function Step", node -> new WorkflowFunctionStepProcessor(node, expressionEvaluator, jsExecutor));
-        processorMap.put("JavaScript Code Step", node -> new JSCodeStepProcessor(node, expressionEvaluator, jsExecutor));
+        processorMap.put("JavaScript Code Step", node -> new JSCodeStepProcessor(node, expressionEvaluator, jsExecutor, blue));
 
         return Optional.ofNullable(processorMap.get(step.getType().getName())).map(func -> func.apply(step));
     }

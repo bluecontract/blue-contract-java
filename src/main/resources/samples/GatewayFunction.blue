@@ -2,7 +2,22 @@ name: Gateway Function
 type: 66oteHvnKcpRvS1ty6qND1keob9PJVakKxjTQPQY8YFA
 initiateStepsCode: |
   function evaluateCondition(condition) {
-    return new Function('contract', `return ${condition}`)(contract);
+    console.log(`Evaluating condition: ${condition}`);
+    try {
+      const xValue = contract("/properties/x");
+      console.log(`x value: ${xValue}, type: ${typeof xValue}`);
+      console.log(`x === 1: ${xValue === 1}`);
+      console.log(`x == 1: ${xValue == 1}`);
+      console.log(`Object.is(x, 1): ${Object.is(xValue, 1)}`);
+      console.log(`x.toString(): "${xValue.toString()}"`);
+      console.log(`JSON.stringify(x): ${JSON.stringify(xValue)}`);
+      const result = new Function('contract', `return ${condition}`)(contract);
+      console.log(`Condition result: ${result}`);
+      return result;
+    } catch (error) {
+      console.error(`Error evaluating condition: ${error.message}`);
+      return false;
+    }
   }
 
   let steps = [];
@@ -10,7 +25,6 @@ initiateStepsCode: |
 
   for (let condition of conditions) {
     if (condition.if) {
-      console.log(`Evaluating condition: ${condition.if}`);
       if (evaluateCondition(condition.if)) {
         console.log('Condition matched');
         steps = condition.steps;

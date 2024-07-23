@@ -3,6 +3,9 @@ package blue.contract.processor;
 import blue.contract.AbstractStepProcessor;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
+import blue.contract.model.event.ContractProcessingEvent;
+import blue.contract.model.event.ContractUpdateEvent;
+import blue.contract.utils.Events;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.language.model.Node;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class UpdateStepProcessor extends AbstractStepProcessor {
 
@@ -68,6 +72,13 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
             JsonNode result = patch.apply(objNode);
             Node updatedContract = JSON_MAPPER.convertValue(result, Node.class);
             context.getContractProcessingContext().contract(updatedContract);
+
+            ContractUpdateEvent updateEvent = new ContractUpdateEvent()
+                    .changeset(JSON_MAPPER.convertValue(rawChangeset, Node.class));
+            Node updateEventNode = YAML_MAPPER.convertValue(updateEvent, Node.class);
+            ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(updateEventNode, step.getName(), context);
+            Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);
+            context.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
         } catch (IOException | JsonPatchException e) {
             throw new IllegalArgumentException("Applying JSON Patch failed", e);
         }

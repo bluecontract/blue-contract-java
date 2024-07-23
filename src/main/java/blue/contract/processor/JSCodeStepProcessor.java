@@ -5,8 +5,10 @@ import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
+import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
+import blue.language.utils.limits.PathLimits;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,8 +22,9 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     private final String code;
     private final JSExecutor jsExecutor;
 
-    public JSCodeStepProcessor(Node step, ExpressionEvaluator expressionEvaluator, JSExecutor jsExecutor) {
+    public JSCodeStepProcessor(Node step, ExpressionEvaluator expressionEvaluator, JSExecutor jsExecutor, Blue blue) {
         super(step, expressionEvaluator);
+        blue.extend(step, PathLimits.withSinglePath("/*"));
         this.code = (String) step.getProperties().get("code").getValue();
         this.jsExecutor = jsExecutor;
     }
@@ -39,6 +42,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     }
 
     private void processEvent(Node event, WorkflowProcessingContext context) {
+
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("event", NodeToObject.get(event, SIMPLE));
         bindings.put("steps", context.getWorkflowInstance().getStepResults());

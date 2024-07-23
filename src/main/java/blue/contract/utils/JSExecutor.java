@@ -1,9 +1,12 @@
 package blue.contract.utils;
 
+import blue.contract.processor.CustomFileSystem;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.io.FileSystem;
+import org.graalvm.polyglot.io.IOAccess;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,11 +15,22 @@ import java.util.List;
 import java.util.Map;
 
 public class JSExecutor {
+    private final FileSystem customFS;
+
+    public JSExecutor() {
+        this.customFS = new CustomFileSystem(FileSystem.newDefaultFileSystem());
+    }
+
     public Object executeScript(String code, Map<String, Object> bindings) throws IOException {
-        Source source = Source.newBuilder("js", code, "jsCode").build();
+        Source source = Source.newBuilder("js", code, "jsCode")
+                .mimeType("application/javascript+module")
+                .build();
         try (Context context = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.ALL)
                 .allowHostClassLookup(className -> true)
+                .allowIO(IOAccess.newBuilder()
+                        .fileSystem(customFS)
+                        .build())
                 .option("engine.WarnInterpreterOnly", "false")
                 .build()) {
 
