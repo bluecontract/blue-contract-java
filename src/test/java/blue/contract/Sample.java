@@ -55,6 +55,13 @@ public class Sample {
                 emittedEvents.addAll(update.getEmittedEvents());
             }
         }
+
+
+        Node successfulPaymentEvent = new Node().type(new Node().blueId("6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1"));
+        ContractInstance instance = load(fileId - 1);
+        update = contractProcessor.processEvent(successfulPaymentEvent, instance,
+                initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+        save(update, fileId++);
     }
 
     private static void save(ContractUpdate contractUpdate, int id) throws IOException {

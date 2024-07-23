@@ -160,8 +160,11 @@ public class ContractProcessor {
                 .previousContractInstance(context.getPreviousContractInstance())
                 .startedWorkflowsCount(startedWorkflows)
                 .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances)
-                .lastChangeContractInstance(contractChanged ? context.getPreviousContractInstance() : null)
-                .lastContractChangeContractInstance(instanceChanged ? context.getPreviousContractInstance() : null);
+                .lastChangeContractInstance(contractChanged ?
+                        context.getPreviousContractInstance() : contractInstance.getLastChangeContractInstance())
+                .lastContractChangeContractInstance(instanceChanged ?
+                        context.getPreviousContractInstance() :
+                        contractInstance.getLastContractChangeContractInstance());
     }
 
     private List<WorkflowInstance> processWorkflows(Node event, ContractProcessingContext context, int initialStartedWorkflows) {
