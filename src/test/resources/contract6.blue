@@ -26,6 +26,7 @@ workflows:
                   type: Contract Initialized
               steps:
                 - name: TriggerEvent
+                  description: Payment Failed
                   type: Trigger Event Step
                   event:
                     type: 6ZekovRNmg5PPy6Y4yATmnWqNDUoFhT5LowxAtkP7mta
@@ -42,6 +43,19 @@ workflows:
                     - op: add
                       path: /properties/y
                       val: 1
+
+            - name: ExpectEvents
+              trigger:
+                description: Payment Successful
+                event:
+                  type: 6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1
+              steps:
+                - name: UpdateStep
+                  type: Update Step
+                  changeset:
+                    - op: replace
+                      path: /properties/x
+                      val: ${contract("/properties/x") + 1}
 
 
   - name: ExpectEvents
