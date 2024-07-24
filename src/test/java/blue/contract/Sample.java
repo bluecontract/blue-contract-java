@@ -65,10 +65,13 @@ public class Sample {
     }
 
     private static void save(ContractUpdate contractUpdate, int id) throws IOException {
+        Node contractUpdateNode = JSON_MAPPER.convertValue(contractUpdate, Node.class);
         File outputFile = new File("src/test/resources/" + id + "_update.blue");
-        YAML_MAPPER.writeValue(outputFile, contractUpdate);
+        YAML_MAPPER.writeValue(outputFile, NodeToObject.get(contractUpdateNode, NodeToObject.Strategy.SIMPLE));
+
+        Node contractInstanceNode = contractUpdateNode.getAsNode("/contractInstance");
         outputFile = new File("src/test/resources/" + id + "_contractInstance.json");
-        JSON_MAPPER.writeValue(outputFile, contractUpdate.getContractInstance());
+        JSON_MAPPER.writeValue(outputFile, NodeToObject.get(contractInstanceNode, NodeToObject.Strategy.SIMPLE));
     }
 
     private static ContractInstance load(int id) throws IOException {
