@@ -9,6 +9,7 @@ import java.util.List;
 public class ContractUpdate {
     private ContractInstance contractInstance;
     private Node contractInstancePrev;
+    private int epoch;
     private List<Node> emittedEvents;
     private Node initiateContractEntry;
     private Node initiateContractProcessingEntry;
@@ -31,6 +32,10 @@ public class ContractUpdate {
         return contractInstancePrev;
     }
 
+    public int getEpoch() {
+        return epoch;
+    }
+
     public List<Node> getEmittedEvents() {
         return emittedEvents;
     }
@@ -50,6 +55,11 @@ public class ContractUpdate {
 
     public ContractUpdate contractInstancePrev(Node contractInstancePrev) {
         this.contractInstancePrev = contractInstancePrev;
+        return this;
+    }
+
+    public ContractUpdate epoch(int epoch) {
+        this.epoch = epoch;
         return this;
     }
 

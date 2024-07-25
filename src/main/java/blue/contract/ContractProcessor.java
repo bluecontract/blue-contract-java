@@ -95,6 +95,14 @@ public class ContractProcessor {
         return blue.resolve(contract);
     }
 
+    public ContractUpdate processEvent(Node event, ContractUpdate contractUpdate) {
+        ContractUpdate result = processEvent(event, contractUpdate.getContractInstance(),
+                contractUpdate.getInitiateContractEntry().getAsText("/blueId"),
+                contractUpdate.getInitiateContractProcessingEntry().getAsText("/blueId"));
+        result.epoch(result.getEpoch() + 1);
+        return result;
+    }
+
     public ContractUpdate processEvent(Node event, ContractInstance contractInstance,
                                        String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
 
