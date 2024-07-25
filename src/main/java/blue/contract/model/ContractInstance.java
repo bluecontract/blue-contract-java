@@ -3,58 +3,26 @@ package blue.contract.model;
 import blue.language.model.Node;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ContractInstance {
+public class ContractInstance implements Cloneable {
+
+    public static final int ROOT_INSTANCE_ID = 0;
 
     private int id;
-    private Node contract;
-    private int epoch;
-    private Node previousContractInstance;
-    private Node lastChangeContractInstance;
-    private Node lastContractChangeContractInstance;
-    private int startedWorkflowCount;
-    private int startedLocalContractCount;
-    private List<WorkflowInstance> workflowInstances;
-    private List<ContractInstance> localContractInstances;
+    private Node contractState;
+    private ProcessingState processingState;
 
     public int getId() {
         return id;
     }
 
-    public Node getContract() {
-        return contract;
+    public Node getContractState() {
+        return contractState;
     }
 
-    public int getEpoch() {
-        return epoch;
-    }
-
-    public Node getPreviousContractInstance() {
-        return previousContractInstance;
-    }
-
-    public Node getLastChangeContractInstance() {
-        return lastChangeContractInstance;
-    }
-
-    public Node getLastContractChangeContractInstance() {
-        return lastContractChangeContractInstance;
-    }
-
-    public int getStartedWorkflowCount() {
-        return startedWorkflowCount;
-    }
-
-    public int getStartedLocalContractCount() {
-        return startedLocalContractCount;
-    }
-
-    public List<WorkflowInstance> getWorkflowInstances() {
-        return workflowInstances;
-    }
-
-    public List<ContractInstance> getLocalContractInstances() {
-        return localContractInstances;
+    public ProcessingState getProcessingState() {
+        return processingState;
     }
 
     public ContractInstance id(int id) {
@@ -62,48 +30,25 @@ public class ContractInstance {
         return this;
     }
 
-    public ContractInstance contract(Node contract) {
-        this.contract = contract;
+    public ContractInstance contractState(Node contractState) {
+        this.contractState = contractState;
         return this;
     }
 
-    public ContractInstance epoch(int epoch) {
-        this.epoch = epoch;
+    public ContractInstance processingState(ProcessingState processingState) {
+        this.processingState = processingState;
         return this;
     }
 
-    public ContractInstance previousContractInstance(Node previousContractInstance) {
-        this.previousContractInstance = previousContractInstance;
-        return this;
-    }
-
-    public ContractInstance lastChangeContractInstance(Node lastChangeContractInstance) {
-        this.lastChangeContractInstance = lastChangeContractInstance;
-        return this;
-    }
-
-    public ContractInstance lastContractChangeContractInstance(Node lastContractChangeContractInstance) {
-        this.lastContractChangeContractInstance = lastContractChangeContractInstance;
-        return this;
-    }
-
-    public ContractInstance startedWorkflowsCount(int startedWorkflowCount) {
-        this.startedWorkflowCount = startedWorkflowCount;
-        return this;
-    }
-
-    public ContractInstance startedLocalContractsCount(int startedLocalContractCount) {
-        this.startedLocalContractCount = startedLocalContractCount;
-        return this;
-    }
-
-    public ContractInstance workflowInstances(List<WorkflowInstance> workflowInstances) {
-        this.workflowInstances = workflowInstances;
-        return this;
-    }
-
-    public ContractInstance localContractInstances(List<ContractInstance> localContractInstances) {
-        this.localContractInstances = localContractInstances;
-        return this;
+    @Override
+    public ContractInstance clone() {
+        try {
+            ContractInstance cloned = (ContractInstance) super.clone();
+            cloned.contractState = this.contractState != null ? this.contractState.clone() : null;
+            cloned.processingState = this.processingState != null ? this.processingState.clone() : null;
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("ContractInstance should be cloneable", e);
+        }
     }
 }

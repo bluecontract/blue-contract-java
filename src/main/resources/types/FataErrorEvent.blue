@@ -1,0 +1,8 @@
+name: Fatal Error Event
+description: Represents a fatal, irrecoverable error that occurred during the processing of a contract instance.
+errorMessage:
+  type: Text
+  description: Detailed description of the error.
+stackTrace:
+  type: Text
+  description: Stack trace of the error, if available.

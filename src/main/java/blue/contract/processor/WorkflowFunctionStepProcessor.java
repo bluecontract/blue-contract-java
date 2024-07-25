@@ -10,8 +10,6 @@ import blue.contract.utils.JSExecutor;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +32,12 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
 
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
-        ProcessingResult result = processEvent(event, context, ProcessingMode.HANDLE);
+        ProcessingResult result = null;
+        try {
+            result = processEvent(event, context, ProcessingMode.HANDLE);
+        } catch (JSExecutor.JSException ex) {
+            return processJSException(ex, context);
+        }
         if (result == ProcessingResult.FINISHED) {
             return handleNextStepByOrder(event, context);
         } else if (result == ProcessingResult.CONTINUE) {
@@ -46,7 +49,12 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
 
     @Override
     public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
-        ProcessingResult result = processEvent(event, context, ProcessingMode.FINALIZE);
+        ProcessingResult result = null;
+        try {
+            result = processEvent(event, context, ProcessingMode.FINALIZE);
+        } catch (JSExecutor.JSException ex) {
+            return processJSException(ex, context);
+        }
         if (result == ProcessingResult.FINISHED) {
             return finalizeNextStepByOrder(event, context);
         } else if (result == ProcessingResult.CONTINUE) {
@@ -58,7 +66,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
         }
     }
 
-    private ProcessingResult processEvent(Node event, WorkflowProcessingContext context, ProcessingMode mode) {
+    private ProcessingResult processEvent(Node event, WorkflowProcessingContext context, ProcessingMode mode) throws JSExecutor.JSException {
         WorkflowInstance workflowInstance = context.getWorkflowInstance();
 
         if (!workflowInstance.hasNestedWorkflowInstance()) {
@@ -73,7 +81,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
         return processNestedWorkflow(event, context, mode);
     }
 
-    private Node generateSubflowDefinition(Node event, WorkflowProcessingContext context) {
+    private Node generateSubflowDefinition(Node event, WorkflowProcessingContext context) throws JSExecutor.JSException {
         Node node = step.getProperties().get("initiateStepsCode");
         if (node == null)
             throw new IllegalArgumentException("Attribute \"initiateStepsCode\" is required for Workflow Functions.");
@@ -97,7 +105,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
             } else {
                 throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
             }
-        } catch (IOException e) {
+        } catch (JSExecutor.JSCriticalException e) {
             throw new IllegalArgumentException("Error executing JS script", e);
         }
     }
@@ -111,7 +119,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
 
         if (result.isPresent()) {
             WorkflowInstance processedSubflow = result.get();
-            if (processedSubflow.isFinished()) {
+            if (processedSubflow.isCompleted()) {
                 workflowInstance.nestedWorkflowInstance(null);
                 // map results
                 return ProcessingResult.FINISHED;

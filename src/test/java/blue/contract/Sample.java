@@ -22,7 +22,7 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 public class Sample {
 
     public static void main(String[] args) throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract6.blue"), Node.class);
+        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract7.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         List<Node> emittedEvents = new ArrayList<>();
         String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
@@ -57,11 +57,11 @@ public class Sample {
         }
 
 
-        Node successfulPaymentEvent = new Node().type(new Node().blueId("6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1"));
-        ContractInstance instance = load(fileId - 1);
-        update = contractProcessor.processEvent(successfulPaymentEvent, instance,
-                initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-        save(update, fileId++);
+//        Node successfulPaymentEvent = new Node().type(new Node().blueId("6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1"));
+//        ContractInstance instance = load(fileId - 1);
+//        update = contractProcessor.processEvent(successfulPaymentEvent, instance,
+//                initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+//        save(update, fileId++);
     }
 
     private static void save(ContractUpdate contractUpdate, int id) throws IOException {

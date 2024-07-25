@@ -15,18 +15,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static blue.contract.model.ContractInstance.ROOT_INSTANCE_ID;
 import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
 
 public class ContractProcessingContext {
     private Node contract;
     private int contractInstanceId;
-    private int epoch;
     private List<Node> emittedEvents = new ArrayList<>();;
     private List<ContractInstance> contractInstances;
     private int startedLocalContracts;
     private String initiateContractEntryBlueId;
     private String initiateContractProcessingEntryBlueId;
-    private Node previousContractInstance;
+    private boolean completed;
+    private boolean terminatedWithError;
     private StepProcessorProvider stepProcessorProvider;
     private Blue blue;
 
@@ -36,10 +37,6 @@ public class ContractProcessingContext {
 
     public int getContractInstanceId() {
         return contractInstanceId;
-    }
-
-    public int getEpoch() {
-        return epoch;
     }
 
     public List<Node> getEmittedEvents() {
@@ -62,8 +59,12 @@ public class ContractProcessingContext {
         return initiateContractProcessingEntryBlueId;
     }
 
-    public Node getPreviousContractInstance() {
-        return previousContractInstance;
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public boolean isTerminatedWithError() {
+        return terminatedWithError;
     }
 
     public StepProcessorProvider getStepProcessorProvider() {
@@ -81,11 +82,6 @@ public class ContractProcessingContext {
 
     public ContractProcessingContext contractInstanceId(int contractInstanceId) {
         this.contractInstanceId = contractInstanceId;
-        return this;
-    }
-
-    public ContractProcessingContext epoch(int epoch) {
-        this.epoch = epoch;
         return this;
     }
 
@@ -114,8 +110,13 @@ public class ContractProcessingContext {
         return this;
     }
 
-    public ContractProcessingContext previousContractInstance(Node previousContractInstance) {
-        this.previousContractInstance = previousContractInstance;
+    public ContractProcessingContext completed(boolean completed) {
+        this.completed = completed;
+        return this;
+    }
+
+    public ContractProcessingContext terminatedWithError(boolean terminatedWithError) {
+        this.terminatedWithError = terminatedWithError;
         return this;
     }
 
@@ -150,7 +151,7 @@ public class ContractProcessingContext {
                 return contractInstances.stream()
                         .filter(instance -> instance.getId() == id.intValue())
                         .findFirst()
-                        .map(ContractInstance::getContract)
+                        .map(ContractInstance::getContractState)
                         .orElse(null);
             }
         }
@@ -162,6 +163,22 @@ public class ContractProcessingContext {
         BigInteger max = new BigInteger("9007199254740991");
 
         return (number.compareTo(min) >= 0) && (number.compareTo(max) <= 0);
+    }
+
+    public ContractInstance getContractInstance(int instanceId) {
+        return  contractInstances.stream()
+                .filter(instance -> instance.getId() == instanceId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No contract instance with id=" + instanceId + " found"));
+    }
+
+    public ContractInstance getCurrentContractInstance() {
+        return getContractInstance(getContractInstanceId());
+    }
+
+
+    public ContractInstance getRootContractInstance() {
+        return getContractInstance(ROOT_INSTANCE_ID);
     }
 
 }

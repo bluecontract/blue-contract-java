@@ -60,10 +60,22 @@ public class WorkflowProcessor {
             throw new IllegalArgumentException("No StepProcessor found for event: " +
                     JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
 
-        if (mode == ProcessingMode.HANDLE)
-            return stepProcessor.get().handleEvent(event, context);
-        else
-            return stepProcessor.get().finalizeEvent(event, context);
+        context.beginTransaction();
+
+        Optional<WorkflowInstance> result;
+        if (mode == ProcessingMode.HANDLE) {
+            result = stepProcessor.get().handleEvent(event, context);
+        } else {
+            result = stepProcessor.get().finalizeEvent(event, context);
+        }
+
+        if (result.isPresent()) {
+            context.commitTransaction();
+            return result;
+        } else {
+            context.rollbackTransaction();
+            return Optional.empty();
+        }
     }
 
 }

@@ -5,12 +5,12 @@ import blue.language.model.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkflowInstance {
+public class WorkflowInstance implements Cloneable {
     private int id;
     private Node workflow;
     private String currentStepName;
     private Map<String, Object> stepResults;
-    private boolean finished;
+    private boolean completed;
     private WorkflowInstance nestedWorkflowInstance;
 
     public WorkflowInstance() {
@@ -37,8 +37,8 @@ public class WorkflowInstance {
         return stepResults;
     }
 
-    public boolean isFinished() {
-        return finished;
+    public boolean isCompleted() {
+        return completed;
     }
 
     public WorkflowInstance getNestedWorkflowInstance() {
@@ -60,13 +60,18 @@ public class WorkflowInstance {
         return this;
     }
 
+    public WorkflowInstance stepResults(Map<String, Object> stepResults) {
+        this.stepResults = stepResults;
+        return this;
+    }
+
     public WorkflowInstance processingContext(Map<String, Object> processingContext) {
         this.stepResults = processingContext;
         return this;
     }
 
-    public WorkflowInstance finished(boolean finished) {
-        this.finished = finished;
+    public WorkflowInstance completed(boolean completed) {
+        this.completed = completed;
         return this;
     }
 
@@ -77,6 +82,23 @@ public class WorkflowInstance {
 
     public boolean hasNestedWorkflowInstance() {
         return nestedWorkflowInstance != null;
+    }
+
+    @Override
+    public WorkflowInstance clone() {
+        try {
+            WorkflowInstance cloned = (WorkflowInstance) super.clone();
+            cloned.workflow = this.workflow != null ? this.workflow.clone() : null;
+            if (this.stepResults != null) {
+                cloned.stepResults = new HashMap<>(this.stepResults);
+            }
+            if (this.nestedWorkflowInstance != null) {
+                cloned.nestedWorkflowInstance = this.nestedWorkflowInstance.clone();
+            }
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("WorkflowInstance should be cloneable", e);
+        }
     }
 
 }

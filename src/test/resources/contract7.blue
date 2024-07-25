@@ -1,0 +1,53 @@
+name: Testing Exceptions
+type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialized
+    steps:
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/y
+            val: 1
+
+      - name: TriggerEvent
+        type: Trigger Event Step
+        event:
+          type: 7r9eeARFL6wpNtC2zSvENFiDpiU8KrhpTgMJfwt8C1cH
+          abc: 1
+
+      - name: Event 2
+        type: Expect Event Step
+        event:
+          type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+          abc: ca-boom!
+          zz: 12
+          x:
+            c:
+              type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+
+      - name: JSStep2
+        type: JavaScript Code Step
+        code: |
+          const a = 1;
+          // const b = a + c;
+          ({ controlAction: 'returnFromWorkflow' });
+          // ({ a });
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/z
+            val: 1
+
+  - trigger:
+      event:
+        type: Contract Initialized
+    steps:
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/x
+            val: 1

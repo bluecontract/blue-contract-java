@@ -10,7 +10,6 @@ import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
 import blue.language.utils.limits.PathLimits;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,17 +30,25 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
 
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
-        processEvent(event, context);
+        try {
+            processEvent(event, context);
+        } catch (JSExecutor.JSException ex) {
+            return processJSException(ex, context);
+        }
         return handleNextStepByOrder(event, context);
     }
 
     @Override
     public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
-        processEvent(event, context);
+        try {
+            processEvent(event, context);
+        } catch (JSExecutor.JSException ex) {
+            return processJSException(ex, context);
+        }
         return finalizeNextStepByOrder(event, context);
     }
 
-    private void processEvent(Node event, WorkflowProcessingContext context) {
+    private void processEvent(Node event, WorkflowProcessingContext context) throws JSExecutor.JSException {
 
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("event", NodeToObject.get(event, SIMPLE));
@@ -49,21 +56,17 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
         bindings.put("contract", (java.util.function.Function<String, Object>) path ->
                 context.getContractProcessingContext().accessContract(path, true, true));
 
-        try {
-            Object result = jsExecutor.executeScript(code, bindings);
+        Object result = jsExecutor.executeScript(code, bindings);
 
-            Optional<String> stepName = getStepName();
-            if (stepName.isPresent()) {
-                if (result instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> resultMap = (Map<String, Object>) result;
-                    context.getWorkflowInstance().getStepResults().put(stepName.get(), resultMap);
-                } else {
-                    throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
-                }
-            } 
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Error executing JS script", e);
+        Optional<String> stepName = getStepName();
+        if (stepName.isPresent()) {
+            if (result instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> resultMap = (Map<String, Object>) result;
+                context.getWorkflowInstance().getStepResults().put(stepName.get(), resultMap);
+            } else {
+                throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
+            }
         }
     }
 }

@@ -1,17 +1,17 @@
 package blue.contract;
 
+import blue.contract.exception.ContractProcessingException;
 import blue.contract.model.ContractInstance;
+import blue.contract.model.ProcessingState;
 import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.ContractUpdate;
 import blue.contract.model.WorkflowInstance;
 import blue.language.Blue;
-import blue.language.NodeProvider;
 import blue.language.model.Node;
 import blue.language.utils.BlueIdCalculator;
 import blue.language.utils.limits.Limits;
 import blue.language.utils.limits.PathLimits;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,10 +41,20 @@ public class ContractProcessor {
                                    String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
         Node event = initializationEvent();
         Node preprocessedContract = preprocess(contract);
+
+        ContractInstance rootInstance = new ContractInstance()
+                .id(ContractInstance.ROOT_INSTANCE_ID)
+                .contractState(preprocessedContract)
+                .processingState(new ProcessingState());
+
+        List<ContractInstance> contractInstances = new ArrayList<>();
+        contractInstances.add(rootInstance);
+
         ContractProcessingContext context = initiatedContext != null ? initiatedContext :
                 new ContractProcessingContext()
+                        .contractInstances(contractInstances)
+                        .contractInstanceId(ContractInstance.ROOT_INSTANCE_ID)
                         .contract(preprocessedContract)
-                        .contractInstances(new ArrayList<>())
                         .startedLocalContracts(0)
                         .initiateContractEntryBlueId(initiateContractEntryBlueId)
                         .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
@@ -53,24 +63,27 @@ public class ContractProcessor {
 
         List<WorkflowInstance> workflowInstances = processWorkflows(event, context, 0);
         int startedWorkflowInstancesCount = workflowInstances.size();
-        workflowInstances.removeIf(WorkflowInstance::isFinished);
+        workflowInstances.removeIf(WorkflowInstance::isCompleted);
 
-        ContractInstance instance = new ContractInstance()
-                .contract(context.getContract())
+        rootInstance.getProcessingState()
                 .startedWorkflowsCount(startedWorkflowInstancesCount)
                 .workflowInstances(workflowInstances.isEmpty() ? null : workflowInstances)
-                .startedLocalContractsCount(context.getContractInstances().size())
-                .localContractInstances(context.getContractInstances().isEmpty() ? null : context.getContractInstances());
+                .startedLocalContractsCount(context.getStartedLocalContracts())
+                .localContractInstances(context.getContractInstances().size() > 1 ?
+                        context.getContractInstances().subList(1, context.getContractInstances().size()) : null)
+                .completed(context.isCompleted())
+                .terminatedWithError(context.isTerminatedWithError());
+
+        rootInstance.contractState(context.getContract());
 
         return new ContractUpdate()
-                .contractInstance(instance)
+                .contractInstance(rootInstance)
                 .emittedEvents(context.getEmittedEvents().isEmpty() ? null : context.getEmittedEvents())
                 .initiateContractEntry(new Node().blueId(initiateContractEntryBlueId))
                 .initiateContractProcessingEntry(new Node().blueId(initiateContractProcessingEntryBlueId));
     }
 
     private Node preprocess(Node contract) {
-
         Limits contractLimits = new PathLimits.Builder()
                 .addPath("/participants/*")
                 .addPath("/properties/*")
@@ -84,34 +97,42 @@ public class ContractProcessor {
 
     public ContractUpdate processEvent(Node event, ContractInstance contractInstance,
                                        String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
-        int initialStartedLocalContracts = contractInstance.getStartedLocalContractCount();
-        String previousContractInstanceBlueId = calculateBlueId(contractInstance);
 
-        List<ContractInstance> initialContractInstances = new ArrayList<>();
-        if (contractInstance.getLocalContractInstances() != null)
-            initialContractInstances.addAll(contractInstance.getLocalContractInstances());
+        if (contractInstance.getProcessingState().isCompleted() || contractInstance.getProcessingState().isTerminatedWithError()) {
+            throw new IllegalStateException("Contract instance is already completed or terminated with error.");
+        }
+
+        int initialStartedLocalContracts = contractInstance.getProcessingState().getStartedLocalContractCount();
+        String previousContractInstanceBlueId = calculateBlueId(contractInstance);
 
         List<ContractInstance> contractInstances = new ArrayList<>();
         contractInstances.add(contractInstance);
-        contractInstances.addAll(initialContractInstances);
+        if (contractInstance.getProcessingState().getLocalContractInstances() != null) {
+            contractInstances.addAll(contractInstance.getProcessingState().getLocalContractInstances());
+        }
 
         ContractProcessingContext context = new ContractProcessingContext()
                 .contractInstances(contractInstances)
+                .contractInstanceId(contractInstance.getId())
+                .contract(contractInstance.getContractState())
                 .startedLocalContracts(initialStartedLocalContracts)
                 .initiateContractEntryBlueId(initiateContractEntryBlueId)
                 .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
-                .epoch(contractInstance.getEpoch() + 1)
-                .previousContractInstance(new Node().blueId(previousContractInstanceBlueId))
                 .stepProcessorProvider(stepProcessorProvider)
                 .blue(blue);
 
-        processEventInContractInstance(event, contractInstance, context);
-        initialContractInstances.forEach(instance -> processEventInContractInstance(event, instance, context));
+        for (ContractInstance instance : contractInstances) {
+            processEventInContractInstance(event, instance, context);
+            if (context.isCompleted()) {
+                break;
+            }
+        }
 
         List<ContractInstance> localContractInstances = contractInstances.stream()
-                .filter(instance -> !instance.equals(contractInstance))
+                .filter(instance -> instance.getId() != ContractInstance.ROOT_INSTANCE_ID)
                 .collect(Collectors.toList());
-        contractInstance
+
+        contractInstance.getProcessingState()
                 .startedLocalContractsCount(context.getStartedLocalContracts())
                 .localContractInstances(localContractInstances.isEmpty() ? null : localContractInstances);
 
@@ -121,67 +142,58 @@ public class ContractProcessor {
                 .emittedEvents(context.getEmittedEvents().isEmpty() ? null : context.getEmittedEvents())
                 .initiateContractEntry(new Node().blueId(initiateContractEntryBlueId))
                 .initiateContractProcessingEntry(new Node().blueId(initiateContractProcessingEntryBlueId));
-
     }
 
     private void processEventInContractInstance(Node event, ContractInstance contractInstance, ContractProcessingContext context) {
-        Node contract = contractInstance.getContract();
-        String prevContractBlueId = BlueIdCalculator.calculateBlueId(contract);
-        context.contract(contract);
+        context.contract(contractInstance.getContractState());
         context.contractInstanceId(contractInstance.getId());
-        List<WorkflowInstance> existingWorkflowInstances = contractInstance.getWorkflowInstances();
-        int startedWorkflows = contractInstance.getStartedWorkflowCount();
+
+        List<WorkflowInstance> existingWorkflowInstances = contractInstance.getProcessingState().getWorkflowInstances();
+        int startedWorkflows = contractInstance.getProcessingState().getStartedWorkflowCount();
 
         List<WorkflowInstance> newWorkflowInstances = processWorkflows(event, context, startedWorkflows);
         startedWorkflows += newWorkflowInstances.size();
-
-        boolean existingWorkflowsChanged = false;
         if (existingWorkflowInstances != null) {
-            for (WorkflowInstance workflowInstance : existingWorkflowInstances) {
-                Optional<WorkflowInstance> processedWorkflow = workflowProcessor.processEvent(event, workflowInstance, context);
-                if (processedWorkflow.isPresent()) {
-                    existingWorkflowsChanged = true;
-                }
-            }
+            existingWorkflowInstances.forEach(workflowInstance -> workflowProcessor.processEvent(event, workflowInstance, context));
         }
 
         List<WorkflowInstance> updatedWorkflowInstances = new ArrayList<>();
-        if (existingWorkflowInstances != null)
+        if (existingWorkflowInstances != null) {
             updatedWorkflowInstances.addAll(existingWorkflowInstances);
+        }
         updatedWorkflowInstances.addAll(newWorkflowInstances);
-        updatedWorkflowInstances.removeIf(WorkflowInstance::isFinished);
+        updatedWorkflowInstances.removeIf(WorkflowInstance::isCompleted);
 
-        boolean contractChanged = !context.getContract().getAsText("/blueId").equals(prevContractBlueId);
-        boolean instanceChanged = contractChanged || !newWorkflowInstances.isEmpty() || existingWorkflowsChanged;
-
-        contractInstance
-                .contract(context.getContract())
-                .epoch(context.getEpoch())
-                .previousContractInstance(context.getPreviousContractInstance())
+        contractInstance.contractState(context.getContract());
+        contractInstance.getProcessingState()
                 .startedWorkflowsCount(startedWorkflows)
-                .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances)
-                .lastChangeContractInstance(contractChanged ?
-                        context.getPreviousContractInstance() : contractInstance.getLastChangeContractInstance())
-                .lastContractChangeContractInstance(instanceChanged ?
-                        context.getPreviousContractInstance() :
-                        contractInstance.getLastContractChangeContractInstance());
+                .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances);
     }
 
     private List<WorkflowInstance> processWorkflows(Node event, ContractProcessingContext context, int initialStartedWorkflows) {
-
         Node workflowsNode = context.getContract().getProperties().get("workflows");
         if (workflowsNode == null)
             return new ArrayList<>();
 
         List<Node> workflows = workflowsNode.getItems();
         AtomicInteger currentId = new AtomicInteger(initialStartedWorkflows);
+        List<WorkflowInstance> processedWorkflows = new ArrayList<>();
 
-        return workflows.stream()
-                .map(workflow -> workflowProcessor.processEvent(event, workflow, context))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(instance -> instance.id(currentId.getAndIncrement()))
-                .collect(Collectors.toList());
+        for (Node workflow : workflows) {
+            try {
+                Optional<WorkflowInstance> result = workflowProcessor.processEvent(event, workflow, context);
+                if (result.isPresent()) {
+                    result.get().id(currentId.getAndIncrement());
+                    processedWorkflows.add(result.get());
+                    if (context.isCompleted())
+                        return processedWorkflows;
+                }
+            } catch (ContractProcessingException e) {
+                break;
+            }
+        }
+
+        return processedWorkflows;
     }
 
     private Node initializationEvent() {
