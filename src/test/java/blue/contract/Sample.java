@@ -22,7 +22,7 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 public class Sample {
 
     public static void main(String[] args) throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract7.blue"), Node.class);
+        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract6.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         List<Node> emittedEvents = new ArrayList<>();
         String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
@@ -48,8 +48,7 @@ public class Sample {
         int fileId = 2;
         while (!emittedEvents.isEmpty()) {
             Node emittedEvent = emittedEvents.remove(0);
-            ContractInstance instance = load(fileId - 1);
-            update = contractProcessor.processEvent(emittedEvent, instance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+            update = contractProcessor.processEvent(emittedEvent, load(fileId - 1));
             save(update, fileId++);
             if (update.getEmittedEvents() != null) {
                 emittedEvents.addAll(update.getEmittedEvents());
@@ -74,9 +73,9 @@ public class Sample {
         JSON_MAPPER.writeValue(outputFile, NodeToObject.get(contractInstanceNode, NodeToObject.Strategy.SIMPLE));
     }
 
-    private static ContractInstance load(int id) throws IOException {
-        File inputFile = new File("src/test/resources/" + id + "_contractInstance.json");
-        return YAML_MAPPER.readValue(inputFile, ContractInstance.class);
+    private static ContractUpdate load(int id) throws IOException {
+        File inputFile = new File("src/test/resources/" + id + "_update.blue");
+        return YAML_MAPPER.readValue(inputFile, ContractUpdate.class);
     }
 
     private static Blue defaultBlue() {
