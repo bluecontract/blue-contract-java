@@ -57,7 +57,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
     private boolean matchesContractDetails(ContractProcessingEvent contractProcessingEvent,
                                            Integer contractInstanceId, String initiateContractEntryBlueId) {
-        return contractInstanceId.equals(contractProcessingEvent.getContractInstanceId()) &&
+        return (contractInstanceId == null || contractInstanceId.equals(contractProcessingEvent.getContractInstanceId())) &&
                initiateContractEntryBlueId.equals(contractProcessingEvent.getInitiateContractEntry().get("/blueId"));
     }
 
@@ -87,6 +87,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
                 (!nodeClass.get().equals(LocalContract.class) && !nodeClass.get().equals(ExternalContract.class))) {
                 throw new IllegalArgumentException("Property \"contract\" must be either a \"Local Contract\" or \"External Contract\".");
             }
+
             return blue.nodeToObject(contractNode, nodeClass.get());
         }
         return null;
@@ -103,7 +104,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
             return matchesContractDetails(contractProcessingEvent, localContract.getId(), currentInitiateContractEntryBlueId);
         } else if (contract instanceof ExternalContract) {
             ExternalContract externalContract = (ExternalContract) contract;
-            return matchesContractDetails(contractProcessingEvent, externalContract.getLocalContractInstanceId(),
+            return matchesContractDetails(contractProcessingEvent, (Integer) externalContract.getLocalContractInstanceId().getValue(),
                     (String) externalContract.getInitiateContractEntry().get("/blueId"));
         }
         return false;

@@ -1,0 +1,22 @@
+name: Testing Events
+type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+properties:
+  caughtEvents: 0
+externalContracts:
+  someContract:
+    type: BbNPrYyYhcqMxj24LAzrnYHFgYxkruihY76QuypYxuYW
+    initiateContractEntry:
+      value: 6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR
+workflows:
+  - name: ExpectEvents
+    trigger:
+      event:
+        type: DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5
+      contract: ${contract("/externalContracts/someContract")}
+    steps:
+      - name: UpdateStep
+        type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/caughtEvents
+            val: ${contract("/properties/caughtEvents") + 1}

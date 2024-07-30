@@ -15,6 +15,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,17 +31,22 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
 
     public UpdateStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
         super(step, expressionEvaluator);
-        prepareChangeset();
+        List<Map<String, Object>> changeset = step.getProperties().get("changeset").getItems().stream()
+                .map(el -> (Map<String, Object>) NodeToObject.get(el, SIMPLE))
+                .toList();
+        this.rawChangeset = prepareChangeset(changeset, false);
     }
 
-    private void prepareChangeset() {
-        this.rawChangeset = step.getProperties().get("changeset").getItems().stream()
-                .map(e -> {
-                    Map<String, Object> map = (Map<String, Object>) NodeToObject.get(e, SIMPLE);
-                    if (map.containsKey("val")) {
-                        map.put("value", map.remove("val"));
+    private List<Map<String, Object>> prepareChangeset(List<Map<String, Object>> changeset, boolean toVal) {
+        return changeset.stream()
+                .map(change -> {
+                    Map<String, Object> newChange = new HashMap<>(change);
+                    String fromKey = toVal ? "value" : "val";
+                    String toKey = toVal ? "val" : "value";
+                    if (newChange.containsKey(fromKey)) {
+                        newChange.put(toKey, newChange.remove(fromKey));
                     }
-                    return map;
+                    return newChange;
                 })
                 .collect(Collectors.toList());
     }
@@ -73,8 +79,9 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
             Node updatedContract = JSON_MAPPER.convertValue(result, Node.class);
             context.getContractProcessingContext().contract(updatedContract);
 
+            List<Map<String, Object>> eventChangeset = prepareChangeset(evaluatedChangeset, true);
             ContractUpdateEvent updateEvent = new ContractUpdateEvent()
-                    .changeset(JSON_MAPPER.convertValue(rawChangeset, Node.class));
+                    .changeset(JSON_MAPPER.convertValue(eventChangeset, Node.class));
             Node updateEventNode = YAML_MAPPER.convertValue(updateEvent, Node.class);
             ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(updateEventNode, step.getName(), context);
             Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);

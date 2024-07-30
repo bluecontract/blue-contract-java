@@ -6,13 +6,13 @@ import blue.language.model.Node;
 @BlueId("BbNPrYyYhcqMxj24LAzrnYHFgYxkruihY76QuypYxuYW")
 public class ExternalContract {
     private Node initiateContractEntry;
-    private Integer localContractInstanceId;
+    private Node localContractInstanceId;
 
     public Node getInitiateContractEntry() {
         return initiateContractEntry;
     }
 
-    public Integer getLocalContractInstanceId() {
+    public Node getLocalContractInstanceId() {
         return localContractInstanceId;
     }
 
@@ -21,7 +21,7 @@ public class ExternalContract {
         return this;
     }
 
-    public ExternalContract localContractInstanceId(Integer localContractInstanceId) {
+    public ExternalContract localContractInstanceId(Node localContractInstanceId) {
         this.localContractInstanceId = localContractInstanceId;
         return this;
     }
