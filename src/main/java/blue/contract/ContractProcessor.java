@@ -99,7 +99,7 @@ public class ContractProcessor {
         ContractUpdate result = processEvent(event, contractUpdate.getContractInstance(),
                 contractUpdate.getInitiateContractEntry().getAsText("/blueId"),
                 contractUpdate.getInitiateContractProcessingEntry().getAsText("/blueId"));
-        result.epoch(result.getEpoch() + 1);
+        result.epoch(contractUpdate.getEpoch() + 1);
         return result;
     }
 
