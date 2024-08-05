@@ -38,7 +38,7 @@ public class ExpressionEvaluator {
         Map<String, Object> bindings = createBindings(context, scope, resolveFinalLink);
 
         try {
-            return jsExecutor.executeScript(jsExpression, bindings);
+            return jsExecutor.executeExpression(jsExpression, bindings);
         } catch (Exception e) {
             throw new RuntimeException("Error evaluating JS expression: " + jsExpression, e);
         }

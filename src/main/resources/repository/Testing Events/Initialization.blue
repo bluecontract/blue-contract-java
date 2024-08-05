@@ -1,0 +1,16 @@
+name: Initialization
+type: Contract
+properties:
+  x: 0
+  ticket:
+    type: Ticket
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/x
+            val: 1

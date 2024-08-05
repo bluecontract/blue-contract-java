@@ -3,7 +3,7 @@ package blue.contract.model;
 import blue.language.model.BlueId;
 import blue.language.model.Node;
 
-@BlueId("BbNPrYyYhcqMxj24LAzrnYHFgYxkruihY76QuypYxuYW")
+@BlueId("83vpYdEkjbguc9Mbixz2qV2ZkzaCgV4gptSeyyU4QzaJ")
 public class ExternalContract {
     private Node initiateContractEntry;
     private Node localContractInstanceId;

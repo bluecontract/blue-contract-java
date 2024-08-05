@@ -1,0 +1,11 @@
+name: Trigger Event Step
+type: Workflow Step
+description: |
+  A specialized workflow step designed to generate and emit a specific event. 
+event:
+  description: |
+    Defines the event to be triggered. 
+
+    Important: Any ${} expressions within the event object will be evaluated 
+    at runtime. The actual triggered event will contain the evaluated values, 
+    not the raw template expressions.

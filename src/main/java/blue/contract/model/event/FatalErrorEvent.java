@@ -2,7 +2,7 @@ package blue.contract.model.event;
 
 import blue.language.model.BlueId;
 
-@BlueId("9xhgr2ZGd976hQG4ag6gufDxK3Td3Zcz8STF8AxMrxwi")
+@BlueId("9NSnAkLGgfj2bHkkT6RzjjSgqt68B5kaotFK5aCoP317")
 public class FatalErrorEvent {
 
     private String errorMessage;

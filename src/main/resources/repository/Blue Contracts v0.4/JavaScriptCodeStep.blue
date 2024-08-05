@@ -1,0 +1,11 @@
+name: JavaScript Code Step
+type: Workflow Step
+description: |
+  A versatile workflow step that allows the execution of custom JavaScript code 
+  within the workflow. This step provides flexibility to perform complex 
+  operations, data transformations, or custom logic that may not be easily 
+  achievable with predefined step types.
+code:
+  type: Text
+  description: |
+    The JavaScript code to be executed as part of this step.

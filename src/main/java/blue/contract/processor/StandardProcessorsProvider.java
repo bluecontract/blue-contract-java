@@ -30,7 +30,7 @@ public class StandardProcessorsProvider implements StepProcessorProvider {
             return Optional.empty();
         }
 
-        JSExecutor jsExecutor = new JSExecutor();
+        JSExecutor jsExecutor = new JSExecutor(blue);
         ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(jsExecutor);
 
         Optional<StepProcessor> workflowFunctionProcessor = getWorkflowFunctionProcessor(step, expressionEvaluator, jsExecutor);
@@ -39,11 +39,9 @@ public class StandardProcessorsProvider implements StepProcessorProvider {
         }
 
         Map<String, Function<Node, StepProcessor>> processorMap = new HashMap<>();
-        processorMap.put("Hello Event", node -> new HelloEventProcessor(node, expressionEvaluator));
         processorMap.put("Expect Event Step", node -> new ExpectEventStepProcessor(node, expressionEvaluator));
         processorMap.put("Trigger Event Step", node -> new TriggerEventStepProcessor(node, expressionEvaluator));
         processorMap.put("Update Step", node -> new UpdateStepProcessor(node, expressionEvaluator));
-        processorMap.put("Dummy Code", node -> new DummyCodeStepProcessor(node, expressionEvaluator));
         processorMap.put("Initialize Local Contract Step", node -> new InitializeLocalContractStepProcessor(node, expressionEvaluator));
         processorMap.put("Workflow Function Step", node -> new WorkflowFunctionStepProcessor(node, expressionEvaluator, jsExecutor));
         processorMap.put("JavaScript Code Step", node -> new JSCodeStepProcessor(node, expressionEvaluator, jsExecutor, blue));
@@ -55,7 +53,6 @@ public class StandardProcessorsProvider implements StepProcessorProvider {
         String workflowFunctionBlueId = BlueIds.getBlueId(WorkflowFunction.class)
                 .orElseThrow(() -> new IllegalArgumentException("No @BlueId annotation for WorkflowFunction class."));
         if (Types.isSubtype(step, new Node().blueId(workflowFunctionBlueId), blue.getNodeProvider())) {
-//        if (blue.isNodeSubtypeOf(step, new Node().blueId(workflowFunctionBlueId)))
             return Optional.of(new WorkflowFunctionStepProcessor(step, expressionEvaluator, jsExecutor));
         }
         return Optional.empty();

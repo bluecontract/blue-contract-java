@@ -1,7 +1,10 @@
 name: Contract
 description: (full documentation goes here)
-participants:
-  description: participants part
+messaging:
+  participants:
+    description: participants part
+  secureChannel:
+    description: channel part
 properties:
   description: properties part
 workflows:

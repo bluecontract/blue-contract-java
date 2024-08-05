@@ -1,0 +1,119 @@
+name: Chess
+type: Contract
+messaging:
+  participants:
+    Player White:
+      timeline:
+        value: Hvi3cK5LBVYzgkydR23mPs5ARWYKjEsFd5mcJfGvKxcE
+    Player Black:
+      timeline:
+        value: ARWYKjEsFd5mcJfGvKxcEHvi3cK5LBVYzgkydR23mPs5
+
+properties:
+  chessboard:
+    description: Chessboard state in FEN notation
+    type: Text
+    value: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  winner:
+    description: Indicates who won the game (e.g., 'White', 'Black', or 'None' if the game is not over or ended in a draw)
+    type: Text
+  draw:
+    description: Indicates whether the game ended in a draw (true) or not (false)
+    type: Boolean
+  gameOver:
+    description:  Indicates whether the game has ended (true) or is still in progress (false)
+    type: Boolean
+  playerToMove:
+    value: White
+    description: Indicates whose move it is ('White' or 'Black')
+
+workflows:
+  - trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Chess Move
+    steps:
+
+      - description: Check player
+        type: JavaScript Code Step
+        code: |
+          let playerToMove = contract("/properties/playerToMove");
+          let expectedTimeline = (playerToMove === 'White') ? 
+              contract("/messaging/participants/Player White/timeline") :
+              contract("/messaging/participants/Player Black/timeline")
+          let timeline = event.timeline;
+          
+          if (timeline != expectedTimeline) {
+            throw new RejectAndAwaitNextEventException('Not your move!');
+          }
+          return { }
+
+      - name: move
+        type: JavaScript Code Step
+        code: |
+          const chessModule = importBlueESModule('blue:FQP53g6UNu75EeEDmTX8mKHqoNSLQgYxQxpFhAzKyHhJ');
+          const Chess = chessModule.Chess;
+
+          function checkMove(from, to, position) {
+              const game = new Chess(position);
+
+              try {
+                  const move = game.move({ from, to });
+                  if (move === null) {
+                      return { legal: false, position: game.fen(), gameOver: false, winner: null, draw: false };
+                  }
+                  const newPosition = game.fen();
+
+                  let gameOver = game.isGameOver();
+                  let winner = null;
+                  let draw = false;
+
+                  if (gameOver) {
+                      if (game.isCheckmate()) {
+                          winner = game.turn() === 'w' ? 'black' : 'white';
+                      } else if (game.isDraw()) {
+                          draw = true;
+                      }
+                  }
+
+                  return { legal: true, position: newPosition, gameOver: gameOver, winner: winner, draw: draw };
+              } catch (error) {
+                  return { legal: false, position: game.fen(), error: error.message, gameOver: false, winner: null, draw: false };
+              }
+          }
+
+          let position = contract("/properties/chessboard");
+          let from = event.message.from;
+          let to = event.message.to;
+          let result;
+
+          result = checkMove(from, to, position);
+          
+          if (!result.legal) {
+            throw new RejectAndAwaitNextEventException('Illegal move');
+          }
+          
+          if (result.winner === null) {
+            result.winner = 'None';
+          }
+
+          return { result };
+
+      - type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/chessboard
+            val: ${steps.move.result.position}
+          - op: replace
+            path: /properties/draw
+            val: ${steps.move.result.draw}
+          - op: replace
+            path: /properties/winner
+            val: ${steps.move.result.winner}
+          - op: replace
+            path: /properties/gameOver
+            val: ${steps.move.result.gameOver}
+          - op: replace
+            path: /properties/playerToMove
+            val: '${(contract("/properties/playerToMove") === "White") ? "Black" : "White"}'

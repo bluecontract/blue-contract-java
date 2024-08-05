@@ -35,6 +35,15 @@ public class CustomFileSystem implements FileSystem {
         return defaultFS.parsePath(path);
     }
 
+    public String readBlueResource(String resourceId) throws IOException {
+//        String resourcePath = blueResources.get(resourceId);
+//        if (resourcePath == null) {
+//            throw new IOException("Blue resource not found: " + resourceId);
+//        }
+        System.out.println("resourceId: " + resourceId);
+        return new String(Files.readAllBytes(Paths.get("src", "main", "resources", "samples/chess.js")));
+    }
+
     @Override
     public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) throws IOException {
         return defaultFS.newByteChannel(path, options, attrs);

@@ -1,10 +1,13 @@
 package blue.contract.processor;
 
 import blue.contract.AbstractStepProcessor;
+import blue.contract.model.ContractInstance;
+import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
+import blue.contract.utils.JSExecutor.ContractCompleteResult;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToObject;
@@ -31,24 +34,30 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
         try {
-            processEvent(event, context);
+            Object result = processEvent(event, context);
+            if (result instanceof ContractCompleteResult) {
+                return handleContractComplete((ContractCompleteResult) result, context);
+            }
+            return handleNextStepByOrder(event, context);
         } catch (JSExecutor.JSException ex) {
             return processJSException(ex, context);
         }
-        return handleNextStepByOrder(event, context);
     }
 
     @Override
     public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
         try {
-            processEvent(event, context);
+            Object result = processEvent(event, context);
+            if (result instanceof ContractCompleteResult) {
+                return handleContractComplete((ContractCompleteResult) result, context);
+            }
+            return finalizeNextStepByOrder(event, context);
         } catch (JSExecutor.JSException ex) {
             return processJSException(ex, context);
         }
-        return finalizeNextStepByOrder(event, context);
     }
 
-    private void processEvent(Node event, WorkflowProcessingContext context) throws JSExecutor.JSException {
+    private Object processEvent(Node event, WorkflowProcessingContext context) throws JSExecutor.JSException {
 
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("event", NodeToObject.get(event, SIMPLE));
@@ -68,5 +77,17 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
                 throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
             }
         }
+        return result;
     }
+
+    private Optional<WorkflowInstance> handleContractComplete(ContractCompleteResult result, WorkflowProcessingContext context) {
+        ContractProcessingContext contractProcessingContext = context.getContractProcessingContext();
+        ContractInstance currentInstance = contractProcessingContext.getCurrentContractInstance();
+        currentInstance.getProcessingState().completed(true);
+        if (currentInstance.getId() == ContractInstance.ROOT_INSTANCE_ID) {
+            contractProcessingContext.completed(true);
+        }
+        return Optional.of(context.getWorkflowInstance().completed(true));
+    }
+
 }

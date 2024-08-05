@@ -1,0 +1,18 @@
+name: JSON Patch Entry
+description: Represents a single operation in a JSON Patch, defining a specific change to be applied to a JSON document.
+op:
+  type: Text
+  description: The operation to be performed on the target JSON document.
+  constraints:
+    options:
+      - add
+      - remove
+      - replace
+      - move
+      - copy
+      - test
+path:
+  type: Text
+  description: A JSON Pointer string indicating the location in the document where the operation should be applied. Must start with a forward slash (/).
+val:
+  description: The value to be used in the operation.

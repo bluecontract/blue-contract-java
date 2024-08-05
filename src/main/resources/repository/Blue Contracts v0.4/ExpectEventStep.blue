@@ -1,0 +1,16 @@
+name: Expect Event Step
+type: Workflow Step
+description: |
+  A specialized workflow step designed to wait for and process a specific event. 
+  This step acts as a gatekeeper, allowing the workflow to pause until a 
+  particular event occurs, then facilitating the event's progression through 
+  subsequent workflow steps.
+event:
+  description: |
+    Defines the expected event characteristics. This object specifies the 
+    criteria that an incoming event must meet to be considered a match and 
+    trigger the continuation of the workflow.
+    
+    Important: Any ${} expressions within the event object will be evaluated 
+    at runtime. The incoming event will be compared against this evaluated 
+    version of the criteria, not the raw template.

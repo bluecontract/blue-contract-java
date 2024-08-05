@@ -1,5 +1,5 @@
 name: My Function
-type: 66oteHvnKcpRvS1ty6qND1keob9PJVakKxjTQPQY8YFA
+type: 4TPPuFJrpB4LdEXjPvT8ViM9QB1CA1VyUTEtAEeJpc2f
 initiateStepsCode: |
   const value = contract("/name") + " - " + functionStep.abc;
   

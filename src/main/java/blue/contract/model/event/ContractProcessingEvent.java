@@ -3,7 +3,7 @@ package blue.contract.model.event;
 import blue.language.model.BlueId;
 import blue.language.model.Node;
 
-@BlueId("D3qPzjYFEqit1SVgUM8fKzaVrjgmNgZr2WikLDvCdwBM")
+@BlueId("HQgee2RezD7yupwCgRnSzKwhqUGwzNNRq1n1eyFD9X1w")
 public class ContractProcessingEvent {
     private Integer contractInstanceId;
     private Integer workflowInstanceId;

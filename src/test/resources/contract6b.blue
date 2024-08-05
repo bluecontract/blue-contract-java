@@ -1,17 +1,18 @@
-name: Testing Events
-type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+blue: Blue Contracts v0.4
+name: Testing Events 2
+type: Contract
 properties:
   caughtEvents: 0
 externalContracts:
   someContract:
-    type: BbNPrYyYhcqMxj24LAzrnYHFgYxkruihY76QuypYxuYW
+    type: External Contract
     initiateContractEntry:
-      value: 6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR
+      blueId: 6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR
 workflows:
   - name: ExpectEvents
     trigger:
       event:
-        type: DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5
+        type: Contract Update Event
       contract: ${contract("/externalContracts/someContract")}
     steps:
       - name: UpdateStep

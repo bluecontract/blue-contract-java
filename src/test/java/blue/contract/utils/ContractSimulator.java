@@ -1,5 +1,6 @@
-package blue.contract;
+package blue.contract.utils;
 
+import blue.contract.ContractProcessor;
 import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdate;
 import blue.contract.processor.StandardProcessorsProvider;
@@ -22,24 +23,21 @@ public class ContractSimulator {
     private final String initiateContractEntryBlueId;
     private final String initiateContractProcessingEntryBlueId;
     private final List<Node> pendingEvents;
-    private int currentFileId;
     private ContractInstance currentInstance;
     private List<Node> processedEvents = new ArrayList<>();
-    private final String filePrefix;
+    private List<ContractUpdate> contractUpdates = new ArrayList<>();
 
-    public ContractSimulator(Blue blue, String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId, String filePrefix) {
+    public ContractSimulator(Blue blue, String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
         StandardProcessorsProvider provider = new StandardProcessorsProvider(blue);
         this.contractProcessor = new ContractProcessor(provider, blue);
         this.initiateContractEntryBlueId = initiateContractEntryBlueId;
         this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
         this.pendingEvents = new ArrayList<>();
-        this.currentFileId = 1;
-        this.filePrefix = filePrefix;
     }
 
-    public void initiateContract(Node contract) throws IOException {
+    public void initiateContract(Node contract) {
         ContractUpdate update = contractProcessor.initiate(contract, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-        save(update, currentFileId++);
+        contractUpdates.add(update);
         currentInstance = update.getContractInstance();
         if (update.getEmittedEvents() != null) {
             pendingEvents.addAll(update.getEmittedEvents());
@@ -50,13 +48,13 @@ public class ContractSimulator {
         pendingEvents.add(event);
     }
 
-    public void processEvents(int numberOfEventsToProcess) throws IOException {
+    public void processEvents(int numberOfEventsToProcess) {
         int eventsProcessed = 0;
         while (!pendingEvents.isEmpty() && eventsProcessed < numberOfEventsToProcess) {
             Node event = pendingEvents.remove(0);
             ContractUpdate update = contractProcessor.processEvent(event, currentInstance,
                     initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-            save(update, currentFileId++);
+            contractUpdates.add(update);
             currentInstance = update.getContractInstance();
             if (update.getEmittedEvents() != null) {
                 pendingEvents.addAll(update.getEmittedEvents());
@@ -70,14 +68,14 @@ public class ContractSimulator {
         return new ArrayList<>(processedEvents);
     }
 
-    public void processEmittedEventsOnly() throws IOException {
+    public void processEmittedEventsOnly() {
         int initialPendingEventsCount = pendingEvents.size();
         for (int i = 0; i < initialPendingEventsCount; i++) {
             if (!pendingEvents.isEmpty()) {
                 Node event = pendingEvents.remove(0);
                 ContractUpdate update = contractProcessor.processEvent(event, currentInstance,
                         initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-                save(update, currentFileId++);
+                contractUpdates.add(update);
                 currentInstance = update.getContractInstance();
                 if (update.getEmittedEvents() != null) {
                     pendingEvents.addAll(update.getEmittedEvents());
@@ -86,19 +84,18 @@ public class ContractSimulator {
         }
     }
 
-    private void save(ContractUpdate contractUpdate, int id) throws IOException {
-        Node contractUpdateNode = JSON_MAPPER.convertValue(contractUpdate, Node.class);
-        File outputFile = new File("src/test/resources/" + filePrefix + "_" + id + "_update.blue");
-        YAML_MAPPER.writeValue(outputFile, NodeToObject.get(contractUpdateNode, NodeToObject.Strategy.SIMPLE));
+    public void save(String directory, String filePrefix) throws IOException {
+        for (int i = 0; i < contractUpdates.size(); i++) {
+            ContractUpdate contractUpdate = contractUpdates.get(i);
+            Node contractUpdateNode = JSON_MAPPER.convertValue(contractUpdate, Node.class);
 
-        Node contractInstanceNode = contractUpdateNode.getAsNode("/contractInstance");
-        outputFile = new File("src/test/resources/" + filePrefix + "_" + id + "_contractInstance.json");
-        JSON_MAPPER.writeValue(outputFile, NodeToObject.get(contractInstanceNode, NodeToObject.Strategy.SIMPLE));
-    }
+            File outputFile = new File(directory + "/" + filePrefix + "_" + (i + 1) + "_update.blue");
+            YAML_MAPPER.writeValue(outputFile, NodeToObject.get(contractUpdateNode, NodeToObject.Strategy.SIMPLE));
 
-    private ContractInstance load(int id) throws IOException {
-        File inputFile = new File("src/test/resources/" + filePrefix + "_" + id + "_contractInstance.json");
-        return YAML_MAPPER.readValue(inputFile, ContractInstance.class);
+            Node contractInstanceNode = contractUpdateNode.getAsNode("/contractInstance");
+            outputFile = new File(directory + "/" + filePrefix + "_" + (i + 1) + "_contractInstance.json");
+            JSON_MAPPER.writeValue(outputFile, NodeToObject.get(contractInstanceNode, NodeToObject.Strategy.SIMPLE));
+        }
     }
 
     public List<Node> getPendingEvents() {
@@ -106,7 +103,10 @@ public class ContractSimulator {
     }
 
     public int getCurrentFileId() {
-        return currentFileId;
+        return contractUpdates.size();
     }
 
+    public List<ContractUpdate> getContractUpdates() {
+        return contractUpdates;
+    }
 }

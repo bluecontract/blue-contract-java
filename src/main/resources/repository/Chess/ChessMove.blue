@@ -1,0 +1,8 @@
+name: Chess Move
+description: Represents a single move in the game of chess.
+from:
+  type: Text
+  description: Move from, e.g. 'e2'
+to:
+  type: Text
+  description: Move to, e.g. 'e4'

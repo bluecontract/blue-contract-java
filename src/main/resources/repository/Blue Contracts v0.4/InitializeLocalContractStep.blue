@@ -1,0 +1,8 @@
+name: Initialize Local Contract Step
+type: Workflow Step
+description: |
+  A specialized workflow step designed to create and initialize a new local 
+  instance.
+contract:
+  description: |
+    Specifies the content of the contract that will be initialized.

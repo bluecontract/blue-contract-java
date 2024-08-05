@@ -1,0 +1,7 @@
+name: Workflow Function Step
+type: Workflow Step
+description: |
+  A versatile workflow step that allows the execution of predefined functions 
+  within the workflow. This step provides a way to encapsulate common operations 
+  or complex logic into reusable functions, enhancing modularity and 
+  maintainability of workflows.

@@ -2,7 +2,7 @@ package blue.contract.model;
 
 import blue.language.model.BlueId;
 
-@BlueId("GGo3aanJBb5DdzXovf7ibiBs3bZkXzHeizTCgYFhLWpQ")
+@BlueId("6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f")
 public class LocalContract {
     private Integer id;
 

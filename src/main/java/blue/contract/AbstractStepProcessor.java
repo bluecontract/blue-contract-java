@@ -11,6 +11,10 @@ import blue.contract.utils.Events;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.contract.utils.JSExecutor;
+import blue.contract.utils.JSExecutor.ContractCompleteResult;
+import blue.contract.utils.JSExecutor.JSCriticalException;
+import blue.contract.utils.JSExecutor.RejectAndAwaitNextEventException;
+import blue.contract.utils.JSExecutor.TerminateContractWithErrorException;
 import blue.contract.utils.Workflows;
 import blue.language.model.Node;
 
@@ -101,28 +105,21 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         return evaluateExpressionsRecursively(node, context, ExpressionScope.GLOBAL, false);
     }
 
-    protected Optional<WorkflowInstance> processJSException(JSExecutor.JSException ex,
-                                                            WorkflowProcessingContext workflowProcessingContext)  {
-        ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
-        if (ex instanceof JSExecutor.JSCriticalException) {
-            terminateContractWithError(ex, workflowProcessingContext, contractProcessingContext);
-        } else if (ex instanceof JSExecutor.ProcessControlException) {
-            JSExecutor.ProcessControlException pce = (JSExecutor.ProcessControlException) ex;
-            switch (pce.getControlAction()) {
-                case "completeContract":
-                    ContractInstance currentInstance = contractProcessingContext.getCurrentContractInstance();
-                    currentInstance.getProcessingState().completed(true);
-                    if (currentInstance.getId() == ContractInstance.ROOT_INSTANCE_ID) {
-                        contractProcessingContext.completed(true);
-                    }
-                    return Optional.of(workflowProcessingContext.getWorkflowInstance().completed(true));
-                case "returnFromWorkflow":
-                    workflowProcessingContext.rollbackTransaction();
-                    return Optional.empty();
-                case "terminateContractWithError":
-                    terminateContractWithError(ex, workflowProcessingContext, contractProcessingContext);
-            }
+    protected Optional<WorkflowInstance> processJSException(JSExecutor.JSException ex, WorkflowProcessingContext context) {
+        ContractProcessingContext contractProcessingContext = context.getContractProcessingContext();
+
+        if (ex instanceof RejectAndAwaitNextEventException) {
+            context.rollbackTransaction();
+            return Optional.empty();
+        } else if (ex instanceof TerminateContractWithErrorException) {
+            terminateContractWithError(ex, context, contractProcessingContext);
+            return Optional.empty();
+        } else if (ex instanceof JSCriticalException) {
+            terminateContractWithError(ex, context, contractProcessingContext);
+            return Optional.empty();
         }
+
+        terminateContractWithError(ex, context, contractProcessingContext);
         return Optional.empty();
     }
 
@@ -136,7 +133,7 @@ public abstract class AbstractStepProcessor implements StepProcessor {
 
         FatalErrorEvent errorEvent = new FatalErrorEvent()
                 .errorMessage("Critical, irrecoverable JS error, contract terminated with error.")
-                .stackTrace(((JSExecutor.JSCriticalException) ex).getJsStackTrace());
+                .stackTrace(((JSCriticalException) ex).getJsStackTrace());
         Node errorEventNode = YAML_MAPPER.convertValue(errorEvent, Node.class);
         ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(errorEventNode, step.getName(), workflowProcessingContext);
         Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);

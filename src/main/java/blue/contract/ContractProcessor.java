@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static blue.contract.Properties.CONTRACT_INITIALIZATION_EVENT_BLUE_ID;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class ContractProcessor {
@@ -187,17 +188,19 @@ public class ContractProcessor {
         AtomicInteger currentId = new AtomicInteger(initialStartedWorkflows);
         List<WorkflowInstance> processedWorkflows = new ArrayList<>();
 
-        for (Node workflow : workflows) {
-            try {
-                Optional<WorkflowInstance> result = workflowProcessor.processEvent(event, workflow, context);
-                if (result.isPresent()) {
-                    result.get().id(currentId.getAndIncrement());
-                    processedWorkflows.add(result.get());
-                    if (context.isCompleted())
-                        return processedWorkflows;
+        if (workflows != null) {
+            for (Node workflow : workflows) {
+                try {
+                    Optional<WorkflowInstance> result = workflowProcessor.processEvent(event, workflow, context);
+                    if (result.isPresent()) {
+                        result.get().id(currentId.getAndIncrement());
+                        processedWorkflows.add(result.get());
+                        if (context.isCompleted())
+                            return processedWorkflows;
+                    }
+                } catch (ContractProcessingException e) {
+                    break;
                 }
-            } catch (ContractProcessingException e) {
-                break;
             }
         }
 
@@ -205,7 +208,7 @@ public class ContractProcessor {
     }
 
     private Node initializationEvent() {
-        return new Node().type(new Node().name("Contract Initialized"));
+        return new Node().type(new Node().blueId(CONTRACT_INITIALIZATION_EVENT_BLUE_ID));
     }
 
     private String calculateBlueId(ContractInstance contractInstance) {

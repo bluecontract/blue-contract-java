@@ -1,15 +1,19 @@
 package blue.contract;
 
+import blue.contract.utils.ContractSimulator;
 import blue.language.Blue;
 import blue.language.NodeProvider;
 import blue.language.model.Node;
+import blue.language.preprocess.Preprocessor;
 import blue.language.provider.DirectoryBasedNodeProvider;
+import blue.language.provider.SequentialNodeProvider;
 import blue.language.provider.ipfs.IPFSNodeProvider;
-import blue.language.utils.SequentialNodeProvider;
 import blue.language.utils.TypeClassResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
 
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
@@ -26,7 +30,9 @@ public class Sample {
         String initiateContractProcessingEntryBlueId = "BeTSqC2nC2jmUNSKJJQxrNzUcVc2P674Bi637bsBTy1";
 
         Blue blue = defaultBlue();
-        ContractSimulator simulator = new ContractSimulator(blue, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, "c6");
+        contract = blue.preprocess(contract);
+
+        ContractSimulator simulator = new ContractSimulator(blue, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
 
         simulator.initiateContract(contract);
         simulator.processEmittedEventsOnly();
@@ -38,6 +44,8 @@ public class Sample {
         simulator.addEvent(successfulPaymentEvent);
 
         simulator.processEvents(25);
+
+
     }
 
     private static void runTwoContracts() throws IOException {
@@ -49,8 +57,11 @@ public class Sample {
         String initiateContractProcessingEntryBlueId2 = "xrNzUcVc2P674Bi637bsBTy1BeTSqC2nC2jmUNSKJJQ";
 
         Blue blue = defaultBlue();
-        ContractSimulator simulator1 = new ContractSimulator(blue, initiateContractEntryBlueId1, initiateContractProcessingEntryBlueId1, "c61");
-        ContractSimulator simulator2 = new ContractSimulator(blue, initiateContractEntryBlueId2, initiateContractProcessingEntryBlueId2, "c62");
+        contract1 = blue.preprocess(contract1);
+        contract2 = blue.preprocess(contract2);
+
+        ContractSimulator simulator1 = new ContractSimulator(blue, initiateContractEntryBlueId1, initiateContractProcessingEntryBlueId1);
+        ContractSimulator simulator2 = new ContractSimulator(blue, initiateContractEntryBlueId2, initiateContractProcessingEntryBlueId2);
 
         simulator1.initiateContract(contract1);
         simulator2.initiateContract(contract2);
@@ -62,20 +73,36 @@ public class Sample {
 
     }
 
-    private static Blue defaultBlue() {
+    public static Blue defaultBlue() {
         NodeProvider directoryBasedNodeProvider = null;
         try {
-            directoryBasedNodeProvider = new DirectoryBasedNodeProvider("types", "samples");
+            Preprocessor preprocessor = new Preprocessor();
+            Node blueNode = getBlueForBlueContract();
+            Function<Node, Node> preprocessingFunction = doc -> preprocessor.preprocess(doc, blueNode);
+            directoryBasedNodeProvider = new DirectoryBasedNodeProvider(preprocessingFunction, "types", "samples");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new Blue(
+        Blue blue = new Blue(
                 new SequentialNodeProvider(
                         directoryBasedNodeProvider,
                         new IPFSNodeProvider()
                 ),
                 new TypeClassResolver("blue.contract.model")
         );
+        blue.addPreprocessingAliases(AliasRegistry.MAP);
+        return blue;
+    }
+
+    private static Node getBlueForBlueContract() {
+        try (InputStream inputStream = Sample.class.getClassLoader().getResourceAsStream("types/BlueContractSample.blue")) {
+            if (inputStream == null) {
+                throw new RuntimeException("Unable to find DefaultBlue.blue in classpath");
+            }
+            return YAML_MAPPER.readValue(inputStream, Node.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading BlueContract.blue from classpath", e);
+        }
     }
 
 }

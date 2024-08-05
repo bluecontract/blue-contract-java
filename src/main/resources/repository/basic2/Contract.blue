@@ -1,0 +1,16 @@
+name: My Contract XYZ
+type: Contract
+properties:
+  x: 2
+  ticket:
+    type: ABCDE
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/x
+            val: 1

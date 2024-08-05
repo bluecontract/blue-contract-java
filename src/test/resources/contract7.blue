@@ -1,9 +1,10 @@
+blue: Blue Contracts v0.4
 name: Testing Exceptions
-type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+type: Contract
 workflows:
   - trigger:
       event:
-        type: Contract Initialized
+        type: Contract Initialization Event
     steps:
 
       - type: Update Step
@@ -15,18 +16,15 @@ workflows:
       - name: TriggerEvent
         type: Trigger Event Step
         event:
-          type: 7r9eeARFL6wpNtC2zSvENFiDpiU8KrhpTgMJfwt8C1cH
+          type: Payment Failed
           abc: 1
 
       - name: Event 2
         type: Expect Event Step
         event:
-          type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+          type: Payment Related Event
           abc: ca-boom!
           zz: 12
-          x:
-            c:
-              type: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
 
       - name: JSStep2
         type: JavaScript Code Step
@@ -44,7 +42,7 @@ workflows:
 
   - trigger:
       event:
-        type: Contract Initialized
+        type: Contract Initialization Event
     steps:
       - type: Update Step
         changeset:

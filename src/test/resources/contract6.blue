@@ -1,35 +1,35 @@
+blue: Blue Contracts v0.4
 name: Testing Events
-type: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+type: Contract
 properties:
   caughtEvents: 0
   localContractStartedWhenInitializing:
-    type: GGo3aanJBb5DdzXovf7ibiBs3bZkXzHeizTCgYFhLWpQ
+    type: Local Contract
     id: 1
 workflows:
   - name: StartLocalContract
     trigger:
       event:
-        type: Contract Initialized
+        type: Contract Initialization Event
     steps:
       - name: InitializeContract
         type: Initialize Local Contract Step
         contract:
           name: My Local Contract
-          type:
-            blueId: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+          type: Contract
           properties:
             x: 0
           workflows:
             - name: Initial
               trigger:
                 event:
-                  type: Contract Initialized
+                  type: Contract Initialization Event
               steps:
                 - name: TriggerEvent
                   description: Payment Failed
                   type: Trigger Event Step
                   event:
-                    type: 6ZekovRNmg5PPy6Y4yATmnWqNDUoFhT5LowxAtkP7mta
+                    type: Payment Failed
                     zz: 12
                 - name: UpdateStep
                   type: Update Step
@@ -48,7 +48,7 @@ workflows:
               trigger:
                 description: Payment Successful
                 event:
-                  type: 6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1
+                  type: Payment Successful
               steps:
                 - name: UpdateStep
                   type: Update Step
@@ -61,7 +61,7 @@ workflows:
   - name: ExpectEvents
     trigger:
       event:
-        type: DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5
+        type: Contract Update Event
       contract: ${contract("/properties/localContractStartedWhenInitializing")}
     steps:
       - name: UpdateStep

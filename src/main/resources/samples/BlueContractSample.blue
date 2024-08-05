@@ -1,0 +1,38 @@
+- blueId:
+    D5HTFSjSg2roM6mRnFkQqcQoA8YDeKWqcAH9sd4aBBnB
+- type:
+    blueId: 31WTDXxg5afqBNT8mpidmAxeuBs6SV1YXeaSrzjXzWdu
+  mappings:
+    Contract:
+      value: 8nxee3jJSSUg9kwArUSn4enzQdKPYLCVCRkZUrdFmqNU
+    Workflow Step:
+      value: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+    Contract Initialization Event:
+      value: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
+    Update Step:
+      value: J9p4gkueTjXvT7GVRf7VFvjEUmKjVBT7EVaih1tJqp5b
+    Initialize Local Contract Step:
+      value: D7bzHri8CT5j7aZtWVLcTAXkVdrrhe9inGbQopszrtbB
+    Expect Event Step:
+      value: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+    Trigger Event Step:
+      value: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+    JavaScript Code Step:
+      value: 5TrdtnYzrxenA6HLujs6z2Q5gLcS9heyrr3HpBNSbeFb
+    Workflow Function Step:
+      value: 8ZZiA8FgJC1scybYXCVt4Qf9Zh9LQGMLChDtVmDfZh9o
+    Local Contract:
+      value: 6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f
+    External Contract:
+      value: 83vpYdEkjbguc9Mbixz2qV2ZkzaCgV4gptSeyyU4QzaJ
+    Contract Update Event:
+      value: DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5
+- type:
+    blueId: 31WTDXxg5afqBNT8mpidmAxeuBs6SV1YXeaSrzjXzWdu
+  mappings:
+    Payment Related Event:
+      value: 5rz4JnH7sCQsopLHC7UN3H36eVwaAkCHgGJFw4zVVFD2
+    Payment Successful:
+      value: 6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1
+    Payment Failed:
+      value: 6ZekovRNmg5PPy6Y4yATmnWqNDUoFhT5LowxAtkP7mta
