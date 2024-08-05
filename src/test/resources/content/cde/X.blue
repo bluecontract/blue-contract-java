@@ -1,0 +1,6 @@
+name: X
+a:
+  type: A
+b:
+  c:
+    type: B
