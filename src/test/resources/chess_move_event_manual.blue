@@ -1,0 +1,15 @@
+---
+type:
+  blueId: FpdE3U9mgzCGytPDbr11s2hJxTwGcDtMkXiZdBQySjNM
+timeline:
+  value: Hvi3cK5LBVYzgkydR23mPs5ARWYKjEsFd5mcJfGvKxcE
+  type: Text
+message:
+  type:
+    blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+  from:
+    value: e2
+    type: Text
+  to:
+    value: e4
+    type: Text

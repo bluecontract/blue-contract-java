@@ -44,6 +44,10 @@ public class ContractSimulator {
         }
     }
 
+    public void setContractInstance(ContractInstance ci) {
+        currentInstance = ci;
+    }
+
     public void addEvent(Node event) {
         pendingEvents.add(event);
     }
