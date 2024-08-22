@@ -1,3 +1,20 @@
+## v0.3.0 (2024-08-08)
+
+### Feat
+
+- Upgrade blue-language to 0.5.0
+- packager, first tests, chess
+- error handling, ContractInstance structure
+
+### Fix
+
+- test resources
+- ContractSimulator for external contracts
+- ContractUpdate epochs, tests updates
+- ContractSimulator for external contracts
+- epoch in ContractUpdate
+- saving simplified docs
+
 ## v0.2.0 (2024-07-23)
 
 ### Feat
