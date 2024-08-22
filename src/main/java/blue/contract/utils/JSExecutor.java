@@ -143,7 +143,7 @@ public class JSExecutor implements AutoCloseable {
                 return resultMap.get("value");
             }
         }
-        return javaResult;
+        return blue.objectToNode(javaResult);
     }
 
     private Object handleException(PolyglotException e) throws JSException {

@@ -1,11 +1,7 @@
 package blue.contract;
 
 import blue.contract.exception.ContractProcessingException;
-import blue.contract.model.ContractInstance;
-import blue.contract.model.ProcessingState;
-import blue.contract.model.ContractProcessingContext;
-import blue.contract.model.ContractUpdate;
-import blue.contract.model.WorkflowInstance;
+import blue.contract.model.*;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.BlueIdCalculator;
@@ -26,11 +22,13 @@ public class ContractProcessor {
     private StepProcessorProvider stepProcessorProvider;
     private WorkflowProcessor workflowProcessor;
     private Blue blue;
+    private ContractProcessorConfig contractProcessorConfig;
 
     public ContractProcessor(StepProcessorProvider stepProcessorProvider, Blue blue) {
         this.blue = blue;
         this.stepProcessorProvider = stepProcessorProvider;
         this.workflowProcessor = new WorkflowProcessor(stepProcessorProvider);
+        this.contractProcessorConfig = new ContractProcessorConfig();
     }
 
     public ContractUpdate initiate(Node contract,
@@ -60,7 +58,8 @@ public class ContractProcessor {
                         .initiateContractEntryBlueId(initiateContractEntryBlueId)
                         .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
                         .stepProcessorProvider(stepProcessorProvider)
-                        .blue(blue);
+                        .blue(blue)
+                        .config(contractProcessorConfig);
 
         List<WorkflowInstance> workflowInstances = processWorkflows(event, context, 0);
         int startedWorkflowInstancesCount = workflowInstances.size();
@@ -128,7 +127,8 @@ public class ContractProcessor {
                 .initiateContractEntryBlueId(initiateContractEntryBlueId)
                 .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
                 .stepProcessorProvider(stepProcessorProvider)
-                .blue(blue);
+                .blue(blue)
+                .config(contractProcessorConfig);
 
         for (ContractInstance instance : contractInstances) {
             processEventInContractInstance(event, instance, context);
@@ -216,7 +216,22 @@ public class ContractProcessor {
     }
 
     private Node toNode(ContractInstance contractInstance) {
-        return YAML_MAPPER.convertValue(contractInstance, Node.class);
+        return blue.objectToNode(contractInstance);
     }
 
+    public StepProcessorProvider getStepProcessorProvider() {
+        return stepProcessorProvider;
+    }
+
+    public WorkflowProcessor getWorkflowProcessor() {
+        return workflowProcessor;
+    }
+
+    public Blue getBlue() {
+        return blue;
+    }
+
+    public ContractProcessorConfig getContractProcessorConfig() {
+        return contractProcessorConfig;
+    }
 }

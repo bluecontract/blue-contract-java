@@ -2,8 +2,11 @@ package blue.contract.model;
 
 import blue.language.model.BlueId;
 import blue.language.model.Node;
+import blue.language.model.TypeBlueId;
 
-@BlueId("83vpYdEkjbguc9Mbixz2qV2ZkzaCgV4gptSeyyU4QzaJ")
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
+
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class ExternalContract {
     private Node initiateContractEntry;
     private Node localContractInstanceId;

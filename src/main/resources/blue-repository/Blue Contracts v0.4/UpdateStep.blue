@@ -5,7 +5,7 @@ description: |
   This is the sole step type authorized to modify contract content.
 changeset:
   type: List
-  itemType: JSON Patch Entry
+  itemType: Json Patch Entry
   description: |
     An ordered list of JSON Patch operations to be applied sequentially.
     Each operation modifies the contract's content atomically.

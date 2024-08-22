@@ -1,0 +1,8 @@
+name: Workflow
+description: (docs)
+trigger:
+  description: (docs)
+steps:
+  description: (docs)
+  type: List
+  itemType: WorkflowStep

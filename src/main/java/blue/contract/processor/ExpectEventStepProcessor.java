@@ -6,9 +6,14 @@ import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.language.Blue;
 import blue.language.model.Node;
+import blue.language.utils.NodeTypeMatcher;
+import blue.language.utils.NodeTypeMatcher.TargetTypeTransformer;
 import blue.language.utils.limits.PathLimits;
 
 import java.util.Optional;
+
+import static blue.contract.model.ContractProcessorConfig.EVENT_TARGET_TYPE_TRANSFORMER;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
@@ -18,7 +23,6 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
     @Override
     public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
-
         Blue blue = context.getContractProcessingContext().getBlue();
 
         Node expectedEventNode = extractExpectedEvent(context, blue);
@@ -39,7 +43,17 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
             return Optional.empty();
         }
 
-        if (context.getContractProcessingContext().getBlue().nodeMatchesType(event, expectedEventNode)) {
+        ContractProcessingContext contractContext = context.getContractProcessingContext();
+        boolean nodeMatchesType;
+        if (contractContext.getConfig().has(EVENT_TARGET_TYPE_TRANSFORMER)) {
+            TargetTypeTransformer transformer = contractContext.getConfig().get(EVENT_TARGET_TYPE_TRANSFORMER);
+            Node clone = transformer.transform(event);
+            nodeMatchesType = contractContext.getBlue().nodeMatchesType(clone, expectedEventNode, transformer);
+        } else {
+            nodeMatchesType = contractContext.getBlue().nodeMatchesType(event, expectedEventNode);
+        }
+
+        if (nodeMatchesType) {
             return finalizeNextStepByOrder(event, context);
         } else {
             return Optional.empty();

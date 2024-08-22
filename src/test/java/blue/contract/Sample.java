@@ -20,30 +20,33 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 public class Sample {
 
     public static void main(String[] args) throws IOException {
-        runTwoContracts();
+        runSingleContract();
     }
 
     private static void runSingleContract() throws IOException {
-        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract6.blue"), Node.class);
+        Node contract = YAML_MAPPER.readValue(new File("src/test/resources/contract9.blue"), Node.class);
         Node event = YAML_MAPPER.readValue(new File("src/test/resources/event.blue"), Node.class);
         String initiateContractEntryBlueId = "6fauav11TexaBmxXWURBbwLjXnsLgvEZX9QKyajeSrKR";
         String initiateContractProcessingEntryBlueId = "BeTSqC2nC2jmUNSKJJQxrNzUcVc2P674Bi637bsBTy1";
 
         Blue blue = defaultBlue();
         contract = blue.preprocess(contract);
+        event = blue.preprocess(event);
 
-        ContractSimulator simulator = new ContractSimulator(blue, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+        System.out.println(YAML_MAPPER.writeValueAsString(event));
 
-        simulator.initiateContract(contract);
-        simulator.processEmittedEventsOnly();
-
-        simulator.addEvent(event);
-        simulator.processEvents(5);
-
-        Node successfulPaymentEvent = new Node().type(new Node().blueId("6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1"));
-        simulator.addEvent(successfulPaymentEvent);
-
-        simulator.processEvents(25);
+//        ContractSimulator simulator = new ContractSimulator(blue, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+//
+//        simulator.initiateContract(contract);
+//        simulator.processEmittedEventsOnly();
+//
+//        simulator.addEvent(event);
+//        simulator.processEvents(5);
+//
+//        Node successfulPaymentEvent = new Node().type(new Node().blueId("6qFN7V1kCXU2CVvnNrVJMdoi9nUCoBnwL4Q5B6FQP4x1"));
+//        simulator.addEvent(successfulPaymentEvent);
+//
+//        simulator.processEvents(25);
 
 
     }

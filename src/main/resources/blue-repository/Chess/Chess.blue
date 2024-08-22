@@ -3,12 +3,9 @@ type: Contract
 messaging:
   participants:
     Player White:
-      timeline:
-        value: Hvi3cK5LBVYzgkydR23mPs5ARWYKjEsFd5mcJfGvKxcE
+      description: Player White timeline
     Player Black:
-      timeline:
-        value: ARWYKjEsFd5mcJfGvKxcEHvi3cK5LBVYzgkydR23mPs5
-
+      description: Player Black timeline
 properties:
   chessboard:
     description: Chessboard state in FEN notation
@@ -28,14 +25,15 @@ properties:
     description: Indicates whose move it is ('White' or 'Black')
 
 workflows:
-  - trigger:
+  - name: Move
+    trigger:
       event:
         type: Timeline Entry
         message:
           type: Chess Move
     steps:
 
-      - description: Check player
+      - name: Check Player
         type: JavaScript Code Step
         code: |
           let playerToMove = contract("/properties/playerToMove");
@@ -44,12 +42,12 @@ workflows:
               contract("/messaging/participants/Player Black/timeline")
           let timeline = event.timeline;
           
-          if (timeline != expectedTimeline) {
+          if (timeline.blueId != expectedTimeline.blueId) {                   
             throw new RejectAndAwaitNextEventException('Not your move!');
           }
           return { }
 
-      - name: move
+      - name: ProcessMove
         type: JavaScript Code Step
         code: |
           const chessModule = importBlueESModule('blue:FQP53g6UNu75EeEDmTX8mKHqoNSLQgYxQxpFhAzKyHhJ');
@@ -100,20 +98,21 @@ workflows:
 
           return { result };
 
-      - type: Update Step
+      - name: Apply Changes
+        type: Update Step
         changeset:
           - op: replace
             path: /properties/chessboard
-            val: ${steps.move.result.position}
+            val: ${steps.ProcessMove.result.position}
           - op: replace
             path: /properties/draw
-            val: ${steps.move.result.draw}
+            val: ${steps.ProcessMove.result.draw}
           - op: replace
             path: /properties/winner
-            val: ${steps.move.result.winner}
+            val: ${steps.ProcessMove.result.winner}
           - op: replace
             path: /properties/gameOver
-            val: ${steps.move.result.gameOver}
+            val: ${steps.ProcessMove.result.gameOver}
           - op: replace
             path: /properties/playerToMove
             val: '${(contract("/properties/playerToMove") === "White") ? "Black" : "White"}'

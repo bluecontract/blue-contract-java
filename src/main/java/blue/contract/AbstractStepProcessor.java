@@ -134,9 +134,9 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         FatalErrorEvent errorEvent = new FatalErrorEvent()
                 .errorMessage("Critical, irrecoverable JS error, contract terminated with error.")
                 .stackTrace(((JSCriticalException) ex).getJsStackTrace());
-        Node errorEventNode = YAML_MAPPER.convertValue(errorEvent, Node.class);
+        Node errorEventNode = contractProcessingContext.getBlue().objectToNode(errorEvent);
         ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(errorEventNode, step.getName(), workflowProcessingContext);
-        Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);
+        Node processingEventNode = contractProcessingContext.getBlue().objectToNode(processingEvent);
         workflowProcessingContext.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
 
         throw new ContractProcessingException("Critical JS error", ex);

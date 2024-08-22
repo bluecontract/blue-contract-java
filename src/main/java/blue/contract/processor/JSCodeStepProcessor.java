@@ -10,14 +10,14 @@ import blue.contract.utils.JSExecutor;
 import blue.contract.utils.JSExecutor.ContractCompleteResult;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 import blue.language.utils.limits.PathLimits;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class JSCodeStepProcessor extends AbstractStepProcessor {
 
@@ -60,7 +60,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     private Object processEvent(Node event, WorkflowProcessingContext context) throws JSExecutor.JSException {
 
         Map<String, Object> bindings = new HashMap<>();
-        bindings.put("event", NodeToObject.get(event, SIMPLE));
+        bindings.put("event", NodeToMapListOrValue.get(event, SIMPLE));
         bindings.put("steps", context.getWorkflowInstance().getStepResults());
         bindings.put("contract", (java.util.function.Function<String, Object>) path ->
                 context.getContractProcessingContext().accessContract(path, true, true));

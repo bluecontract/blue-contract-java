@@ -1,22 +1,21 @@
 package blue.contract;
 
-import blue.contract.model.ContractUpdate;
-import blue.contract.model.event.ContractProcessingEvent;
-import blue.contract.model.event.ContractUpdateEvent;
 import blue.contract.packager.model.BluePackage;
 import blue.contract.utils.ContractSimulator;
 import blue.contract.utils.PackagingUtils.ClasspathBasedPackagingEnvironment;
 import blue.language.Blue;
 import blue.language.model.Node;
+import blue.language.provider.DirectoryBasedNodeProvider;
+import blue.language.utils.TypeClassResolver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static blue.contract.utils.PackagingUtils.createClasspathBasedPackagingEnvironment;
-import static blue.contract.utils.Properties.BLUE_CONTRACTS_V04;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_1;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_2;
+import static blue.contract.utils.Utils.defaultTestingEnvironment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlowsTest {
@@ -26,9 +25,12 @@ public class FlowsTest {
     private static BluePackage contractPackage;
 
     @BeforeAll
-    static void setUp() {
-        env = createClasspathBasedPackagingEnvironment("repository", "blue.contract.model");
-        blue = env.getBlue();
+    static void setUp() throws IOException {
+        env = defaultTestingEnvironment();
+        blue = new Blue(
+                new DirectoryBasedNodeProvider("blue-preprocessed", "samples"),
+                new TypeClassResolver("blue.contract.model")
+        );
         contractPackage = env.getPackage("Testing Flows");
     }
 

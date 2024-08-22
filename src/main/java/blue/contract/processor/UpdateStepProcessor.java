@@ -7,9 +7,8 @@ import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.model.event.ContractUpdateEvent;
 import blue.contract.utils.Events;
 import blue.contract.utils.ExpressionEvaluator;
-import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.language.model.Node;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -21,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
@@ -32,7 +31,7 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
     public UpdateStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
         super(step, expressionEvaluator);
         List<Map<String, Object>> changeset = step.getProperties().get("changeset").getItems().stream()
-                .map(el -> (Map<String, Object>) NodeToObject.get(el, SIMPLE))
+                .map(el -> (Map<String, Object>) NodeToMapListOrValue.get(el, SIMPLE))
                 .toList();
         this.rawChangeset = prepareChangeset(changeset, false);
     }
@@ -64,7 +63,7 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
     }
 
     private void processEvent(Node event, WorkflowProcessingContext context) {
-        Object obj = NodeToObject.get(context.getContractProcessingContext().getContract(), SIMPLE);
+        Object obj = NodeToMapListOrValue.get(context.getContractProcessingContext().getContract(), SIMPLE);
         JsonNode objNode = JSON_MAPPER.convertValue(obj, JsonNode.class);
 
         try {
@@ -82,9 +81,9 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
             List<Map<String, Object>> eventChangeset = prepareChangeset(evaluatedChangeset, true);
             ContractUpdateEvent updateEvent = new ContractUpdateEvent()
                     .changeset(JSON_MAPPER.convertValue(eventChangeset, Node.class));
-            Node updateEventNode = YAML_MAPPER.convertValue(updateEvent, Node.class);
+            Node updateEventNode = context.getContractProcessingContext().getBlue().objectToNode(updateEvent);
             ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(updateEventNode, step.getName(), context);
-            Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);
+            Node processingEventNode = context.getContractProcessingContext().getBlue().objectToNode(processingEvent);
             context.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
         } catch (IOException | JsonPatchException e) {
             throw new IllegalArgumentException("Applying JSON Patch failed", e);

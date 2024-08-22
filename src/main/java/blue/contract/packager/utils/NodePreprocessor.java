@@ -7,7 +7,7 @@ import blue.language.preprocess.Preprocessor;
 import blue.language.provider.BasicNodeProvider;
 import blue.language.utils.BlueIdCalculator;
 import blue.language.utils.NodeProviderWrapper;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 
 import java.util.ArrayList;
 import java.util.List;

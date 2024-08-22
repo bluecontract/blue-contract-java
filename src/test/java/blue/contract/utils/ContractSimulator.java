@@ -6,7 +6,8 @@ import blue.contract.model.ContractUpdate;
 import blue.contract.processor.StandardProcessorsProvider;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
+import blue.language.utils.NodeTypeMatcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -15,10 +16,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContractSimulator {
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-    private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
+import static blue.contract.model.ContractProcessorConfig.EVENT_TARGET_TYPE_TRANSFORMER;
+import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
+public class ContractSimulator {
+
+    private final Blue blue;
     private final ContractProcessor contractProcessor;
     private final String initiateContractEntryBlueId;
     private final String initiateContractProcessingEntryBlueId;
@@ -29,10 +33,28 @@ public class ContractSimulator {
 
     public ContractSimulator(Blue blue, String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
         StandardProcessorsProvider provider = new StandardProcessorsProvider(blue);
+        this.blue = blue;
         this.contractProcessor = new ContractProcessor(provider, blue);
+        // don't verify timeline related fields
+        contractProcessor.getContractProcessorConfig().set(EVENT_TARGET_TYPE_TRANSFORMER,
+                (NodeTypeMatcher.TargetTypeTransformer) targetType -> {
+                    if (targetType.getProperties() != null) {
+                        Node result = targetType.clone();
+                        result.getProperties().remove("timeline");
+                        result.getProperties().remove("thread");
+                        result.getProperties().remove("signature");
+                        return result;
+                    }
+                    return targetType;
+                }
+        );
         this.initiateContractEntryBlueId = initiateContractEntryBlueId;
         this.initiateContractProcessingEntryBlueId = initiateContractProcessingEntryBlueId;
         this.pendingEvents = new ArrayList<>();
+    }
+
+    public void initiateContract(Object contract) {
+        initiateContract(blue.objectToNode(contract));
     }
 
     public void initiateContract(Node contract) {
@@ -46,6 +68,14 @@ public class ContractSimulator {
 
     public void addEvent(Node event) {
         pendingEvents.add(event);
+    }
+
+    public void addEvent(Object event) {
+        addEvent(blue.objectToNode(event));
+    }
+
+    public void processEvents() {
+        processEvents(pendingEvents.size());
     }
 
     public void processEvents(int numberOfEventsToProcess) {
@@ -90,11 +120,11 @@ public class ContractSimulator {
             Node contractUpdateNode = JSON_MAPPER.convertValue(contractUpdate, Node.class);
 
             File outputFile = new File(directory + "/" + filePrefix + "_" + (i + 1) + "_update.blue");
-            YAML_MAPPER.writeValue(outputFile, NodeToObject.get(contractUpdateNode, NodeToObject.Strategy.SIMPLE));
+            YAML_MAPPER.writeValue(outputFile, NodeToMapListOrValue.get(contractUpdateNode, NodeToMapListOrValue.Strategy.SIMPLE));
 
             Node contractInstanceNode = contractUpdateNode.getAsNode("/contractInstance");
             outputFile = new File(directory + "/" + filePrefix + "_" + (i + 1) + "_contractInstance.json");
-            JSON_MAPPER.writeValue(outputFile, NodeToObject.get(contractInstanceNode, NodeToObject.Strategy.SIMPLE));
+            JSON_MAPPER.writeValue(outputFile, NodeToMapListOrValue.get(contractInstanceNode, NodeToMapListOrValue.Strategy.SIMPLE));
         }
     }
 
@@ -109,4 +139,9 @@ public class ContractSimulator {
     public List<ContractUpdate> getContractUpdates() {
         return contractUpdates;
     }
+
+    public ContractUpdate getLastContractUpdate() {
+        return contractUpdates.isEmpty() ? null : contractUpdates.get(contractUpdates.size() - 1);
+    }
+
 }

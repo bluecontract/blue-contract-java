@@ -8,13 +8,13 @@ import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.language.model.Node;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
@@ -88,9 +88,9 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
         String code = (String) node.getValue();
 
         Map<String, Object> bindings = new HashMap<>();
-        bindings.put("event", NodeToObject.get(event, SIMPLE));
+        bindings.put("event", NodeToMapListOrValue.get(event, SIMPLE));
         bindings.put("steps", context.getWorkflowInstance().getStepResults());
-        bindings.put("functionStep", NodeToObject.get(step, SIMPLE));
+        bindings.put("functionStep", NodeToMapListOrValue.get(step, SIMPLE));
         bindings.put("contract", (java.util.function.Function<String, Object>) path ->
                 context.getContractProcessingContext().accessContract(path, true, true));
 
@@ -101,7 +101,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
                 Map<String, Object> resultMap = (Map<String, Object>) result;
                 if (!resultMap.containsKey("steps"))
                     throw new IllegalArgumentException("\"initiateStepsCode\" did not return any steps.");
-                return YAML_MAPPER.convertValue(resultMap.get("steps"), Node.class);
+                return context.getContractProcessingContext().getBlue().objectToNode(resultMap.get("steps"));
             } else {
                 throw new IllegalArgumentException("Unexpected result type from JavaScript execution: " + result.getClass());
             }

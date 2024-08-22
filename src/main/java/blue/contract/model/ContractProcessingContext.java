@@ -5,18 +5,15 @@ import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.BlueIds;
 import blue.language.utils.NodePathAccessor;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import static blue.contract.model.ContractInstance.ROOT_INSTANCE_ID;
-import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class ContractProcessingContext {
     private Node contract;
@@ -30,6 +27,7 @@ public class ContractProcessingContext {
     private boolean terminatedWithError;
     private StepProcessorProvider stepProcessorProvider;
     private Blue blue;
+    private ContractProcessorConfig config;
 
     public Node getContract() {
         return contract;
@@ -73,6 +71,10 @@ public class ContractProcessingContext {
 
     public Blue getBlue() {
         return blue;
+    }
+    
+    public ContractProcessorConfig getConfig() {
+        return config;
     }
 
     public ContractProcessingContext contract(Node contract) {
@@ -130,11 +132,16 @@ public class ContractProcessingContext {
         return this;
     }
 
+    public ContractProcessingContext config(ContractProcessorConfig config) {
+        this.config = config;
+        return this;
+    }
+
     public Object accessContract(String path, boolean useGlobalScope, boolean resolveFinalLink) {
         Function<Node, Node> linkingProvider = useGlobalScope ? this::linkingProviderImplementation : null;
         Object result = NodePathAccessor.get(contract, path, linkingProvider, resolveFinalLink);
         if (result instanceof Node) {
-            result = NodeToObject.get((Node) result, SIMPLE);
+            result = NodeToMapListOrValue.get((Node) result, SIMPLE);
         } else if (result instanceof BigInteger) {
             BigInteger bigInt = (BigInteger) result;
             return isInJavaScriptSafeRange(bigInt) ? bigInt.longValue() : bigInt;

@@ -1,8 +1,11 @@
 package blue.contract.model;
 
 import blue.language.model.BlueId;
+import blue.language.model.TypeBlueId;
 
-@BlueId("6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f")
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
+
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class LocalContract {
     private Integer id;
 

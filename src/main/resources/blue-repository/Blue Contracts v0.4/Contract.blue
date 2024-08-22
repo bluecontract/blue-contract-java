@@ -2,10 +2,14 @@ name: Contract
 description: (full documentation goes here)
 messaging:
   participants:
-    description: participants part
+    type: Dictionary
+    keyType: Text
+    valueType: Participant
   secureChannel:
     description: channel part
 properties:
   description: properties part
 workflows:
   description: workflows part
+  type: List
+  itemType: Workflow

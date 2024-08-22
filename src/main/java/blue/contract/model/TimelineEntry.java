@@ -2,14 +2,22 @@ package blue.contract.model;
 
 import blue.language.model.BlueId;
 import blue.language.model.Node;
+import blue.language.model.TypeBlueId;
 
-@BlueId("FpdE3U9mgzCGytPDbr11s2hJxTwGcDtMkXiZdBQySjNM")
-public class TimelineEntry {
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
+
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
+public class TimelineEntry<T> {
+    @BlueId
     private String timeline;
+    @BlueId
     private String timelinePrev;
+    @BlueId
     private String thread;
+    @BlueId
     private String threadPrev;
-    private Node message;
+    private T message;
     private String signature;
 
     public String getTimeline() {
@@ -28,7 +36,7 @@ public class TimelineEntry {
         return threadPrev;
     }
 
-    public Node getMessage() {
+    public T getMessage() {
         return message;
     }
 
@@ -36,32 +44,32 @@ public class TimelineEntry {
         return signature;
     }
 
-    public TimelineEntry timeline(String timeline) {
+    public TimelineEntry<T> timeline(String timeline) {
         this.timeline = timeline;
         return this;
     }
 
-    public TimelineEntry timelinePrev(String timelinePrev) {
+    public TimelineEntry<T> timelinePrev(String timelinePrev) {
         this.timelinePrev = timelinePrev;
         return this;
     }
 
-    public TimelineEntry thread(String thread) {
+    public TimelineEntry<T> thread(String thread) {
         this.thread = thread;
         return this;
     }
 
-    public TimelineEntry threadPrev(String threadPrev) {
+    public TimelineEntry<T> threadPrev(String threadPrev) {
         this.threadPrev = threadPrev;
         return this;
     }
 
-    public TimelineEntry message(Node message) {
+    public TimelineEntry<T> message(T message) {
         this.message = message;
         return this;
     }
 
-    public TimelineEntry signature(String signature) {
+    public TimelineEntry<T> signature(String signature) {
         this.signature = signature;
         return this;
     }

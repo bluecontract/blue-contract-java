@@ -55,6 +55,7 @@ public class WorkflowProcessor {
     }
 
     private Optional<WorkflowInstance> handleEvent(Node event, Node step, WorkflowProcessingContext context, ProcessingMode mode) {
+
         Optional<StepProcessor> stepProcessor = stepProcessorProvider.getProcessor(step);
         if (!stepProcessor.isPresent())
             throw new IllegalArgumentException("No StepProcessor found for event: " +

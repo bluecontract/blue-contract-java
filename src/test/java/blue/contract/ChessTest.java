@@ -1,92 +1,66 @@
 package blue.contract;
 
-import blue.contract.model.ContractUpdate;
-import blue.contract.model.TimelineEntry;
-import blue.contract.model.event.ContractProcessingEvent;
-import blue.contract.model.event.ContractUpdateEvent;
-import blue.contract.packager.model.BluePackage;
+import blue.contract.model.*;
 import blue.contract.utils.ContractSimulator;
 import blue.contract.utils.PackagingUtils.ClasspathBasedPackagingEnvironment;
-import blue.contract.utils.SampleBlueIds;
+import blue.contract.utils.RepositoryExportingTool;
 import blue.language.Blue;
 import blue.language.NodeProvider;
 import blue.language.model.Node;
 import blue.language.provider.ClasspathBasedNodeProvider;
-import blue.language.utils.BlueIds;
-import blue.language.utils.NodeToObject;
+import blue.language.provider.DirectoryBasedNodeProvider;
+import blue.language.utils.TypeClassResolver;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 import static blue.contract.utils.PackagingUtils.createClasspathBasedPackagingEnvironment;
-import static blue.contract.utils.Properties.BLUE_CONTRACTS_V04;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_1;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_2;
+import static blue.contract.utils.Utils.defaultTestingEnvironment;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ChessTest {
 
-    private static ClasspathBasedPackagingEnvironment env;
     private static Blue blue;
-    private static BluePackage contractPackage;
 
     @BeforeAll
     static void setUp() throws IOException {
-        List<NodeProvider> additionalNodeProviders = Collections.singletonList(new ClasspathBasedNodeProvider("samples"));
-        env = createClasspathBasedPackagingEnvironment("repository", "blue.contract.model", additionalNodeProviders);
-        blue = env.getBlue();
-        contractPackage = env.getPackage("Chess");
+        new RepositoryExportingTool(defaultTestingEnvironment()).exportRepository();
+        blue = new Blue(
+                new DirectoryBasedNodeProvider("blue-preprocessed", "samples"),
+                new TypeClassResolver("blue.contract.model")
+        );
     }
 
     @Test
-    void testInitializationEvent() throws IOException {
+    void testChessGame() throws IOException {
         String timelineWhite = "Hvi3cK5LBVYzgkydR23mPs5ARWYKjEsFd5mcJfGvKxcE";
         String timelineBlack = "ARWYKjEsFd5mcJfGvKxcEHvi3cK5LBVYzgkydR23mPs5";
-        Node contract = contractPackage.getPreprocessedNodes().get("Chess");
+        Chess chess = new Chess(timelineWhite, timelineBlack);
 
         ContractSimulator simulator = new ContractSimulator(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
+        simulator.initiateContract(chess);
 
-        simulator.initiateContract(contract);
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineWhite).message(new ChessMove("e2", "e4")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineBlack).message(new ChessMove("e7", "e5")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineWhite).message(new ChessMove("f1", "c4")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineBlack).message(new ChessMove("a7", "a6")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineWhite).message(new ChessMove("d1", "h5")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineBlack).message(new ChessMove("a6", "a5")));
+        simulator.addEvent(new TimelineEntry<ChessMove>().timeline(timelineWhite).message(new ChessMove("h5", "f7")));
+        simulator.processEvents();
 
-        simulator.addEvent(entry(timelineWhite, move("e2", "e4")));
-        simulator.addEvent(entry(timelineWhite, move("e2", "e4")));
-        simulator.addEvent(entry(timelineBlack, move("e7", "e5")));
-        simulator.addEvent(entry(timelineWhite, move("f1", "c4")));
-        simulator.addEvent(entry(timelineBlack, move("a7", "a6")));
-        simulator.addEvent(entry(timelineWhite, move("d1", "h5")));
-        simulator.addEvent(entry(timelineBlack, move("a6", "a5")));
-        simulator.addEvent(entry(timelineWhite, move("h5", "f7")));
-        simulator.processEvents(10);
+        Chess finalAfterMoves = blue.nodeToObject(simulator.getLastContractUpdate().getContractInstance().getContractState(), Chess.class);
+        assertEquals("rnbqkbnr/1ppp1Qpp/8/p3p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4", finalAfterMoves.getProperties().getChessboard());
 
-        simulator.save("src/test/resources", "chess");
-    }
+//        simulator.save("src/test/resources", "chess");
 
-    private Node entry(String timeline, Node node) {
-        BluePackage blueContracts = env.getPackage("Blue Contracts v0.4");
-        String move1 = "type:\n" +
-                       "  blueId: " + blueContracts.getPreprocessedNodes().get("Timeline Entry").getAsText("/blueId") + "\n" +
-                       "timeline:\n" +
-                       "  value: " + timeline + "\n" +
-                       "  type: Text";
-        Node result = blue.preprocess(blue.yamlToNode(move1));
-        result.properties("message", node);
-        return result;
-    }
-
-    private Node move(String from, String to) {
-        String move1 = "type:\n" +
-                       "  blueId: " + contractPackage.getPreprocessedNodes().get("Chess Move").getAsText("/blueId") + "\n" +
-                       "from:\n" +
-                       "  value: " + from + "\n" +
-                       "  type: Text\n" +
-                       "to:\n" +
-                       "  value: " + to + "\n" +
-                       "  type: Text";
-        return blue.preprocess(blue.yamlToNode(move1));
     }
 
 }

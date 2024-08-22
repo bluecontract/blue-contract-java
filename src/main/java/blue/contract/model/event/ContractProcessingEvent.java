@@ -2,8 +2,11 @@ package blue.contract.model.event;
 
 import blue.language.model.BlueId;
 import blue.language.model.Node;
+import blue.language.model.TypeBlueId;
 
-@BlueId("HQgee2RezD7yupwCgRnSzKwhqUGwzNNRq1n1eyFD9X1w")
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
+
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class ContractProcessingEvent {
     private Integer contractInstanceId;
     private Integer workflowInstanceId;

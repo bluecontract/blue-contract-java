@@ -77,5 +77,9 @@ public class PackagingUtils {
         public BluePackage getPackage(String packageName) {
             return packageMap.get(packageName);
         }
+
+        public Map<String, BluePackage> getPackageMap() {
+            return packageMap;
+        }
     }
 }

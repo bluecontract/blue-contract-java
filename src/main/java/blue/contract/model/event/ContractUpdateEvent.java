@@ -1,9 +1,11 @@
 package blue.contract.model.event;
 
-import blue.language.model.BlueId;
 import blue.language.model.Node;
+import blue.language.model.TypeBlueId;
 
-@BlueId({"DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5"})
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
+
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class ContractUpdateEvent {
     private Node changeset;
 

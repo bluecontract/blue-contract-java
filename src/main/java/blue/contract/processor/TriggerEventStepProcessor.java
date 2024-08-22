@@ -35,7 +35,7 @@ public class TriggerEventStepProcessor extends AbstractStepProcessor {
         Node eventNode = step.getProperties().get("event").clone();
         eventNode = evaluateExpressionsRecursively(eventNode, workflowProcessingContext);
         ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(eventNode, step.getName(), workflowProcessingContext);
-        Node processingEventNode = YAML_MAPPER.convertValue(processingEvent, Node.class);
+        Node processingEventNode = workflowProcessingContext.getContractProcessingContext().getBlue().objectToNode(processingEvent);
         workflowProcessingContext.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
     }
 

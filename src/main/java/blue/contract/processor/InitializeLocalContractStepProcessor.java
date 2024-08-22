@@ -6,13 +6,13 @@ import blue.contract.model.*;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.utils.NodeToObject;
+import blue.language.utils.NodeToMapListOrValue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static blue.language.utils.NodeToObject.Strategy.SIMPLE;
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class InitializeLocalContractStepProcessor extends AbstractStepProcessor {
 
@@ -61,7 +61,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
             LocalContract result = new LocalContract()
                     .id(instance.getId());
             Map<String, Object> map = new HashMap<>();
-            map.put("localContract", NodeToObject.get(blue.objectToNode(result), SIMPLE));
+            map.put("localContract", NodeToMapListOrValue.get(blue.objectToNode(result), SIMPLE));
             workflowProcessingContext.getWorkflowInstance().getStepResults().put(stepName.get(), map);
         }
 
