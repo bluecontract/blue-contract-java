@@ -1,0 +1,21 @@
+name: Contract Update Action
+description: |
+  Represents an action to update a contract instance. This structure serves as the standard method for contract 
+  processors to document and present steps in the contract lifecycle.
+contractInstance:
+  description: The contract instance after incoming event is applied.
+contractInstancePrev:
+  type: Text
+  description: The contract instance before incoming event is applied.
+epoch:
+  type: Integer
+  description: The epoch number associated with this update action. Starts with zero for newly initiated contract.
+emittedEvents:
+  type: List
+  description: A list of events emitted during the contract processing.
+initiateContractEntry:
+  type: Timeline Entry
+  description: The original Initiate Contract Action timeline entry. This links the processing action to the specific contract.
+initiateContractProcessingEntry:
+  type: Timeline Entry
+  description: The original Initiate Contract Processing Action timeline entry.

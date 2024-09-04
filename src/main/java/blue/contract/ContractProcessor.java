@@ -1,237 +1,167 @@
 package blue.contract;
 
-import blue.contract.exception.ContractProcessingException;
-import blue.contract.model.*;
+import blue.contract.model.ContractInstance;
+import blue.contract.model.ContractUpdateAction;
+import blue.contract.model.GenericContract;
+import blue.contract.model.event.AgreedUponSimulatedEvent;
+import blue.contract.model.event.ContractProcessingEvent;
+import blue.contract.model.subscription.ContractSubscription;
+import blue.contract.model.subscription.LocalContractSubscription;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.utils.BlueIdCalculator;
-import blue.language.utils.limits.Limits;
-import blue.language.utils.limits.PathLimits;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import static blue.contract.Properties.CONTRACT_INITIALIZATION_EVENT_BLUE_ID;
-import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
+import java.util.*;
 
 public class ContractProcessor {
 
-    private StepProcessorProvider stepProcessorProvider;
-    private WorkflowProcessor workflowProcessor;
-    private Blue blue;
-    private ContractProcessorConfig contractProcessorConfig;
+    private final SingleEventContractProcessor singleEventProcessor;
+    private final Blue blue;
 
     public ContractProcessor(StepProcessorProvider stepProcessorProvider, Blue blue) {
+        this.singleEventProcessor = new SingleEventContractProcessor(stepProcessorProvider, blue);
         this.blue = blue;
-        this.stepProcessorProvider = stepProcessorProvider;
-        this.workflowProcessor = new WorkflowProcessor(stepProcessorProvider);
-        this.contractProcessorConfig = new ContractProcessorConfig();
     }
 
-    public ContractUpdate initiate(Node contract,
-                                   String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
-        return initiate(contract, null, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-    }
+    public List<ContractUpdateAction> initiate(Node contract,
+                                               String initiateContractEntryBlueId,
+                                               String initiateContractProcessingEntryBlueId) {
+        List<ContractUpdateAction> result = new ArrayList<>();
 
-    public ContractUpdate initiate(Node contract, ContractProcessingContext initiatedContext,
-                                   String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
-        Node event = initializationEvent();
-        Node preprocessedContract = preprocess(contract);
+        ContractUpdateAction initialAction = singleEventProcessor.initiate(contract, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+        initialAction.epoch(0);
+        result.add(initialAction);
 
-        ContractInstance rootInstance = new ContractInstance()
-                .id(ContractInstance.ROOT_INSTANCE_ID)
-                .contractState(preprocessedContract)
-                .processingState(new ProcessingState());
+        processAdditionalEvents(initialAction.getContractInstance(), result, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, 1);
 
-        List<ContractInstance> contractInstances = new ArrayList<>();
-        contractInstances.add(rootInstance);
-
-        ContractProcessingContext context = initiatedContext != null ? initiatedContext :
-                new ContractProcessingContext()
-                        .contractInstances(contractInstances)
-                        .contractInstanceId(ContractInstance.ROOT_INSTANCE_ID)
-                        .contract(preprocessedContract)
-                        .startedLocalContracts(0)
-                        .initiateContractEntryBlueId(initiateContractEntryBlueId)
-                        .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
-                        .stepProcessorProvider(stepProcessorProvider)
-                        .blue(blue)
-                        .config(contractProcessorConfig);
-
-        List<WorkflowInstance> workflowInstances = processWorkflows(event, context, 0);
-        int startedWorkflowInstancesCount = workflowInstances.size();
-        workflowInstances.removeIf(WorkflowInstance::isCompleted);
-
-        rootInstance.getProcessingState()
-                .startedWorkflowsCount(startedWorkflowInstancesCount)
-                .workflowInstances(workflowInstances.isEmpty() ? null : workflowInstances)
-                .startedLocalContractsCount(context.getStartedLocalContracts())
-                .localContractInstances(context.getContractInstances().size() > 1 ?
-                        context.getContractInstances().subList(1, context.getContractInstances().size()) : null)
-                .completed(context.isCompleted())
-                .terminatedWithError(context.isTerminatedWithError());
-
-        rootInstance.contractState(context.getContract());
-
-        return new ContractUpdate()
-                .contractInstance(rootInstance)
-                .emittedEvents(context.getEmittedEvents().isEmpty() ? null : context.getEmittedEvents())
-                .initiateContractEntry(new Node().blueId(initiateContractEntryBlueId))
-                .initiateContractProcessingEntry(new Node().blueId(initiateContractProcessingEntryBlueId));
-    }
-
-    private Node preprocess(Node contract) {
-        Limits contractLimits = new PathLimits.Builder()
-                .addPath("/participants/*")
-                .addPath("/properties/*")
-                .addPath("/workflows/*/*")
-                .addPath("/modules/*/*")
-                .build();
-        blue.extend(contract, contractLimits);
-
-        return blue.resolve(contract);
-    }
-
-    public ContractUpdate processEvent(Node event, ContractUpdate contractUpdate) {
-        ContractUpdate result = processEvent(event, contractUpdate.getContractInstance(),
-                contractUpdate.getInitiateContractEntry().getAsText("/blueId"),
-                contractUpdate.getInitiateContractProcessingEntry().getAsText("/blueId"));
-        result.epoch(contractUpdate.getEpoch() + 1);
         return result;
     }
 
-    public ContractUpdate processEvent(Node event, ContractInstance contractInstance,
-                                       String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
+    public List<ContractUpdateAction> processEvent(Node event,
+                                                   ContractInstance contractInstance,
+                                                   String initiateContractEntryBlueId,
+                                                   String initiateContractProcessingEntryBlueId,
+                                                   int epoch) {
+        List<ContractUpdateAction> actions = new ArrayList<>();
 
-        if (contractInstance.getProcessingState().isCompleted() || contractInstance.getProcessingState().isTerminatedWithError()) {
-            throw new IllegalStateException("Contract instance is already completed or terminated with error.");
+        ContractUpdateAction initialAction = singleEventProcessor.processEvent(event, contractInstance, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+        initialAction.epoch(epoch);
+        actions.add(initialAction);
+
+        processAdditionalEvents(initialAction.getContractInstance(), actions, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, epoch + 1);
+
+        return actions;
+    }
+
+    private void processAdditionalEvents(ContractInstance contractInstance,
+                                         List<ContractUpdateAction> actions,
+                                         String initiateContractEntryBlueId,
+                                         String initiateContractProcessingEntryBlueId,
+                                         int startingEpoch) {
+        ContractUpdateAction lastAction = actions.get(actions.size() - 1);
+        if (lastAction.getEmittedEvents() == null || lastAction.getEmittedEvents().isEmpty()) {
+            return;
         }
 
-        int initialStartedLocalContracts = contractInstance.getProcessingState().getStartedLocalContractCount();
-        String previousContractInstanceBlueId = calculateBlueId(contractInstance);
+        List<ContractSubscription> mergedSubscriptions = mergeSubscriptions(contractInstance);
+        Queue<Node> eventsToProcess = new LinkedList<>();
 
-        List<ContractInstance> contractInstances = new ArrayList<>();
-        contractInstances.add(contractInstance);
-        if (contractInstance.getProcessingState().getLocalContractInstances() != null) {
-            contractInstances.addAll(contractInstance.getProcessingState().getLocalContractInstances());
-        }
+        processEmittedEvents(lastAction.getEmittedEvents(), eventsToProcess);
 
-        ContractProcessingContext context = new ContractProcessingContext()
-                .contractInstances(contractInstances)
-                .contractInstanceId(contractInstance.getId())
-                .contract(contractInstance.getContractState())
-                .startedLocalContracts(initialStartedLocalContracts)
-                .initiateContractEntryBlueId(initiateContractEntryBlueId)
-                .initiateContractProcessingEntryBlueId(initiateContractProcessingEntryBlueId)
-                .stepProcessorProvider(stepProcessorProvider)
-                .blue(blue)
-                .config(contractProcessorConfig);
+        int currentEpoch = startingEpoch;
 
-        for (ContractInstance instance : contractInstances) {
-            processEventInContractInstance(event, instance, context);
-            if (context.isCompleted()) {
-                break;
+        while (!eventsToProcess.isEmpty()) {
+            Node event = eventsToProcess.poll();
+            Optional<AgreedUponSimulatedEvent> agreedUponEvent = extractAgreedUponSimulatedEvent(event);
+            boolean isAgreedUponEvent = agreedUponEvent.isPresent();
+
+            if (isAgreedUponEvent || subscriptionApplies(event, mergedSubscriptions)) {
+                ContractUpdateAction newAction = singleEventProcessor.processEvent(event, lastAction.getContractInstance(), initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
+                newAction.epoch(currentEpoch++);
+                actions.add(newAction);
+                lastAction = newAction;
+
+                if (newAction.getEmittedEvents() != null && !newAction.getEmittedEvents().isEmpty()) {
+                    processEmittedEvents(newAction.getEmittedEvents(), eventsToProcess);
+                }
             }
         }
-
-        List<ContractInstance> localContractInstances = contractInstances.stream()
-                .filter(instance -> instance.getId() != ContractInstance.ROOT_INSTANCE_ID)
-                .collect(Collectors.toList());
-
-        contractInstance.getProcessingState()
-                .startedLocalContractsCount(context.getStartedLocalContracts())
-                .localContractInstances(localContractInstances.isEmpty() ? null : localContractInstances);
-
-        return new ContractUpdate()
-                .contractInstance(contractInstance)
-                .contractInstancePrev(new Node().blueId(previousContractInstanceBlueId))
-                .emittedEvents(context.getEmittedEvents().isEmpty() ? null : context.getEmittedEvents())
-                .initiateContractEntry(new Node().blueId(initiateContractEntryBlueId))
-                .initiateContractProcessingEntry(new Node().blueId(initiateContractProcessingEntryBlueId));
     }
 
-    private void processEventInContractInstance(Node event, ContractInstance contractInstance, ContractProcessingContext context) {
-        context.contract(contractInstance.getContractState());
-        context.contractInstanceId(contractInstance.getId());
-
-        List<WorkflowInstance> existingWorkflowInstances = contractInstance.getProcessingState().getWorkflowInstances();
-        int startedWorkflows = contractInstance.getProcessingState().getStartedWorkflowCount();
-
-        List<WorkflowInstance> newWorkflowInstances = processWorkflows(event, context, startedWorkflows);
-        startedWorkflows += newWorkflowInstances.size();
-        if (existingWorkflowInstances != null) {
-            existingWorkflowInstances.forEach(workflowInstance -> workflowProcessor.processEvent(event, workflowInstance, context));
+    private void processEmittedEvents(List<Node> emittedEvents, Queue<Node> eventsToProcess) {
+        for (Node emittedEvent : emittedEvents) {
+            Optional<AgreedUponSimulatedEvent> agreedUponSimulatedEvent = extractAgreedUponSimulatedEvent(emittedEvent);
+            if (agreedUponSimulatedEvent.isPresent()) {
+                eventsToProcess.add(agreedUponSimulatedEvent.get().getEvent());
+                eventsToProcess.add(emittedEvent);
+            } else {
+                eventsToProcess.add(emittedEvent);
+            }
         }
-
-        List<WorkflowInstance> updatedWorkflowInstances = new ArrayList<>();
-        if (existingWorkflowInstances != null) {
-            updatedWorkflowInstances.addAll(existingWorkflowInstances);
-        }
-        updatedWorkflowInstances.addAll(newWorkflowInstances);
-        updatedWorkflowInstances.removeIf(WorkflowInstance::isCompleted);
-
-        contractInstance.contractState(context.getContract());
-        contractInstance.getProcessingState()
-                .startedWorkflowsCount(startedWorkflows)
-                .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances);
+    }
+    
+    private Optional<AgreedUponSimulatedEvent> extractAgreedUponSimulatedEvent(Node event) {
+        return blue.determineClass(event)
+                .filter(ContractProcessingEvent.class::equals)
+                .map(clazz -> blue.nodeToObject(event, ContractProcessingEvent.class))
+                .map(ContractProcessingEvent::getEvent)
+                .flatMap(innerEvent -> blue.determineClass(innerEvent)
+                        .filter(AgreedUponSimulatedEvent.class::equals)
+                        .map(clazz -> blue.nodeToObject(innerEvent, AgreedUponSimulatedEvent.class)));
     }
 
-    private List<WorkflowInstance> processWorkflows(Node event, ContractProcessingContext context, int initialStartedWorkflows) {
-        Node workflowsNode = context.getContract().getProperties().get("workflows");
-        if (workflowsNode == null)
-            return new ArrayList<>();
+    private List<ContractSubscription> mergeSubscriptions(ContractInstance contractInstance) {
+        List<ContractSubscription> mergedSubscriptions = new ArrayList<>();
+        if (contractInstance.getContractState().getSubscriptions() != null) {
+            mergedSubscriptions.addAll(contractInstance.getContractState().getSubscriptions());
+        }
 
-        List<Node> workflows = workflowsNode.getItems();
-        AtomicInteger currentId = new AtomicInteger(initialStartedWorkflows);
-        List<WorkflowInstance> processedWorkflows = new ArrayList<>();
-
-        if (workflows != null) {
-            for (Node workflow : workflows) {
-                try {
-                    Optional<WorkflowInstance> result = workflowProcessor.processEvent(event, workflow, context);
-                    if (result.isPresent()) {
-                        result.get().id(currentId.getAndIncrement());
-                        processedWorkflows.add(result.get());
-                        if (context.isCompleted())
-                            return processedWorkflows;
-                    }
-                } catch (ContractProcessingException e) {
-                    break;
+        if (contractInstance.getProcessingState().getLocalContractInstances() != null) {
+            for (ContractInstance localInstance : contractInstance.getProcessingState().getLocalContractInstances()) {
+                GenericContract localContract = localInstance.getContractState();
+                if (localContract.getSubscriptions() != null) {
+                    mergedSubscriptions.addAll(localContract.getSubscriptions());
                 }
             }
         }
 
-        return processedWorkflows;
+        return mergedSubscriptions;
     }
 
-    private Node initializationEvent() {
-        return new Node().type(new Node().blueId(CONTRACT_INITIALIZATION_EVENT_BLUE_ID));
+    private boolean subscriptionApplies(Node event, List<ContractSubscription> subscriptions) {
+        return blue.determineClass(event)
+                .filter(ContractProcessingEvent.class::equals)
+                .map(clazz -> blue.nodeToObject(event, ContractProcessingEvent.class))
+                .map(contractProcessingEvent -> subscriptions.stream()
+                        .filter(LocalContractSubscription.class::isInstance)
+                        .map(LocalContractSubscription.class::cast)
+                        .anyMatch(subscription -> subscriptionMatchesEvent(subscription, contractProcessingEvent)))
+                .orElse(false);
     }
 
-    private String calculateBlueId(ContractInstance contractInstance) {
-        return BlueIdCalculator.calculateBlueId(toNode(contractInstance));
+    private boolean subscriptionMatchesEvent(LocalContractSubscription subscription, ContractProcessingEvent event) {
+        return Optional.of(true)
+                .filter(__ -> matchesContractInstance(subscription, event))
+                .filter(__ -> matchesWorkflowInstance(subscription, event))
+                .filter(__ -> matchesEventType(subscription, event))
+                .isPresent();
     }
 
-    private Node toNode(ContractInstance contractInstance) {
-        return blue.objectToNode(contractInstance);
+    private boolean matchesContractInstance(LocalContractSubscription subscription, ContractProcessingEvent event) {
+        return subscription.getContractInstanceId() == null ||
+               subscription.getContractInstanceId().equals(event.getContractInstanceId());
     }
 
-    public StepProcessorProvider getStepProcessorProvider() {
-        return stepProcessorProvider;
+    private boolean matchesWorkflowInstance(LocalContractSubscription subscription, ContractProcessingEvent event) {
+        return subscription.getWorkflowInstanceId() == null ||
+               subscription.getWorkflowInstanceId().equals(event.getWorkflowInstanceId());
     }
 
-    public WorkflowProcessor getWorkflowProcessor() {
-        return workflowProcessor;
+    private boolean matchesEventType(LocalContractSubscription subscription, ContractProcessingEvent event) {
+        return subscription.getEvent() == null ||
+               blue.nodeMatchesType(event.getEvent(), subscription.getEvent());
     }
 
-    public Blue getBlue() {
-        return blue;
-    }
-
-    public ContractProcessorConfig getContractProcessorConfig() {
-        return contractProcessorConfig;
+    public SingleEventContractProcessor getSingleEventProcessor() {
+        return singleEventProcessor;
     }
 }

@@ -5,7 +5,7 @@ import blue.language.model.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkflowInstance implements Cloneable {
+public class WorkflowInstance {
     private int id;
     private Node workflow;
     private String currentStepName;
@@ -82,23 +82,6 @@ public class WorkflowInstance implements Cloneable {
 
     public boolean hasNestedWorkflowInstance() {
         return nestedWorkflowInstance != null;
-    }
-
-    @Override
-    public WorkflowInstance clone() {
-        try {
-            WorkflowInstance cloned = (WorkflowInstance) super.clone();
-            cloned.workflow = this.workflow != null ? this.workflow.clone() : null;
-            if (this.stepResults != null) {
-                cloned.stepResults = new HashMap<>(this.stepResults);
-            }
-            if (this.nestedWorkflowInstance != null) {
-                cloned.nestedWorkflowInstance = this.nestedWorkflowInstance.clone();
-            }
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("WorkflowInstance should be cloneable", e);
-        }
     }
 
 }

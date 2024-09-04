@@ -1,0 +1,38 @@
+name: Local Contracts Contract
+type: Contract
+subscriptions:
+  - type: Local Contract Subscription
+    contractInstanceId: 22
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+
+      - type: Initialize Local Contract Step
+        contract:
+          name: My Local Contract
+          type: Contract
+          subscriptions:
+            - type: Local Contract Subscription
+              contractInstanceId: 0
+              event:
+                type: Contract Update Event
+                changeset:
+                  - path: /properties/x
+          workflows:
+            - trigger:
+                event:
+                  type: Contract Initialization Event
+              steps:
+                - name: llm
+                  type: Expect Event Step
+                  description: your task
+                  event:
+                    type: Simulator Timeline Entry
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/x
+            val: 1

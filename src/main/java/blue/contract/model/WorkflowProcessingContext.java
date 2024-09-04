@@ -1,6 +1,7 @@
 package blue.contract.model;
 
 import blue.contract.StepProcessorProvider;
+import blue.language.Blue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +12,15 @@ public class WorkflowProcessingContext {
     private ContractProcessingContext contractProcessingContext;
     private StepProcessorProvider stepProcessorProvider;
     private WorkflowProcessingTransaction transaction;
+    private Blue blue;
+
+    public WorkflowProcessingContext() {}
 
     public WorkflowProcessingContext(WorkflowInstance workflowInstance, ContractProcessingContext contractProcessingContext, StepProcessorProvider stepProcessorProvider) {
         this.workflowInstance = workflowInstance;
         this.contractProcessingContext = contractProcessingContext;
         this.stepProcessorProvider = stepProcessorProvider;
+        this.blue = contractProcessingContext.getBlue();
     }
 
     public WorkflowInstance getWorkflowInstance() {
@@ -32,10 +37,10 @@ public class WorkflowProcessingContext {
 
     public void beginTransaction() {
         this.transaction = new WorkflowProcessingTransaction()
-                .contract(contractProcessingContext.getContract().clone())
+                .contract(blue.clone(contractProcessingContext.getContract()))
                 .emittedEvents(new ArrayList<>(contractProcessingContext.getEmittedEvents()))
                 .contractInstances(contractProcessingContext.getContractInstances().stream()
-                        .map(ContractInstance::clone)
+                        .map(instance -> blue.clone(instance))
                         .collect(Collectors.toList()))
                 .startedLocalContracts(contractProcessingContext.getStartedLocalContracts())
                 .contractCompleted(contractProcessingContext.isCompleted())
@@ -44,7 +49,7 @@ public class WorkflowProcessingContext {
                 .workflowStepResults(new HashMap<>(workflowInstance.getStepResults()))
                 .workflowCompleted(workflowInstance.isCompleted())
                 .workflowNestedWorkflowInstance(workflowInstance.getNestedWorkflowInstance() != null ?
-                        workflowInstance.getNestedWorkflowInstance().clone() : null);
+                        blue.clone(workflowInstance.getNestedWorkflowInstance()) : null);
     }
 
     public void commitTransaction() {
@@ -67,5 +72,20 @@ public class WorkflowProcessingContext {
 
             this.transaction = null;
         }
+    }
+
+    public WorkflowProcessingContext workflowInstance(WorkflowInstance workflowInstance) {
+        this.workflowInstance = workflowInstance;
+        return this;
+    }
+
+    public WorkflowProcessingContext contractProcessingContext(ContractProcessingContext contractProcessingContext) {
+        this.contractProcessingContext = contractProcessingContext;
+        return this;
+    }
+
+    public WorkflowProcessingContext stepProcessorProvider(StepProcessorProvider stepProcessorProvider) {
+        this.stepProcessorProvider = stepProcessorProvider;
+        return this;
     }
 }

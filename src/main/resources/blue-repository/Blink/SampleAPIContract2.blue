@@ -1,0 +1,23 @@
+name: Sample API Contract 2
+messaging:
+  participants:
+    Assistant:
+      description: Assistant making tasks
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - name: my
+        type: Expect Event Step
+        description: your task
+        event:
+          type: Timeline Entry
+          message:
+            type: Assistant Task
+            request:
+              type: API Request
+              method: POST
+              url: https://stockfish.online/api/s/v2.php
+            response:
+              type: API Response

@@ -1,0 +1,22 @@
+name: API Response
+description: |
+  Represents an API response. This structure can be used for all types of API responses, including those with JSON or text bodies.
+statusCode:
+  type: Integer
+  description: The HTTP status code of the response.
+headers:
+  type: Dictionary
+  keyType: Text
+  valueType: Text
+  description: Key-value pairs representing HTTP headers received in the response.
+body:
+  description: The response body. Can be a string for text data, a dictionary for JSON data, or null if no body is returned.
+contentType:
+  type: Text
+  description: The content type of the response (e.g., application/json, text/plain).
+responseTime:
+  type: Integer
+  description: The time taken (in milliseconds) for the API to respond.
+error:
+  type: Text
+  description: Any error message if the request failed. Null if no error occurred.

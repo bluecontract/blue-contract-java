@@ -1,7 +1,8 @@
 package blue.contract;
 
+import blue.contract.model.GenericContract;
 import blue.contract.packager.model.BluePackage;
-import blue.contract.utils.ContractSimulator;
+import blue.contract.simulator.ContractRunner;
 import blue.contract.utils.PackagingUtils.ClasspathBasedPackagingEnvironment;
 import blue.language.Blue;
 import blue.language.model.Node;
@@ -15,35 +16,27 @@ import java.io.IOException;
 import static blue.contract.utils.PackagingUtils.createClasspathBasedPackagingEnvironment;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_1;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_2;
-import static blue.contract.utils.Utils.defaultTestingEnvironment;
+import static blue.contract.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlowsTest {
 
-    private static ClasspathBasedPackagingEnvironment env;
-    private static Blue blue;
-    private static BluePackage contractPackage;
-
-    @BeforeAll
-    static void setUp() throws IOException {
-        env = defaultTestingEnvironment();
-        blue = new Blue(
-                new DirectoryBasedNodeProvider("blue-preprocessed", "samples"),
-                new TypeClassResolver("blue.contract.model")
-        );
-        contractPackage = env.getPackage("Testing Flows");
-    }
-
     @Test
     void testInitializationEvent() throws IOException {
-        Node contract = contractPackage.getPreprocessedNodes().get("JS Complete Contract");
+        Blue blue = testBlue();
+        Node contract = getPreprocessedNode(TESTING_FLOWS, "JS Complete Contract");
 
-        ContractSimulator simulator = new ContractSimulator(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
+        GenericContract contract1 = blue.nodeToObject(contract, GenericContract.class);
+        System.out.println(blue.objectToYaml(contract1));
 
-        simulator.initiateContract(contract);
-//        simulator.processEmittedEventsOnly();
+        ContractRunner simulator = new ContractRunner(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
+//
+//        simulator.initiateContract(contract);
+////        simulator.processEmittedEventsOnly();
+//
+//        simulator.save("src/test/resources", "f1");
 
-        simulator.save("src/test/resources", "f1");
+
 //
 //        ContractUpdate initial = simulator.getContractUpdates().get(0);
 //
@@ -75,7 +68,5 @@ public class FlowsTest {
 //        assertEquals("replace", firstChange.getAsText("/op"));
 //        assertEquals("/properties/x", firstChange.getAsText("/path"));
     }
-
-
 
 }

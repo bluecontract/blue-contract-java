@@ -8,6 +8,14 @@ import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 
 @TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class UpdateStep extends WorkflowStep {
-    public List<JsonPatchEntry> changeset;
+    private List<JsonPatchEntry> changeset;
 
+    public List<JsonPatchEntry> getChangeset() {
+        return changeset;
+    }
+
+    public UpdateStep changeset(List<JsonPatchEntry> changeset) {
+        this.changeset = changeset;
+        return this;
+    }
 }

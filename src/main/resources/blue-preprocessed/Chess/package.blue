@@ -1,0 +1,14 @@
+---
+items:
+- blueId: GEVWpoLNCrAWHaPWnFjMKbrfibUc51w3FCxhS7CsbEes
+- type:
+    blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
+  mappings:
+    Chess:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: FZiXswEWHF6KDgmoZ5gbi3g2temsY67wDv7y7khJWHPw
+    Chess Move:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX

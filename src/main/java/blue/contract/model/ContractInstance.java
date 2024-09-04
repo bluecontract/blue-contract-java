@@ -1,23 +1,16 @@
 package blue.contract.model;
 
-import blue.language.model.Node;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class ContractInstance implements Cloneable {
-
-    public static final int ROOT_INSTANCE_ID = 0;
+public class ContractInstance {
 
     private int id;
-    private Node contractState;
+    private GenericContract contractState;
     private ProcessingState processingState;
 
     public int getId() {
         return id;
     }
 
-    public Node getContractState() {
+    public GenericContract getContractState() {
         return contractState;
     }
 
@@ -30,7 +23,7 @@ public class ContractInstance implements Cloneable {
         return this;
     }
 
-    public ContractInstance contractState(Node contractState) {
+    public ContractInstance contractState(GenericContract contractState) {
         this.contractState = contractState;
         return this;
     }
@@ -40,15 +33,4 @@ public class ContractInstance implements Cloneable {
         return this;
     }
 
-    @Override
-    public ContractInstance clone() {
-        try {
-            ContractInstance cloned = (ContractInstance) super.clone();
-            cloned.contractState = this.contractState != null ? this.contractState.clone() : null;
-            cloned.processingState = this.processingState != null ? this.processingState.clone() : null;
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("ContractInstance should be cloneable", e);
-        }
-    }
 }

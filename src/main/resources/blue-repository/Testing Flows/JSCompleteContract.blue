@@ -1,5 +1,11 @@
 name: JS Complete Contract
 type: Contract
+messaging:
+  participants:
+    Alice:
+      timeline: 124
+properties:
+  abc: 234
 workflows:
   - trigger:
       event:
@@ -9,7 +15,7 @@ workflows:
         changeset:
           - op: add
             path: /properties/x
-            val: 1
+            val: 1x
 
       - type: JavaScript Code Step
         code: |
@@ -22,4 +28,4 @@ workflows:
         changeset:
           - op: add
             path: /properties/y
-            val: 1
+            val: 1x

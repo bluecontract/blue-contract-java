@@ -1,0 +1,51 @@
+name: Delegation Testing Contract
+type: Contract
+messaging:
+  participants:
+    Alice:
+      description: Alice has privs to change x
+    Bob:
+      description: Bob can't change x, but can call another workflow
+properties:
+  x: 0
+workflows:
+  - name: change x
+    trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Text
+    steps:
+
+      - name: must be Alice
+        type: JavaScript Code Step
+        code: |
+          let expectedTimeline = contract("/messaging/participants/Alice/timeline");
+          let timeline = event.timeline;
+          
+          if (timeline.blueId != expectedTimeline.blueId && event.message != 'go') {
+            throw new RejectAndAwaitNextEventException('Not Alice!');
+          }
+          
+          return { }
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/x
+            val: 1
+
+  - name: ask x
+    trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Integer
+    steps:
+      - type: Trigger Event Step
+        event:
+          type: Agreed Upon Simulated Event
+          event:
+            type: Timeline Entry
+            message: go
+

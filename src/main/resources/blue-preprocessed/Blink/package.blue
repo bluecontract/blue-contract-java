@@ -1,0 +1,54 @@
+---
+items:
+- blueId: 2ZhKdH1wWiwsntm2yYLVh6SieZTWVgz8qPeS8JvNJFHM
+- type:
+    blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
+  mappings:
+    Task:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 8paxd7yfahkGGxyaxBAkMXsWpKuzW4qS35ZZVHiB8hL
+    Sample API Contract:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: G5CLHQEgttKhytsm1nVWMfFWy8AsrKX8GhNTpvpG5fBu
+    Sample API Contract 2:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: J6HVxKV9WJtFAi7MQH59o2CRBrq9XHjQTSDfT9GKhvu
+    API Response:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: CT1QjaY8RYryxR596hph2SX6wwC1wGvipi1CjDRcJbd4
+    Assistant Message:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 2Dw47cJMtpB6BhRkA6DkAqrgc3NKFcHHoqwUy9z3Ts1x
+    Temp Sample:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 6PxbC9jTHadhkn3t2CG6TCjVLY9F69XTdFH1S5MpjoAm
+    LLM Request:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: GXkQ3iphMJRzWukJt8fAJNr7kSBpKfkVxH4j1VdBpcoo
+    Main Chat Message:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9nFWBvNxVD9fHsMFmqM5wxTGn36Q5Tw6dSDFnsnyF1w8
+    LLM Response:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9Rie4HdYiHTEJRLF77d4VHmaQv43QJvdJ9oUrQy89hMn
+    API Request:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 6QzWdtAdH7LGrhoBdTpCgDE188jp4MWuXv8tXJwK4RE5
+    Conversation Entry:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+    Sample Task:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9APSusg1oMAh4Dh296R6tUQzp9mza6KfZXZ7cCa9VkSa

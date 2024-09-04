@@ -1,0 +1,13 @@
+---
+name: Workflow
+description: (docs)
+steps:
+  description: (docs)
+  type:
+    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+  itemType:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: WorkflowStep
+trigger:
+  description: (docs)

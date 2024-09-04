@@ -1,6 +1,6 @@
 name: Sample Contract
 type:
-  blueId: 6Tm1MD1UjaTTZCUqizqJ5mrPLAVxohN5sm1ezrTv5rD6
+  blueId: G7ngor9aVPuRKFBXtfxqPwAKGo9wWuMvnfp66dyM7xQK
 properties:
   yourProperty: yeah!
 workflows:

@@ -1,12 +1,12 @@
 package blue.contract;
 
-import blue.contract.model.ContractUpdate;
+import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.model.event.ContractUpdateEvent;
 import blue.contract.packager.model.BluePackage;
-import blue.contract.utils.ContractSimulator;
+import blue.contract.simulator.ContractRunner;
 import blue.contract.utils.PackagingUtils.ClasspathBasedPackagingEnvironment;
-import blue.contract.utils.RepositoryExportingTool;
+import blue.contract.utils.Utils;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.provider.DirectoryBasedNodeProvider;
@@ -20,39 +20,25 @@ import static blue.contract.utils.PackagingUtils.createClasspathBasedPackagingEn
 import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_1;
 import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_2;
-import static blue.contract.utils.Utils.defaultTestingEnvironment;
+import static blue.contract.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EventsTest {
 
-    private static ClasspathBasedPackagingEnvironment env;
-    private static Blue blue;
-    private static BluePackage contractPackage;
-
-    @BeforeAll
-    static void setUp() throws IOException {
-        env = defaultTestingEnvironment();
-        blue = new Blue(
-                new DirectoryBasedNodeProvider("blue-preprocessed", "samples"),
-                new TypeClassResolver("blue.contract.model")
-        );
-        contractPackage = env.getPackage("Testing Events");
-    }
-
     @Test
     void testInitializationEvent() throws IOException {
-        Node contract = contractPackage.getPreprocessedNodes().get("Initialization");
+        Blue blue = testBlue();
+        Node contract = getPreprocessedNode(TESTING_EVENTS, "Initialization");
 
-        ContractSimulator simulator = new ContractSimulator(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
+        ContractRunner simulator = new ContractRunner(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
 
         simulator.initiateContract(contract);
         simulator.processEmittedEventsOnly();
 
-        ContractUpdate initial = simulator.getContractUpdates().get(0);
+        ContractUpdateAction initial = simulator.getContractUpdates().get(0);
 
-        BluePackage contractsPackage = env.getPackage(BLUE_CONTRACTS_V04);
-        String contractProcessingEventBlueId = contractsPackage.getPreprocessedNodes().get("Contract Processing Event").getAsText("/blueId");
-        String contractUpdateEventBlueId = contractsPackage.getPreprocessedNodes().get("Contract Update Event").getAsText("/blueId");
+        String contractProcessingEventBlueId = getPreprocessedNode(BLUE_CONTRACTS_V04, "Contract Processing Event").getAsText("/blueId");
+        String contractUpdateEventBlueId = getPreprocessedNode(BLUE_CONTRACTS_V04, "Contract Update Event").getAsText("/blueId");
 
         assertEquals(1, initial.getEmittedEvents().size());
 
@@ -74,7 +60,7 @@ public class EventsTest {
         assertEquals(1, changeset.getItems().size());
 
         Node firstChange = changeset.getItems().get(0);
-        assertEquals(1, firstChange.getAsInteger("/val"));
+        assertEquals("1x", firstChange.getAsText("/val"));
         assertEquals("replace", firstChange.getAsText("/op"));
         assertEquals("/properties/x", firstChange.getAsText("/path"));
     }

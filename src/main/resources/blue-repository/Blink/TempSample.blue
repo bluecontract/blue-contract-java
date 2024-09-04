@@ -1,0 +1,28 @@
+name: Temp Sample
+type: Contract
+
+messaging:
+  participants:
+    Alice:
+      description: Someone providing a task
+    Bob:
+      description: Someone processing a task
+
+properties:
+  x: 0
+
+workflows:
+
+  - name: Chat
+    trigger:
+      event:
+        type: Simulator Timeline Entry
+        timeline:
+          blueId: ${contract('/messaging/participants/Bob/timeline/blueId')}
+    steps:
+      - name: Apply Changes
+        type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/x
+            val: 1

@@ -13,4 +13,4 @@ workflows:
         changeset:
           - op: replace
             path: /properties/x
-            val: 1
+            val: 1x

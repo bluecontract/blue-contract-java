@@ -1,0 +1,6 @@
+name: Assistant Message
+type: Conversation Entry
+message:
+  type: Text
+priority:
+  type: Text

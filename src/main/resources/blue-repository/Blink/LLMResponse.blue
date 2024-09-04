@@ -1,0 +1,9 @@
+name: LLM Response
+description: |
+  Represents a response from a Language Learning Model (LLM). This structure can be used for all types of LLM responses.
+content:
+  type: Text
+  description: The generated content from the LLM.
+responseTime:
+  type: Integer
+  description: The time taken (in milliseconds) for the LLM to generate the response.

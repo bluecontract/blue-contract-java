@@ -1,0 +1,14 @@
+---
+items:
+- blueId: GEVWpoLNCrAWHaPWnFjMKbrfibUc51w3FCxhS7CsbEes
+- type:
+    blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
+  mappings:
+    Ticket:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: FkgxXcPZGGWkA9YEVXEjNpa2cALfJXZ2fcPPgA7STi6U
+    My Contract:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: D7jU49DmQtWdXtBMXcofjWruap7uNm8wbtoEFn5wpxuB

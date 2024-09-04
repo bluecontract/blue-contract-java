@@ -1,0 +1,23 @@
+name: Sample Task
+type: Contract
+properties:
+  result:
+    description: result
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+
+      - name: Apply Changes
+        type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/result
+            val: abc
+            
+      - type: Trigger Event Step
+        event:
+          type: Assistant Message
+          message: Show up
+          priority: HIGH

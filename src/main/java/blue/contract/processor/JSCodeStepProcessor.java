@@ -5,6 +5,7 @@ import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowInstance;
 import blue.contract.model.WorkflowProcessingContext;
+import blue.contract.utils.Constants;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.contract.utils.JSExecutor.ContractCompleteResult;
@@ -84,7 +85,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
         ContractProcessingContext contractProcessingContext = context.getContractProcessingContext();
         ContractInstance currentInstance = contractProcessingContext.getCurrentContractInstance();
         currentInstance.getProcessingState().completed(true);
-        if (currentInstance.getId() == ContractInstance.ROOT_INSTANCE_ID) {
+        if (currentInstance.getId() == Constants.ROOT_INSTANCE_ID) {
             contractProcessingContext.completed(true);
         }
         return Optional.of(context.getWorkflowInstance().completed(true));

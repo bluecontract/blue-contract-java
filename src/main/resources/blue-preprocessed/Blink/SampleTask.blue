@@ -1,0 +1,45 @@
+---
+name: Sample Task
+type:
+  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+properties:
+  result:
+    description: result
+workflows:
+  items:
+  - steps:
+      items:
+      - name: Apply Changes
+        type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: abc
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: replace
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/result
+      - type:
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+        event:
+          type:
+            blueId: 2Dw47cJMtpB6BhRkA6DkAqrgc3NKFcHHoqwUy9z3Ts1x
+          message:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: Show up
+          priority:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: HIGH
+    trigger:
+      event:
+        type:
+          blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC

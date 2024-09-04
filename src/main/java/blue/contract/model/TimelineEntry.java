@@ -10,15 +10,15 @@ import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 @TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class TimelineEntry<T> {
     @BlueId
-    private String timeline;
+    protected String timeline;
     @BlueId
-    private String timelinePrev;
+    protected String timelinePrev;
     @BlueId
-    private String thread;
+    protected String thread;
     @BlueId
-    private String threadPrev;
-    private T message;
-    private String signature;
+    protected String threadPrev;
+    protected T message;
+    protected String signature;
 
     public String getTimeline() {
         return timeline;

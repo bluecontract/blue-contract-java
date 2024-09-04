@@ -10,6 +10,7 @@ import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 
 @TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class Workflow {
+    public String name;
     public Node trigger;
     public List<? extends WorkflowStep> steps;
 }

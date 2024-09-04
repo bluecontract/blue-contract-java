@@ -1,0 +1,8 @@
+---
+name: Initiate Contract Action
+description: This action serves as an announcement of the participant's intent to
+  start a new contract instance.
+contract:
+  description: The contract instance which is being initiated.
+  type:
+    blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa

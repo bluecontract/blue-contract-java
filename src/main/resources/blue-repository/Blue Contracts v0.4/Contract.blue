@@ -7,6 +7,9 @@ messaging:
     valueType: Participant
   secureChannel:
     description: channel part
+subscriptions:
+  type: List
+  itemType: Contract Subscription
 properties:
   description: properties part
 workflows:

@@ -1,0 +1,34 @@
+---
+name: Contract Processing Event
+description: "Represents an event that occurs during the processing of a contract\
+  \ instance, capturing the state and context of the workflow and contract steps involved."
+initiateContractEntry:
+  description: Entry for initiating the contract.
+  type:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: Node
+workflowStepName:
+  description: The name of the workflow step where the event occurred.
+  type:
+    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+initiateContractProcessingEntry:
+  description: Entry for initiating the processing of the contract.
+  type:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: Node
+contractInstanceId:
+  description: Identifier for the contract instance where the event occurred.
+  type:
+    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+event:
+  description: The actual event that was triggered when processing the contract.
+  type:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: Node
+workflowInstanceId:
+  description: Identifier for the workflow instance where the event occurred.
+  type:
+    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8

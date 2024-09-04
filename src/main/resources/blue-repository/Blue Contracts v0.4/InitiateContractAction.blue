@@ -1,0 +1,5 @@
+name: Initiate Contract Action
+description: This action serves as an announcement of the participant's intent to start a new contract instance.
+contract:
+  type: Contract
+  description: The contract instance which is being initiated.

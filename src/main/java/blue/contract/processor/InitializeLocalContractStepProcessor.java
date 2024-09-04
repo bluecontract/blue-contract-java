@@ -1,12 +1,14 @@
 package blue.contract.processor;
 
 import blue.contract.AbstractStepProcessor;
-import blue.contract.ContractProcessor;
+import blue.contract.SingleEventContractProcessor;
 import blue.contract.model.*;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToMapListOrValue;
+import blue.language.utils.limits.Limits;
+import blue.language.utils.limits.PathLimits;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,18 +36,20 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
 
     private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
         Blue blue = workflowProcessingContext.getContractProcessingContext().getBlue();
-        Node contractToInitialize = step.getProperties().get("contract");
+        Node extracted = extractContract(workflowProcessingContext, blue);
+        GenericContract contractToInitialize = blue.nodeToObject(extracted, GenericContract.class);
+//        GenericContract contractToInitialize = blue.nodeToObject(step.getProperties().get("contract"), GenericContract.class);
 
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
         int instanceId = contractProcessingContext.getStartedLocalContracts() + 1;
         int currentContractInstanceId = contractProcessingContext.getContractInstanceId();
-        Node currentContract = contractProcessingContext.getContract();
+        GenericContract currentContract = contractProcessingContext.getContract();
         contractProcessingContext.contractInstanceId(instanceId);
         contractProcessingContext.contract(contractToInitialize);
 
-        ContractProcessor contractProcessor = new ContractProcessor(contractProcessingContext.getStepProcessorProvider(), blue);
-        ContractUpdate update = contractProcessor
-                .initiate(contractToInitialize,
+        SingleEventContractProcessor singleEventContractProcessor = new SingleEventContractProcessor(contractProcessingContext.getStepProcessorProvider(), blue);
+        ContractUpdateAction update = singleEventContractProcessor
+                .initiate(extracted,
                         contractProcessingContext,
                         contractProcessingContext.getInitiateContractEntryBlueId(),
                         contractProcessingContext.getInitiateContractProcessingEntryBlueId());
@@ -55,6 +59,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         contractProcessingContext.getContractInstances().add(instance);
         contractProcessingContext.contractInstanceId(currentContractInstanceId);
         contractProcessingContext.contract(currentContract);
+        contractProcessingContext.startedLocalContracts(contractProcessingContext.getStartedLocalContracts() + 1);
 
         Optional<String> stepName = getStepName();
         if (stepName.isPresent()) {
@@ -65,6 +70,29 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
             workflowProcessingContext.getWorkflowInstance().getStepResults().put(stepName.get(), map);
         }
 
+    }
+
+    public Node extractContract(WorkflowProcessingContext context, Blue blue) {
+        Node contractNode = step.getProperties().get("contract");
+        if (contractNode == null)
+            throw new IllegalArgumentException("No \"contract\" defined for step with name \"" +
+                                               getStepName().orElse("<noname>") + "\" in workflow with name \"" +
+                                               context.getWorkflowInstance().getWorkflow().getName() + "\".");
+        blue.extend(contractNode, PathLimits.withSinglePath("/"));
+        contractNode = evaluateExpressionsRecursively(contractNode, context);
+        return contractNode;
+    }
+
+    private Node preprocess(Node contract, Blue blue) {
+        Limits contractLimits = new PathLimits.Builder()
+                .addPath("/participants/*")
+                .addPath("/properties/*")
+                .addPath("/workflows/*/*")
+                .addPath("/modules/*/*")
+                .build();
+        blue.extend(contract, contractLimits);
+
+        return blue.resolve(contract);
     }
 
 }

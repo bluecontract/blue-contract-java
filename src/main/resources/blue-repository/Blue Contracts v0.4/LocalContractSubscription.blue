@@ -1,0 +1,15 @@
+name: Local Contract Subscription
+type: Contract Subscription
+description: Represents a subscription to a local contract.
+contractInstanceId:
+  description: |
+    Identifier for the specific contract instance this subscription is associated with.
+    If null, the subscription applies to all contract instances.
+workflowInstanceId:
+  description: |
+    Identifier for the specific workflow instance this subscription is associated with.
+    If null, the subscription applies to all workflow instances within the specified contract instance.
+event:
+  description: |
+    Represents the event this subscription is interested in.
+    If null, the subscription applies to all events within the specified contract instance.

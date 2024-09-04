@@ -1,0 +1,15 @@
+---
+name: Initiate Contract Processing Action
+description: "An action published by a party (typically a validator or processor)\
+  \ indicating their willingness to process the initiated \ncontract and maintain\
+  \ its state. This action serves as a commitment to validate and update the contract's\
+  \ state \nbased on subsequent events.\n"
+initiateContractEntry:
+  description: The original Initiate Contract Action timeline entry. This links the
+    processing action to the specific contract initiation.
+  type:
+    blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+contract:
+  description: The initial state of the contract being processed.
+  type:
+    blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa

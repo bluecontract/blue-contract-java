@@ -1,0 +1,17 @@
+name: Perform Contract Action
+description: |
+  Represents an action to be performed on a contract instance within a specific workflow.
+initiateContractEntry:
+  type: Timeline Entry
+  description: The original Initiate Contract Action timeline entry. This links the processing action to the specific contract initiation.
+contractInstance:
+  type: Integer
+  description: The identifier of the contract instance on which the action is to be performed.
+workflowInstance:
+  type: Integer
+  description: The identifier of the workflow instance within which the action is being executed.
+workflowName:
+  type: String
+  description: The name of the workflow in which this action is being performed.
+action:
+  description: The actual action to be performed.

@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static blue.contract.model.ContractInstance.ROOT_INSTANCE_ID;
+import static blue.contract.utils.Constants.ROOT_INSTANCE_ID;
 import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class ContractProcessingContext {
-    private Node contract;
+    private GenericContract contract;
     private int contractInstanceId;
     private List<Node> emittedEvents = new ArrayList<>();;
     private List<ContractInstance> contractInstances;
@@ -28,8 +28,9 @@ public class ContractProcessingContext {
     private StepProcessorProvider stepProcessorProvider;
     private Blue blue;
     private ContractProcessorConfig config;
+    private Node incomingEvent;
 
-    public Node getContract() {
+    public GenericContract getContract() {
         return contract;
     }
 
@@ -72,12 +73,16 @@ public class ContractProcessingContext {
     public Blue getBlue() {
         return blue;
     }
-    
+
+    public Node getIncomingEvent() {
+        return incomingEvent;
+    }
+
     public ContractProcessorConfig getConfig() {
         return config;
     }
 
-    public ContractProcessingContext contract(Node contract) {
+    public ContractProcessingContext contract(GenericContract contract) {
         this.contract = contract;
         return this;
     }
@@ -137,9 +142,14 @@ public class ContractProcessingContext {
         return this;
     }
 
+    public ContractProcessingContext incomingEvent(Node incomingEvent) {
+        this.incomingEvent = incomingEvent;
+        return this;
+    }
+
     public Object accessContract(String path, boolean useGlobalScope, boolean resolveFinalLink) {
         Function<Node, Node> linkingProvider = useGlobalScope ? this::linkingProviderImplementation : null;
-        Object result = NodePathAccessor.get(contract, path, linkingProvider, resolveFinalLink);
+        Object result = NodePathAccessor.get(blue.objectToNode(contract), path, linkingProvider, resolveFinalLink);
         if (result instanceof Node) {
             result = NodeToMapListOrValue.get((Node) result, SIMPLE);
         } else if (result instanceof BigInteger) {
@@ -155,11 +165,14 @@ public class ContractProcessingContext {
                     .orElseThrow(() -> new IllegalStateException("LocalContract class must have @BlueId annotation properly set."));
             if (localContractBlueId.equals(node.getType().get("/blueId"))) {
                 BigInteger id = (BigInteger) node.getProperties().get("id").getValue();
-                return contractInstances.stream()
+                Contract contractState = contractInstances.stream()
                         .filter(instance -> instance.getId() == id.intValue())
                         .findFirst()
                         .map(ContractInstance::getContractState)
                         .orElse(null);
+                if (contractState != null) {
+                    return blue.objectToNode(contractState);
+                }
             }
         }
         return null;

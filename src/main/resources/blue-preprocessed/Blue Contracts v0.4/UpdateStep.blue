@@ -1,0 +1,14 @@
+---
+name: Update Step
+description: "A specialized workflow step responsible for executing changes to the\
+  \ contract. \nThis is the sole step type authorized to modify contract content.\n"
+type:
+  blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+changeset:
+  description: |-
+    An ordered list of JSON Patch operations to be applied sequentially.
+    Each operation modifies the contract's content atomically.
+  type:
+    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+  itemType:
+    blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR

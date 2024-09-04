@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static blue.contract.utils.PackagingUtils.createClasspathBasedPackagingEnvironment;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
@@ -24,20 +26,11 @@ public class RepositoryExportingTool {
     public static final String BLUE_IDS_YAML = "blue-ids.yaml";
 
     private final ClasspathBasedPackagingEnvironment env;
+    private CompletableFuture<Void> exportFuture;
+
 
     public RepositoryExportingTool(ClasspathBasedPackagingEnvironment env) {
         this.env = env;
-    }
-
-    public static void main(String[] args) throws IOException {
-        List<NodeProvider> additionalNodeProviders = Collections.singletonList(new ClasspathBasedNodeProvider("samples"));
-        ClasspathBasedPackagingEnvironment env = createClasspathBasedPackagingEnvironment("blue-repository",
-                "blue.contract.model", additionalNodeProviders);
-
-        RepositoryExportingTool tool = new RepositoryExportingTool(env);
-        tool.exportRepository();
-
-        System.out.println("Repository export completed successfully.");
     }
 
     public void exportRepository() throws IOException {
@@ -125,5 +118,20 @@ public class RepositoryExportingTool {
                     });
         }
         Files.createDirectories(targetPath);
+    }
+
+    public CompletableFuture<Void> exportRepositoryAsync() {
+        exportFuture = CompletableFuture.runAsync(() -> {
+            try {
+                exportRepository();
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
+        return exportFuture;
+    }
+
+    public boolean isExportComplete() {
+        return exportFuture != null && exportFuture.isDone();
     }
 }

@@ -3,9 +3,12 @@ package blue.contract;
 import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.model.step.ExpectEventStep;
+import blue.contract.processor.ExpectEventStepProcessor;
 import blue.contract.utils.Workflows;
 import blue.language.Blue;
 import blue.language.model.Node;
+import blue.language.utils.BlueIds;
 
 import java.util.Optional;
 
@@ -33,7 +36,8 @@ public class WorkflowProcessor {
         WorkflowProcessingContext context = new WorkflowProcessingContext(workflowInstance, contractProcessingContext, stepProcessorProvider);
         Node step = workflow.getProperties().get("trigger");
         if (step.getType() == null)
-            step.type(new Node().name("Expect Event Step"));
+            step.type(new Node().blueId(BlueIds.getBlueId(ExpectEventStep.class)
+                    .orElseThrow(() -> new RuntimeException("No blueId found for 'Expect Event Step'."))));
 
         return handleEvent(event, step, context, mode);
 

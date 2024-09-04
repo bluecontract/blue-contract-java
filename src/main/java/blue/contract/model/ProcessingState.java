@@ -1,9 +1,8 @@
 package blue.contract.model;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class ProcessingState implements Cloneable {
+public class ProcessingState {
     private int startedWorkflowCount;
     private int startedLocalContractCount;
     private List<WorkflowInstance> workflowInstances;
@@ -65,23 +64,4 @@ public class ProcessingState implements Cloneable {
         return this;
     }
 
-    @Override
-    public ProcessingState clone() {
-        try {
-            ProcessingState cloned = (ProcessingState) super.clone();
-            if (this.workflowInstances != null) {
-                cloned.workflowInstances = this.workflowInstances.stream()
-                        .map(WorkflowInstance::clone)
-                        .collect(Collectors.toList());
-            }
-            if (this.localContractInstances != null) {
-                cloned.localContractInstances = this.localContractInstances.stream()
-                        .map(ContractInstance::clone)
-                        .collect(Collectors.toList());
-            }
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("ProcessingState should be cloneable", e);
-        }
-    }
 }

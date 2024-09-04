@@ -1,0 +1,14 @@
+name: Workflow Instance Started Event
+workflowInstanceId:
+  type: Integer
+  description: Identifier for the newly created workflow instance
+contractInstanceId:
+  type: Integer
+  description: Identifier for the contract instance
+currentStepName:
+  type: Text
+  description: The name of the workflow step where the workflow instance has stopped.
+initiateContractEntry:
+  description: Entry for initiating the contract.
+initiateContractProcessingEntry:
+  description: Entry for initiating the processing of the contract.

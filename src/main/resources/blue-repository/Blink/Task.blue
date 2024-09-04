@@ -1,0 +1,85 @@
+name: Task
+type: Contract
+
+messaging:
+  participants:
+    User:
+      description: Someone providing a task
+    Assistant:
+      description: Someone processing a task
+
+properties:
+  conversation:
+    type: List
+    itemType: Conversation Entry
+  actualTask:
+    type: Local Contract
+  contractDef:
+    type: Contract
+
+subscriptions:
+  - type: Local Contract Subscription
+    contractInstanceId: 100000
+
+workflows:
+
+  - name: Chat
+    trigger:
+      event:
+        type: Timeline Entry
+        timeline: ${contract('/messaging/participants/User/timeline')}
+        message:
+          type: Text
+    steps:
+      - name: BlinkResponse
+        type: Expect Event Step
+        event:
+          type: Timeline Entry
+          timeline: ${contract('/messaging/participants/Assistant/timeline')}
+
+      - name: Apply Changes
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/conversation/-
+            val: ${steps.BlinkResponse}
+
+
+  - name: Messages from actualTask
+    trigger:
+      name: incomingConversationEntry
+      event:
+        type: Conversation Entry
+      contract: ${contract('/properties/actualTask')}
+    steps:
+      - name: Apply Changes
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/conversation/-
+            val: ${steps.incomingConversationEntry}
+
+  - name: contractDef
+    trigger:
+      event:
+        type: Simulator Timeline Entry
+        timeline: ${contract('/messaging/participants/Assistant/timeline')}
+    steps:
+
+      - name: init
+        type: Initialize Local Contract Step
+        contract: ${event.message}
+
+      - type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/actualTask
+            val: ${steps.init.localContract}
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /subscriptions/-
+            val:
+              type: Local Contract Subscription
+              contractInstanceId: ${steps.init.localContract.id}

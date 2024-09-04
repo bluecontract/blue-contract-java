@@ -1,0 +1,36 @@
+---
+name: My Contract
+type:
+  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+properties:
+  ticket:
+    type:
+      blueId: FkgxXcPZGGWkA9YEVXEjNpa2cALfJXZ2fcPPgA7STi6U
+  x:
+    type:
+      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+    value: 0
+workflows:
+  items:
+  - steps:
+      items:
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+              value: 1
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/x
+    trigger:
+      event:
+        type:
+          blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC

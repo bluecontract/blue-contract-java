@@ -1,0 +1,32 @@
+name: API Request
+description: |
+  Represents an API request. This structure can be used for all types of API requests, including those with JSON or text bodies.
+method:
+  type: Text
+  description: The HTTP method for the request (e.g., GET, POST, PUT, DELETE).
+  constraints:
+    options:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - HEAD
+      - OPTIONS
+url:
+  type: Text
+  description: The full URL for the API endpoint.
+headers:
+  type: Dictionary
+  keyType: Text
+  valueType: Text
+  description: Key-value pairs representing HTTP headers to be sent with the request.
+queryParams:
+  type: Dictionary
+  keyType: Text
+  description: Key-value pairs representing query parameters to be appended to the URL.
+body:
+  description: The request body. Can be a string for text data, a dictionary for JSON data, or null if no body is required.
+timeout:
+  type: Integer
+  description: The maximum time (in milliseconds) to wait for a response before timing out.

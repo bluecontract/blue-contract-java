@@ -1,0 +1,155 @@
+---
+name: Task
+type:
+  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+subscriptions:
+  items:
+  - type:
+      blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+    contractInstanceId:
+      type:
+        blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+      value: 100000
+workflows:
+  items:
+  - name: Chat
+    steps:
+      items:
+      - name: BlinkResponse
+        type:
+          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+        event:
+          type:
+            blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+          timeline:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${contract('/messaging/participants/Assistant/timeline')}"
+      - name: Apply Changes
+        type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.BlinkResponse}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/conversation/-
+    trigger:
+      event:
+        type:
+          blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+        message:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+        timeline:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${contract('/messaging/participants/User/timeline')}"
+  - name: Messages from actualTask
+    steps:
+      items:
+      - name: Apply Changes
+        type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.incomingConversationEntry}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/conversation/-
+    trigger:
+      name: incomingConversationEntry
+      event:
+        type:
+          blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+      contract:
+        type:
+          blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+        value: "${contract('/properties/actualTask')}"
+  - name: contractDef
+    steps:
+      items:
+      - name: init
+        type:
+          blueId: D7bzHri8CT5j7aZtWVLcTAXkVdrrhe9inGbQopszrtbB
+        contract:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${event.message}"
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.init.localContract}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: replace
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/actualTask
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+              contractInstanceId:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: "${steps.init.localContract.id}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /subscriptions/-
+    trigger:
+      event:
+        type:
+          blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+        timeline:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${contract('/messaging/participants/Assistant/timeline')}"
+properties:
+  actualTask:
+    type:
+      blueId: 6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f
+  contractDef:
+    type:
+      blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+  conversation:
+    type:
+      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+    itemType:
+      blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+messaging:
+  participants:
+    Assistant:
+      description: Someone processing a task
+    User:
+      description: Someone providing a task

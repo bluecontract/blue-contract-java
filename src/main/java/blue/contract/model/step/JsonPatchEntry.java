@@ -1,5 +1,6 @@
 package blue.contract.model.step;
 
+import blue.language.model.Node;
 import blue.language.model.TypeBlueId;
 
 import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
@@ -18,7 +19,7 @@ public class JsonPatchEntry {
 
     private Operation op;
     private String path;
-    private String val;
+    private Node val;
 
 
     public Operation getOp() {
@@ -39,11 +40,11 @@ public class JsonPatchEntry {
         return this;
     }
 
-    public String getVal() {
+    public Node getVal() {
         return val;
     }
 
-    public JsonPatchEntry val(String val) {
+    public JsonPatchEntry val(Node val) {
         this.val = val;
         return this;
     }

@@ -6,14 +6,9 @@ import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.utils.NodeTypeMatcher;
-import blue.language.utils.NodeTypeMatcher.TargetTypeTransformer;
 import blue.language.utils.limits.PathLimits;
 
 import java.util.Optional;
-
-import static blue.contract.model.ContractProcessorConfig.EVENT_TARGET_TYPE_TRANSFORMER;
-import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
@@ -44,16 +39,15 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
         }
 
         ContractProcessingContext contractContext = context.getContractProcessingContext();
-        boolean nodeMatchesType;
-        if (contractContext.getConfig().has(EVENT_TARGET_TYPE_TRANSFORMER)) {
-            TargetTypeTransformer transformer = contractContext.getConfig().get(EVENT_TARGET_TYPE_TRANSFORMER);
-            Node clone = transformer.transform(event);
-            nodeMatchesType = contractContext.getBlue().nodeMatchesType(clone, expectedEventNode, transformer);
-        } else {
-            nodeMatchesType = contractContext.getBlue().nodeMatchesType(event, expectedEventNode);
-        }
+        boolean nodeMatchesType = contractContext.getBlue().nodeMatchesType(event, expectedEventNode);
 
         if (nodeMatchesType) {
+
+            Optional<String> stepName = getStepName();
+            if (stepName.isPresent()) {
+                context.getWorkflowInstance().getStepResults().put(stepName.get(), event);
+            }
+
             return finalizeNextStepByOrder(event, context);
         } else {
             return Optional.empty();
@@ -75,7 +69,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
                initiateContractEntryBlueId.equals(contractProcessingEvent.getInitiateContractEntry().get("/blueId"));
     }
 
-    private Node extractExpectedEvent(WorkflowProcessingContext context, Blue blue) {
+    public Node extractExpectedEvent(WorkflowProcessingContext context, Blue blue) {
         Node expectedEventNode = step.getProperties().get("event");
         if (expectedEventNode == null)
             throw new IllegalArgumentException("No \"event\" defined for step with name \"" +

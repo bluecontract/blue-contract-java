@@ -21,3 +21,60 @@ workflows:
           - op: replace
             path: /properties/caughtEvents
             val: ${contract("/properties/caughtEvents") + 1}
+---
+timeline:
+  blueId: ...
+timelinePrev:
+  blueId: ...
+thread:
+  blueId: ...
+message:
+  type: Contract Action
+  initiateContractEntry:
+    blueId: cq6Lk758fQ9Ph4Hce7oBbsYXHJfHvur7iarp8hZhjRyu
+  contractInstance: 0
+  module:
+    type: Modifications Module
+  action:
+    type: Contract Change Request
+    changeset:
+      - op: replace
+        path: /properties/x
+        val: abc
+---
+timeline:
+  blueId: ...
+timelinePrev:
+  blueId: ...
+thread:
+  blueId: ...
+message:
+  type: Contract Change Request
+  changeset:
+    - op: replace
+      path: /properties/x
+      val: abc
+---
+workflows:
+  - trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Contract Update Event
+    steps:
+      - type: Update Step
+        changeset: ${event.message.changeset}
+---
+workflows:
+  - trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Contract Update Event
+    steps:
+      - name: make_changeset
+        type: JavaScript Code Step
+        code: |
+          return { changeset: event.message.changeset };
+      - type: Update Step
+        changeset: ${steps.make_changeset.changeset}

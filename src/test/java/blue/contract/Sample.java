@@ -1,6 +1,6 @@
 package blue.contract;
 
-import blue.contract.utils.ContractSimulator;
+import blue.contract.simulator.ContractRunner;
 import blue.language.Blue;
 import blue.language.NodeProvider;
 import blue.language.model.Node;
@@ -63,8 +63,8 @@ public class Sample {
         contract1 = blue.preprocess(contract1);
         contract2 = blue.preprocess(contract2);
 
-        ContractSimulator simulator1 = new ContractSimulator(blue, initiateContractEntryBlueId1, initiateContractProcessingEntryBlueId1);
-        ContractSimulator simulator2 = new ContractSimulator(blue, initiateContractEntryBlueId2, initiateContractProcessingEntryBlueId2);
+        ContractRunner simulator1 = new ContractRunner(blue, initiateContractEntryBlueId1, initiateContractProcessingEntryBlueId1);
+        ContractRunner simulator2 = new ContractRunner(blue, initiateContractEntryBlueId2, initiateContractProcessingEntryBlueId2);
 
         simulator1.initiateContract(contract1);
         simulator2.initiateContract(contract2);

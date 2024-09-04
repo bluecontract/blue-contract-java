@@ -2,6 +2,7 @@ package blue.contract.utils;
 
 import blue.contract.model.WorkflowProcessingContext;
 import blue.language.model.Node;
+import blue.language.utils.NodeToMapListOrValue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class ExpressionEvaluator {
 
@@ -61,10 +64,20 @@ public class ExpressionEvaluator {
             return null;
         }
 
-        Node processedNode = node.clone();
+        Node processedNode;
 
         Object evaluatedValue = evaluateIfExpression(node.getValue(), context, scope, resolveFinalLink);
-        processedNode.value(evaluatedValue);
+        if (evaluatedValue instanceof Node) {
+            processedNode = (Node) evaluatedValue;
+        } else {
+            processedNode = node.clone();
+            processedNode.value(evaluatedValue);
+
+        }
+
+        processedNode.name(evaluateStringField("name", node.getName(), context, scope, resolveFinalLink));
+        processedNode.description(evaluateStringField("description", node.getDescription(), context, scope, resolveFinalLink));
+        processedNode.blueId(evaluateStringField("blueId", node.getBlueId(), context, scope, resolveFinalLink));
 
         if (node.getItems() != null) {
             List<Node> processedItems = node.getItems().stream()
@@ -86,9 +99,27 @@ public class ExpressionEvaluator {
         return processedNode;
     }
 
+    private String evaluateStringField(String fieldName, Object fieldValue, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+        Object evaluated = evaluateIfExpression(fieldValue, context, scope, resolveFinalLink);
+        if (evaluated == null) {
+            return null;
+        }
+        if (evaluated instanceof String) {
+            return (String) evaluated;
+        }
+        if (evaluated instanceof Node && ((Node) evaluated).getValue() instanceof String) {
+            return (String) ((Node) evaluated).getValue();
+        }
+        throw new RuntimeException("Illegal expression result type for field '" + fieldName + "': " +
+                                   evaluated.getClass() + ", \"" + evaluated + "\"");
+    }
+
     private Map<String, Object> createBindings(WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("steps", context.getWorkflowInstance().getStepResults());
+        if (context.getContractProcessingContext().getIncomingEvent() != null) {
+            bindings.put("event", NodeToMapListOrValue.get(context.getContractProcessingContext().getIncomingEvent(), SIMPLE));
+        }
 
         if (scope == ExpressionScope.GLOBAL) {
             bindings.put("contract", (java.util.function.Function<String, Object>) path ->

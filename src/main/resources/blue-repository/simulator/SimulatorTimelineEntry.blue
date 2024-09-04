@@ -1,0 +1,5 @@
+name: Simulator Timeline Entry
+type: Timeline Entry
+tickSequence:
+  type: Integer
+  description: A global sequential identifier representing the order of events across all timelines in the simulation.

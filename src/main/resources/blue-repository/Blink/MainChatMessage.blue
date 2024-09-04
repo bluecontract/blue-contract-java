@@ -1,0 +1,12 @@
+name: Main Chat Message
+responseTo:
+  type: Text
+messageType:
+  type: Text
+  description: Either 'text' or 'userInput'
+message:
+  type: Text
+userInput:
+  type: Text
+userInputDetails:
+  type: Text
