@@ -2,10 +2,13 @@ package blue.contract.model;
 
 import blue.language.model.BlueId;
 import blue.language.model.Node;
+import blue.language.model.TypeBlueId;
 
 import java.util.List;
 
+import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 
+@TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class ContractUpdateAction {
     private ContractInstance contractInstance;
     @BlueId

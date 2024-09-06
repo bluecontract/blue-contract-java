@@ -1,7 +1,7 @@
 ---
 name: Local Contracts Contract
 type:
-  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+  blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
 subscriptions:
   items:
   - type:
@@ -19,7 +19,7 @@ workflows:
         contract:
           name: My Local Contract
           type:
-            blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+            blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
           subscriptions:
             items:
             - type:

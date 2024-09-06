@@ -45,7 +45,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
             Optional<String> stepName = getStepName();
             if (stepName.isPresent()) {
-                context.getWorkflowInstance().getStepResults().put(stepName.get(), event);
+                context.getWorkflowInstance().addStepResult(stepName.get(), event);
             }
 
             return finalizeNextStepByOrder(event, context);
@@ -112,8 +112,8 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
             return matchesContractDetails(contractProcessingEvent, localContract.getId(), currentInitiateContractEntryBlueId);
         } else if (contract instanceof ExternalContract) {
             ExternalContract externalContract = (ExternalContract) contract;
-            return matchesContractDetails(contractProcessingEvent, (Integer) externalContract.getLocalContractInstanceId().getValue(),
-                    (String) externalContract.getInitiateContractEntry().get("/blueId"));
+            return matchesContractDetails(contractProcessingEvent, externalContract.getLocalContractInstanceId(),
+                    externalContract.getInitiateContractEntry());
         }
         return false;
     }

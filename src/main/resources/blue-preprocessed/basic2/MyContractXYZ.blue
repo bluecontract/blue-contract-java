@@ -1,11 +1,11 @@
 ---
 name: My Contract XYZ
 type:
-  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+  blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
 properties:
   ticket:
     type:
-      blueId: EQwQV5876UNoE12MP8m4CZWu2gjuPQzpkektfMruxQhJ
+      blueId: 93vMAbJ1PTQcqzmRgSH9jG9AMAQxA2EJ3nLWb66KnYQK
   x:
     type:
       blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8

@@ -63,7 +63,8 @@ workflows:
     trigger:
       event:
         type: Simulator Timeline Entry
-        timeline: ${contract('/messaging/participants/Assistant/timeline')}
+        timeline:
+          blueId: ${contract('/messaging/participants/User/timeline/blueId')}
     steps:
 
       - name: init

@@ -44,7 +44,7 @@ public class LocalContractsTest {
         ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
-        contractRunner.save("src/test/resources", "local");
+//        contractRunner.save("src/test/resources", "local");
     }
     
 }

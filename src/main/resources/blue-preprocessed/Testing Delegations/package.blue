@@ -1,10 +1,10 @@
 ---
 items:
-- blueId: GEVWpoLNCrAWHaPWnFjMKbrfibUc51w3FCxhS7CsbEes
+- blueId: 3BDJBY8mgdabn4gWHUqK7NeYeQnxsFYkQiejP9D2VyeJ
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
     Delegation Testing Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: FtT4eEhmNbT6GwJ1qZQ9A2CErJhf1k7pFAcrwZZAEZ5D
+      value: 5D132WzNyxcLbDohnqrgcKF9vowRdhL5TJ4KrgwvjoYB

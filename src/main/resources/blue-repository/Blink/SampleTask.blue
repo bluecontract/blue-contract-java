@@ -3,11 +3,65 @@ type: Contract
 properties:
   result:
     description: result
+  fen:
+    type: Text
 workflows:
   - trigger:
       event:
         type: Contract Initialization Event
     steps:
+
+      - name: api
+        type: Expect Event Step
+        description: your task
+        event:
+          type: Simulator Timeline Entry
+          timeline:
+            blueId: ${contract('/properties/assistantTimeline')}
+          message:
+            type: Assistant Task
+            request:
+              type: API Request
+              method: POST
+              url: https://chess-api.com/v1
+              body:
+                fen: ${contract('/properties/fen')}
+                depth: 10
+            response:
+              type: API Response
+
+      - name: llm
+        type: Expect Event Step
+        description: your task
+        event:
+          type: Simulator Timeline Entry
+          timeline:
+            blueId: ${contract('/properties/assistantTimeline')}
+          message:
+            type: Assistant Task
+            request:
+              type: LLM Request
+              prompt: |
+                Prepare a json like:
+                {
+                  "note": "Put note here",
+                  "move": {
+                    "from": "e2",
+                    "to": "e4"
+                  }
+                }
+                you're recommending this move to someone playing chess
+                note should be max 160 chars and should sound like:
+                'Time to activate our queen now. This move also frees up the d8 square for your rook, improving piece coordination'
+                or
+                'Let's throw a haymaker now! Taking on c7 we're protecting the c-pawn. You have 61% chances of winning now.'
+                or
+                'It's over now! We'll force mate in 3 moves. Let's start by taking this rook.'
+                those are just examples, be creative, don't use it as a pattern - your comments should be interesting and enjoying
+              promptParams:
+                stockfishAnalysis: ${steps.api}
+            response:
+              type: LLM Response
 
       - name: Apply Changes
         type: Update Step
@@ -15,9 +69,9 @@ workflows:
           - op: replace
             path: /properties/result
             val: abc
-            
+
       - type: Trigger Event Step
         event:
           type: Assistant Message
-          message: Show up
+          message: ${steps.llm}
           priority: HIGH

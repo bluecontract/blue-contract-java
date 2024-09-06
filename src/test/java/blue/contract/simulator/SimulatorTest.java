@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static blue.contract.utils.Utils.defaultTestingEnvironment;
+import static blue.contract.utils.Utils.testBlue;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimulatorTest {
@@ -23,11 +24,7 @@ class SimulatorTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        new RepositoryExportingTool(defaultTestingEnvironment()).exportRepository();
-        blue = new Blue(
-                new DirectoryBasedNodeProvider("blue-preprocessed", "samples"),
-                new TypeClassResolver("blue.contract.model")
-        );
+        blue = testBlue();
         simulator = new Simulator(blue);
     }
 

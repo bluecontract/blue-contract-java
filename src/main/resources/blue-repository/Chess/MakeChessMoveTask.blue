@@ -1,0 +1,17 @@
+name: Make Chess Move Task
+type: Contract
+properties:
+  from:
+    type: Text
+  to:
+    type: Text
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Trigger Event Step
+        event:
+          type: Chess Move
+          from: ${contract("/properties/from")}
+          to: ${contract("/properties/to")}

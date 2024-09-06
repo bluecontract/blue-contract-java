@@ -1,0 +1,6 @@
+name: All Events External Contract Subscription
+type: Contract Subscription
+description: Represents a subscription to an external contract, to all events emitted by this contract.
+initiateContractEntry:
+  type: Timeline Entry
+  description: The original Initiate Contract Action timeline entry. This links the processing action to the specific contract initiation.

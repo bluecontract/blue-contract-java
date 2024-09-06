@@ -84,4 +84,11 @@ public class WorkflowInstance {
         return nestedWorkflowInstance != null;
     }
 
+    public void addStepResult(String key, Object value) {
+        if (this.stepResults == null) {
+            this.stepResults = new HashMap<>();
+        }
+        this.stepResults.put(key, value);
+    }
+
 }

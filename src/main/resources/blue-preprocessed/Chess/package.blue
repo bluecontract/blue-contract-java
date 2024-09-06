@@ -1,13 +1,25 @@
 ---
 items:
-- blueId: GEVWpoLNCrAWHaPWnFjMKbrfibUc51w3FCxhS7CsbEes
+- blueId: 2E3ka7RA53yK5wiHipZRRVS9V9ShJA81gB83EZ6cp9pf
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
     Chess:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: FZiXswEWHF6KDgmoZ5gbi3g2temsY67wDv7y7khJWHPw
+      value: 5UFbaxiqJHGzVgRcCpUy5H9YPXKnE7gKrq7RnvDsRa7E
+    Chess Assisted:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9UsmSY3WzuyMksZfiTEivAomxRUY87dCFkoryXh5gC53
+    Make Chess Move Task:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 7FPdGm3uazoX2Qjcy69npFiu9Kykx4RCiRLQWH8Vxiib
+    Chess Assisted Remotely:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: GT7CdQmhJMdXsstxaHzYHCtvJbdPgUubZuFXZyED6GgL
     Chess Move:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

@@ -8,23 +8,24 @@ import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 
 @TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class ExternalContract {
-    private Node initiateContractEntry;
-    private Node localContractInstanceId;
+    @BlueId
+    private String initiateContractEntry;
+    private Integer localContractInstanceId;
 
-    public Node getInitiateContractEntry() {
+    public String getInitiateContractEntry() {
         return initiateContractEntry;
     }
 
-    public Node getLocalContractInstanceId() {
+    public Integer getLocalContractInstanceId() {
         return localContractInstanceId;
     }
 
-    public ExternalContract initiateContractEntry(Node initiateContractEntry) {
+    public ExternalContract initiateContractEntry(String initiateContractEntry) {
         this.initiateContractEntry = initiateContractEntry;
         return this;
     }
 
-    public ExternalContract localContractInstanceId(Node localContractInstanceId) {
+    public ExternalContract localContractInstanceId(Integer localContractInstanceId) {
         this.localContractInstanceId = localContractInstanceId;
         return this;
     }

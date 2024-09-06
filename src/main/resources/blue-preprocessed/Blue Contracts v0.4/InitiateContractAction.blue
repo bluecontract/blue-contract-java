@@ -5,4 +5,4 @@ description: This action serves as an announcement of the participant's intent t
 contract:
   description: The contract instance which is being initiated.
   type:
-    blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+    blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
