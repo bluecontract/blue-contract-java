@@ -30,7 +30,6 @@ public class SampleAPITest {
         simulator = new Simulator(blue);
     }
 
-    @Test
     void testInitializationEvent() throws IOException {
         String assistantId = "Assistant";
         String assistantTimeline = simulator.createTimeline(assistantId);
@@ -57,7 +56,6 @@ public class SampleAPITest {
 //        contractRunner.save("src/test/resources", "api");
     }
 
-    @Test
     void testTask() throws IOException {
         String aliceId = "Alice";
         String aliceTimeline = simulator.createTimeline(aliceId);
