@@ -48,26 +48,42 @@ public class Assistant {
                            " and response type " + responseClass.getSimpleName());
     }
 
-    private void processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
-        System.out.println("Processing ContractUpdateAction");
+    public <Req, Res> List<AssistantTask<Req, Res>> getContractUpdateActionResults(TimelineEntry<Object> entry) {
         ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
-        List<Node> pendingSteps = new ArrayList<>();
+        List<Node> pendingSteps = getPendingSteps(action);
+        System.out.println("Found " + pendingSteps.size() + " pending steps to process");
 
+        List<AssistantTask<Req, Res>> results = new ArrayList<>();
+        for (Node step : pendingSteps) {
+            results.add( processStep(step));
+        }
+        return results;
+    }
+
+    private <Req, Res> void processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
+        System.out.println("Processing ContractUpdateAction");
+        List<AssistantTask<Req, Res>> results = getContractUpdateActionResults(entry);
+
+        for (AssistantTask<Req, Res> result : results) {
+            System.out.println("Appending processed result to timeline:");
+            System.out.println(blue.objectToSimpleYaml(result));
+            simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, result);
+        }
+    }
+
+    private List<Node> getPendingSteps(ContractUpdateAction action) {
+        List<Node> pendingSteps = new ArrayList<>();
         processContractInstance(action.getContractInstance(), pendingSteps);
         if (action.getContractInstance().getProcessingState().getLocalContractInstances() != null) {
             for (ContractInstance localInstance : action.getContractInstance().getProcessingState().getLocalContractInstances()) {
                 processContractInstance(localInstance, pendingSteps);
             }
         }
-
-        System.out.println("Found " + pendingSteps.size() + " pending steps to process");
-        for (Node step : pendingSteps) {
-            processStep(step);
-        }
+        return pendingSteps;
     }
 
     @SuppressWarnings("unchecked")
-    private <Req, Res> void processStep(Node step) {
+    private <Req, Res> AssistantTask<Req, Res> processStep(Node step) {
         System.out.println("Processing step: " + step.getDescription());
         SimulatorTimelineEntry<AssistantTask<Req, Res>> targetEntry =
                 blue.nodeToObject(step, SimulatorTimelineEntry.class);
@@ -86,9 +102,7 @@ public class Assistant {
             Res response = processor.process(task.getRequest(), blue);
             AssistantTask<Req, Res> result = blue.clone(task);
             result.response(response);
-            System.out.println("Appending processed result to timeline:");
-            System.out.println(blue.objectToSimpleYaml(result));
-            simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, result);
+            return result;
         } else {
             System.out.println("Error: No processor found for the given request and response types");
             throw new RuntimeException("No processor found for request type " + requestClass.getSimpleName() +
