@@ -1,7 +1,5 @@
 package blue.contract.utils.anthropic.model;
 
-import java.util.List;
-
 public class Usage {
     private int input_tokens;
     private int output_tokens;
