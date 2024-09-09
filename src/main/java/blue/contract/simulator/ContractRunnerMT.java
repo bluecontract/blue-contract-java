@@ -2,7 +2,6 @@ package blue.contract.simulator;
 
 import blue.contract.ContractProcessor;
 import blue.contract.model.Contract;
-import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.processor.StandardProcessorsProvider;
 import blue.contract.simulator.utils.ContractRunnerSubscriptionUtils;
@@ -79,7 +78,7 @@ public class ContractRunnerMT {
 
         System.out.println("Setting up subscription for contract events");
         simulator.subscribe(
-                entry -> ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId).test(entry),
+                entry -> ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId, runnerTimeline, simulator).test(entry),
                 entry -> {
                     try {
                         eventQueue.put(entry);

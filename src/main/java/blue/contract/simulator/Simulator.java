@@ -3,9 +3,16 @@ package blue.contract.simulator;
 import blue.contract.simulator.model.InitiateTimelineAction;
 import blue.contract.simulator.model.SimulatorTimelineEntry;
 import blue.language.Blue;
+import blue.language.model.Node;
+import blue.language.utils.NodeToMapListOrValue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
+
+import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class Simulator {
     private Map<String, List<SimulatorTimelineEntry<Object>>> timelines;
@@ -86,12 +93,13 @@ public class Simulator {
         List<String> newEntryIds = new ArrayList<>();
 
         for (Object message : messages) {
+
             SimulatorTimelineEntry<Object> newEntry = new SimulatorTimelineEntry<>()
                     .timeline(timelineId)
                     .timelinePrev(prevEntryId)
                     .thread(threadId)
                     .threadPrev(threadPrev)
-                    .message(message)
+                    .message(blue.clone(message))
                     .tickSequence(batchTickSequence);
 
             String blueId = blue.calculateBlueId(newEntry);
@@ -133,6 +141,47 @@ public class Simulator {
         int count = timelines.size();
         System.out.println("Current timeline count: " + count);
         return count;
+    }
+
+    public <T> T getMessageFromLastTimelineEntry(String timelineId, Class<T> clazz) {
+        System.out.println("Getting message from last timeline entry for timeline: " + timelineId);
+
+        List<SimulatorTimelineEntry<Object>> timeline = timelines.get(timelineId);
+        if (timeline == null || timeline.isEmpty()) {
+            System.out.println("Error: Timeline with ID " + timelineId + " does not exist or is empty");
+            return null;
+        }
+
+        SimulatorTimelineEntry<Object> lastEntry = timeline.get(timeline.size() - 1);
+        Object message = lastEntry.getMessage();
+
+        if (message == null) {
+            System.out.println("Last entry has no message");
+            return null;
+        }
+
+        if (!clazz.isInstance(message)) {
+            System.out.println("Error: Message is not an instance of " + clazz.getSimpleName());
+            return null;
+        }
+
+        T typedMessage = clazz.cast(message);
+        System.out.println("Retrieved message of type " + clazz.getSimpleName() + " from last entry");
+        return typedMessage;
+    }
+
+    public void save(String timelineId, int skipEntries, String directory, String filePrefix) throws IOException {
+        List<SimulatorTimelineEntry<Object>> timeline = timelines.get(timelineId);
+        if (timeline == null) {
+            throw new IllegalArgumentException("Timeline with ID " + timelineId + " does not exist");
+        }
+        for (int i = skipEntries; i < timeline.size(); i++) {
+            SimulatorTimelineEntry<Object> entry = timeline.get(i);
+            Node entryNode = JSON_MAPPER.convertValue(entry, Node.class);
+
+            File outputFile = new File(directory + "/" + filePrefix + "_" + (i - skipEntries + 1) + "_entry.blue");
+            YAML_MAPPER.writeValue(outputFile, NodeToMapListOrValue.get(entryNode, NodeToMapListOrValue.Strategy.SIMPLE));
+        }
     }
 
     private static class Subscription {

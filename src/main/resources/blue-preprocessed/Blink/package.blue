@@ -1,13 +1,13 @@
 ---
 items:
-- blueId: 2ZhKdH1wWiwsntm2yYLVh6SieZTWVgz8qPeS8JvNJFHM
+- blueId: 2E3ka7RA53yK5wiHipZRRVS9V9ShJA81gB83EZ6cp9pf
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
     Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 8paxd7yfahkGGxyaxBAkMXsWpKuzW4qS35ZZVHiB8hL
+      value: 9ezs1hfNkqgDRV7UkKc9m7N8VJBLGNToYaabHaj5AGpx
     Sample API Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -27,7 +27,7 @@ items:
     Temp Sample:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 6PxbC9jTHadhkn3t2CG6TCjVLY9F69XTdFH1S5MpjoAm
+      value: kSWhv7TESst22gZa5sAXhDdkKWUpe99nLQMiFskD3hF
     LLM Request:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -51,4 +51,4 @@ items:
     Sample Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 9APSusg1oMAh4Dh296R6tUQzp9mza6KfZXZ7cCa9VkSa
+      value: DXcotZM5jSQoT7FKrRpRTbiDzny782Pu5ri9sEPtySRE

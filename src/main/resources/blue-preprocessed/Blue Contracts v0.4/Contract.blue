@@ -11,7 +11,7 @@ workflows:
   type:
     blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
   itemType:
-    blueId: DeSya52e1HpVrSu2PFxFyFduRhfDsUhEBPPQrgxJFUXj
+    blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
 properties:
   description: properties part
 messaging:

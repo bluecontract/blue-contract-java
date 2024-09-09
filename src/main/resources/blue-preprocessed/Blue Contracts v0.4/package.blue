@@ -15,15 +15,19 @@ items:
     Initiate Contract Action:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 23JcjArsmZMk6AGszwKiwRJzuU1Mp6CWrBwYN93DMivv
+      value: HpPxeht2KPwJQ6DdP1uJBC6osvWz63NAh6i4uKTzJhD
     Fatal Error Event:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 9NSnAkLGgfj2bHkkT6RzjjSgqt68B5kaotFK5aCoP317
+    All Events External Contract Subscription:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: BactZk5uMdvw7cVx4uPxmMaT8Qp9jiHKiDtYaiF8kpf7
     Generic Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: FUQvYLRuDBw7ePPbCTZHJgzMC995hsKnQJpugpzbz9sz
+      value: 97s226iRjUBjr3aqvhXJzrQfSXb7LWMcGAv6Wo9MaRJH
     Workflow Instance Started Event:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -39,7 +43,7 @@ items:
     Initiate Contract Processing Action:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: GaGVTq5x19o6T5GeRTDVbLjgcfpBBJbn9GB2riRrV1wy
+      value: 3kCjhLink96f48Zqw8mTLunyU56Eq2xkdsMSZHN4gX4v
     Contract Processing Event:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -67,7 +71,7 @@ items:
     Workflow:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: DeSya52e1HpVrSu2PFxFyFduRhfDsUhEBPPQrgxJFUXj
+      value: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
     Contract Initialization Event:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -127,4 +131,4 @@ items:
     Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+      value: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb

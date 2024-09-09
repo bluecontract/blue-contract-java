@@ -111,17 +111,21 @@ public class SingleEventContractProcessor {
             throw new IllegalStateException("Contract instance is already completed or terminated with error.");
         }
 
+        contractInstance = blue.clone(contractInstance);
         int initialStartedLocalContracts = contractInstance.getProcessingState().getStartedLocalContractCount();
         String previousContractInstanceBlueId = calculateBlueId(contractInstance);
 
-        List<ContractInstance> contractInstances = new ArrayList<>();
-        contractInstances.add(contractInstance);
-        if (contractInstance.getProcessingState().getLocalContractInstances() != null) {
-            contractInstances.addAll(contractInstance.getProcessingState().getLocalContractInstances());
+        List<ContractInstance> localContractInstances = contractInstance.getProcessingState().getLocalContractInstances();
+        List<Integer> localContractIds = new ArrayList<>();
+        if (localContractInstances != null) {
+            localContractIds = localContractInstances.stream()
+                    .map(ContractInstance::getId)
+                    .sorted()
+                    .toList();
         }
 
         ContractProcessingContext context = new ContractProcessingContext()
-                .contractInstances(contractInstances)
+                .contractInstances(localContractInstances == null ? new ArrayList<>() : new ArrayList<>(localContractInstances))
                 .contractInstanceId(contractInstance.getId())
                 .contract(contractInstance.getContractState())
                 .startedLocalContracts(initialStartedLocalContracts)
@@ -132,20 +136,24 @@ public class SingleEventContractProcessor {
                 .config(contractProcessorConfig)
                 .incomingEvent(event);
 
-        for (ContractInstance instance : contractInstances) {
-            processEventInContractInstance(event, instance, context);
+        processEventInContractInstance(event, contractInstance, context);
+
+        for (int id : localContractIds) {
+            ContractInstance instance = context.getContractInstance(id);
+            ContractInstance result = processEventInContractInstance(event, instance, context);
             if (context.isCompleted()) {
                 break;
             }
+            context.replaceContractInstance(id, result);
         }
 
-        List<ContractInstance> localContractInstances = context.getContractInstances().stream()
-                .filter(instance -> instance.getId() != Constants.ROOT_INSTANCE_ID)
+        List<ContractInstance> processedLocalInstances = context.getContractInstances().stream()
+                .filter(instance -> instance.getId() != 0)
                 .collect(Collectors.toList());
 
         contractInstance.getProcessingState()
                 .startedLocalContractsCount(context.getStartedLocalContracts())
-                .localContractInstances(localContractInstances.isEmpty() ? null : localContractInstances);
+                .localContractInstances(processedLocalInstances);
 
         return new ContractUpdateAction()
                 .contractInstance(contractInstance)
@@ -156,7 +164,7 @@ public class SingleEventContractProcessor {
                 .incomingEvent(event);
     }
 
-    private void processEventInContractInstance(Node event, ContractInstance contractInstance, ContractProcessingContext context) {
+    private ContractInstance processEventInContractInstance(Node event, ContractInstance contractInstance, ContractProcessingContext context) {
         context.contract(contractInstance.getContractState());
         context.contractInstanceId(contractInstance.getId());
 
@@ -181,6 +189,8 @@ public class SingleEventContractProcessor {
         contractInstance.getProcessingState()
                 .startedWorkflowsCount(startedWorkflows)
                 .workflowInstances(updatedWorkflowInstances.isEmpty() ? null : updatedWorkflowInstances);
+
+        return contractInstance;
     }
 
     private List<WorkflowInstance> processWorkflows(Node event, ContractProcessingContext context, int initialStartedWorkflows) {

@@ -6,6 +6,7 @@ import blue.contract.model.Contract;
 import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.processor.StandardProcessorsProvider;
+import blue.contract.simulator.model.SimulatorTimelineEntry;
 import blue.contract.simulator.utils.ContractRunnerSubscriptionUtils;
 import blue.language.Blue;
 import blue.language.model.Node;
@@ -71,25 +72,42 @@ public class ContractRunner2 {
 
         System.out.println("Setting up subscription for contract events");
         simulator.subscribe(
-                ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId),
+                ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId, runnerTimeline, simulator),
                 entry -> {
                     System.out.println("Processing new contract event");
                     int epoch = getLastContractUpdate().getEpoch();
                     System.out.println("Current epoch: " + epoch);
-                    List<ContractUpdateAction> result = contractProcessor.processEvent(blue.objectToNode(entry),
-                            getLastContractUpdate().getContractInstance(),
-                            initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, epoch + 1);
-                    System.out.println("Event processed. Number of new update actions: " + result.size());
-                    contractUpdateActions.addAll(result);
-                    System.out.println("Appending new contract update actions to simulator");
-                    simulator.appendEntries(runnerTimeline, initiateContractProcessingEntryBlueId, result);
+
+                    List<Node> events = new ArrayList<>();
+                    if (initiateContractEntryBlueId.equals(entry.getThread())) {
+                        events.add(blue.objectToNode(entry));
+                    } else {
+                        ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
+                        if (action.getEmittedEvents() != null) {
+                            events.addAll(action.getEmittedEvents());
+                        }
+                    }
+
+                    for (Node event : events) {
+                        List<ContractUpdateAction> result = contractProcessor.processEvent(event,
+                                ((ContractUpdateAction) ((SimulatorTimelineEntry) simulator.getTimelines().get(runnerTimeline).get(simulator.getTimelines().get(runnerTimeline).size() - 1)).getMessage()).getContractInstance(),
+                                initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, epoch + 1);
+                        System.out.println("Event processed. Number of new update actions: " + result.size());
+                        addContractUpdateActions(result);
+                        System.out.println("Appending new contract update actions to simulator");
+                        simulator.appendEntries(runnerTimeline, initiateContractProcessingEntryBlueId, result);
+                    }
                 });
 
         System.out.println("Starting to process contract on runnerTimeline: " + runnerTimeline);
         List<ContractUpdateAction> actions = initiateContract(contract);
-        contractUpdateActions.addAll(actions);
+        addContractUpdateActions(actions);
         System.out.println("Appending initial contract update actions to simulator");
         simulator.appendEntries(runnerTimeline, initiateContractProcessingEntryBlueId, actions);
+    }
+
+    private void addContractUpdateActions(List<ContractUpdateAction> actions) {
+        actions.forEach(action -> contractUpdateActions.add(blue.clone(action)));
     }
 
     public void save(String directory, String filePrefix) throws IOException {

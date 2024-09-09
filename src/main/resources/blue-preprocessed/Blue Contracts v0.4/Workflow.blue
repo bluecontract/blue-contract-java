@@ -6,8 +6,6 @@ steps:
   type:
     blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
   itemType:
-    type:
-      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-    value: WorkflowStep
+    blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
 trigger:
   description: (docs)

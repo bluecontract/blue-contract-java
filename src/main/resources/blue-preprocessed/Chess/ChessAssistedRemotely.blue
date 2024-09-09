@@ -1,5 +1,5 @@
 ---
-name: Chess
+name: Chess Assisted Remotely
 type:
   blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
 workflows:
@@ -146,6 +146,39 @@ workflows:
         message:
           type:
             blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+  - name: assistant move
+    steps:
+      items:
+      - type:
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+        event:
+          type:
+            blueId: 7AvxNpdw5rH2bExYcLd9QQPTFJudYhgj2fCdMQGB5JJF
+          event:
+            type:
+              blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+            message:
+              type:
+                blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+              from:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: e2
+              to:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: e4
+            timeline:
+              blueId: "${contract('/messaging/participants/Player White/timeline/blueId')}"
+    trigger:
+      event:
+        type:
+          blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+      contract:
+        type:
+          blueId: 83vpYdEkjbguc9Mbixz2qV2ZkzaCgV4gptSeyyU4QzaJ
+        initiateContractEntry:
+          blueId: 3Uuf57nfGypCUQQZQ7SSDQsGdg3dikzrAFQAzZZMQKXJ
 properties:
   playerToMove:
     description: Indicates whose move it is ('White' or 'Black')

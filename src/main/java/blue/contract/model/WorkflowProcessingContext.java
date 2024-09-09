@@ -46,7 +46,7 @@ public class WorkflowProcessingContext {
                 .contractCompleted(contractProcessingContext.isCompleted())
                 .terminatedWithError(contractProcessingContext.isTerminatedWithError())
                 .workflowCurrentStepName(workflowInstance.getCurrentStepName())
-                .workflowStepResults(new HashMap<>(workflowInstance.getStepResults()))
+                .workflowStepResults(workflowInstance.getStepResults() == null ? null : new HashMap<>(workflowInstance.getStepResults()))
                 .workflowCompleted(workflowInstance.isCompleted())
                 .workflowNestedWorkflowInstance(workflowInstance.getNestedWorkflowInstance() != null ?
                         blue.clone(workflowInstance.getNestedWorkflowInstance()) : null);

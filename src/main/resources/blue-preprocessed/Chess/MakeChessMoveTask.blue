@@ -1,0 +1,32 @@
+---
+name: Make Chess Move Task
+type:
+  blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
+properties:
+  from:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+  to:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+workflows:
+  items:
+  - steps:
+      items:
+      - type:
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+        event:
+          type:
+            blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+          from:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${contract(\"/properties/from\")}"
+          to:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${contract(\"/properties/to\")}"
+    trigger:
+      event:
+        type:
+          blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC

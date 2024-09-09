@@ -1,14 +1,95 @@
 ---
 name: Sample Task
 type:
-  blueId: 9QY1zfeD2ZGpLZi2aCPmskKbtHB5qx7fBn9SBFVyvBMa
+  blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
 properties:
   result:
     description: result
+  fen:
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
 workflows:
   items:
   - steps:
       items:
+      - name: api
+        description: your task
+        type:
+          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+        event:
+          type:
+            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+          message:
+            type:
+              blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+            request:
+              type:
+                blueId: 6QzWdtAdH7LGrhoBdTpCgDE188jp4MWuXv8tXJwK4RE5
+              method:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: POST
+              body:
+                fen:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  value: "${contract('/properties/fen')}"
+                depth:
+                  type:
+                    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+                  value: 10
+              url:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: https://chess-api.com/v1
+            response:
+              type:
+                blueId: CT1QjaY8RYryxR596hph2SX6wwC1wGvipi1CjDRcJbd4
+          timeline:
+            blueId: "${contract('/properties/assistantTimeline')}"
+      - name: llm
+        description: your task
+        type:
+          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+        event:
+          type:
+            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+          message:
+            type:
+              blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+            request:
+              type:
+                blueId: GXkQ3iphMJRzWukJt8fAJNr7kSBpKfkVxH4j1VdBpcoo
+              prompt:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: |
+                  Prepare a json like:
+                  {
+                    "note": "Put note here",
+                    "move": {
+                      "from": "e2",
+                      "to": "e4"
+                    }
+                  }
+                  you're recommending this move to someone playing chess
+                  note should be max 160 chars and should sound like:
+                  'Time to activate our queen now. This move also frees up the d8 square for your rook, improving piece coordination'
+                  or
+                  'Let's throw a haymaker now! Taking on c7 we're protecting the c-pawn. You have 61% chances of winning now.'
+                  or
+                  'It's over now! We'll force mate in 3 moves. Let's start by taking this rook.'
+                  those are just examples, be creative, don't use it as a pattern - your comments should be interesting and enjoying
+              promptParams:
+                stockfishAnalysis:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  value: "${steps.api}"
+            response:
+              type:
+                blueId: 9Rie4HdYiHTEJRLF77d4VHmaQv43QJvdJ9oUrQy89hMn
+          timeline:
+            blueId: "${contract('/properties/assistantTimeline')}"
       - name: Apply Changes
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
@@ -34,7 +115,7 @@ workflows:
           message:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: Show up
+            value: "${steps.llm}"
           priority:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

@@ -75,6 +75,9 @@ public class ContractProcessor {
             boolean isAgreedUponEvent = agreedUponEvent.isPresent();
 
             if (isAgreedUponEvent || subscriptionApplies(event, mergedSubscriptions)) {
+                if (isAgreedUponEvent) {
+                    event = agreedUponEvent.get().getEvent();
+                }
                 ContractUpdateAction newAction = singleEventProcessor.processEvent(event, lastAction.getContractInstance(), initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
                 newAction.epoch(currentEpoch++);
                 actions.add(newAction);

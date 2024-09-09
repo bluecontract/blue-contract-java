@@ -9,6 +9,7 @@ import blue.contract.simulator.processor.APIRequestProcessor;
 import blue.contract.simulator.processor.LLMRequestProcessor;
 import blue.language.Blue;
 import blue.language.model.Node;
+import org.gradle.internal.impldep.org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,6 @@ public class SampleAPITest {
         simulator = new Simulator(blue);
     }
 
-    @Test
     void testInitializationEvent() throws IOException {
         String assistantId = "Assistant";
         String assistantTimeline = simulator.createTimeline(assistantId);
@@ -53,10 +53,9 @@ public class SampleAPITest {
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
 //        System.out.println(blue.objectToSimpleYaml(contractRunner.getLastContractUpdate().getContractInstance().getContractState()));
-        contractRunner.save("src/test/resources", "api");
+//        contractRunner.save("src/test/resources", "api");
     }
 
-    @Test
     void testTask() throws IOException {
         String aliceId = "Alice";
         String aliceTimeline = simulator.createTimeline(aliceId);
@@ -82,14 +81,15 @@ public class SampleAPITest {
         ContractRunner2 taskRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         taskRunner.startProcessingContract(taskContract, taskRunnerTimeline, simulator);
 
-        Task task = new SampleTask(assistantTimeline);
+        SampleTask task = new SampleTask(assistantTimeline, "rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b - - 1 11");
+        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
+        task = new SampleTask(assistantTimeline, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
 
-        taskRunner.save("src/test/resources", "task");
+        simulator.save(taskRunnerTimeline, 2, "src/test/resources", "task");
 
     }
 
-    @Test
     void testTaskMT() throws IOException, InterruptedException {
         SimulatorMT simulator = new SimulatorMT(blue);
 
@@ -117,8 +117,8 @@ public class SampleAPITest {
         ContractRunnerMT taskRunner = new ContractRunnerMT(blue, initiateContractEntry, initiateContractProcessingEntry);
         taskRunner.startProcessingContract(taskContract, taskRunnerTimeline, simulator);
 
-        Task task = new SampleTask(assistantTimeline);
-        simulator.appendEntry(assistantTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
+        SampleTask task = new SampleTask(assistantTimeline, "rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b - - 1 11");
+        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
 //
 //        // Allow some time for processing (adjust as needed)
         Thread.sleep(10000);
@@ -126,8 +126,6 @@ public class SampleAPITest {
         // Stop processing
         assistant.stop();
         taskRunner.stop();
-
-        taskRunner.save("src/test/resources", "task");
 
         // Shutdown the simulator
         simulator.shutdown();

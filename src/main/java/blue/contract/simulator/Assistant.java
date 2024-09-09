@@ -29,6 +29,7 @@ public class Assistant {
         System.out.println("Assistant created with initiateContractEntryBlueId: " + initiateContractEntryBlueId);
     }
 
+    private boolean workedOnce = false;
     public void start(String assistantTimeline, String runnerTimeline, Simulator simulator) {
         this.assistantTimeline = assistantTimeline;
         this.runnerTimeline = runnerTimeline;
@@ -61,6 +62,7 @@ public class Assistant {
     }
 
     private <Req, Res> void processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
+        workedOnce = true;
         System.out.println("Processing ContractUpdateAction");
         List<AssistantTask<Req, Res>> results = getContractUpdateActionResults(entry);
 

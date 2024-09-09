@@ -192,6 +192,28 @@ public class ContractProcessingContext {
                 .orElseThrow(() -> new IllegalStateException("No contract instance with id=" + instanceId + " found"));
     }
 
+    public void replaceContractInstance(int instanceId, ContractInstance contractInstance) {
+        if (contractInstances == null) {
+            throw new IllegalStateException("Contract instances list is not initialized");
+        }
+
+        int index = -1;
+        for (int i = 0; i < contractInstances.size(); i++) {
+            if (contractInstances.get(i).getId() == instanceId) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            throw new IllegalArgumentException("No contract instance with id=" + instanceId + " found");
+        }
+
+        contractInstances.set(index, contractInstance);
+
+    }
+
+
     public ContractInstance getCurrentContractInstance() {
         return getContractInstance(getContractInstanceId());
     }

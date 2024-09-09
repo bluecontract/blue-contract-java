@@ -5,4 +5,4 @@ trigger:
 steps:
   description: (docs)
   type: List
-  itemType: WorkflowStep
+  itemType: Workflow Step

@@ -11,7 +11,6 @@ import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.BlueIds;
 import blue.language.utils.NodeToMapListOrValue;
-import blue.language.utils.NodeTypeMatcher;
 import blue.language.utils.limits.TypeSpecificPropertyFilter;
 import org.gradle.internal.impldep.com.google.common.collect.ImmutableSet;
 
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static blue.contract.model.ContractProcessorConfig.EVENT_TARGET_TYPE_TRANSFORMER;
 import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
@@ -82,7 +80,7 @@ public class ContractRunner {
     }
 
     public void addEvent(Object event) {
-        addEvent(blue.objectToNode(event));
+        addEvent(blue.objectToNode(blue.clone(event)));
     }
 
     public void processEvents() {
@@ -161,7 +159,7 @@ public class ContractRunner {
         initiateAction.epoch(0);
         simulator.appendEntry(runnerTimeline, initiateContractProcessingEntryBlueId, initiateAction);
         simulator.subscribe(
-                ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId),
+                ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId, runnerTimeline, simulator),
                 entry -> {
                     int epoch = getLastContractUpdate().getEpoch();
                     addEvent(entry);
