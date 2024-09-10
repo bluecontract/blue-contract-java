@@ -1,6 +1,6 @@
 package blue.contract.utils;
 
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
 import blue.language.NodeProvider;
 import blue.language.model.Node;
@@ -8,11 +8,9 @@ import blue.language.provider.ClasspathBasedNodeProvider;
 import blue.language.provider.DirectoryBasedNodeProvider;
 import blue.language.utils.BlueIds;
 import blue.language.utils.TypeClassResolver;
-import blue.language.utils.UncheckedObjectMapper;
 import blue.language.utils.limits.TypeSpecificPropertyFilter;
 import org.gradle.internal.impldep.com.google.common.collect.ImmutableSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

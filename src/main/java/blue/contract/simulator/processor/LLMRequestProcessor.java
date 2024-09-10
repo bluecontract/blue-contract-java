@@ -1,8 +1,8 @@
 package blue.contract.simulator.processor;
 
+import blue.contract.simulator.AssistantProcessor;
 import blue.contract.model.blink.LLMRequest;
 import blue.contract.model.blink.LLMResponse;
-import blue.contract.simulator.AssistantProcessor;
 import blue.contract.utils.anthropic.Anthropic;
 import blue.contract.utils.anthropic.AnthropicConfig;
 import blue.contract.utils.anthropic.model.Content;
@@ -33,6 +33,8 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
             List<Message> messages = new ArrayList<>();
             messages.add(new Message("user", buildPrompt(llmRequest, blue)));
             anthropicRequest.messages(messages);
+            anthropicRequest.system("Process this task according to instructions.");
+            anthropicRequest.temperature(0.0);
 
             Response anthropicResponse = new Anthropic(new AnthropicConfig(ANTHROPIC_KEY)).sendRequest(anthropicRequest);
 

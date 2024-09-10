@@ -149,7 +149,12 @@ public class ContractProcessingContext {
 
     public Object accessContract(String path, boolean useGlobalScope, boolean resolveFinalLink) {
         Function<Node, Node> linkingProvider = useGlobalScope ? this::linkingProviderImplementation : null;
-        Object result = NodePathAccessor.get(blue.objectToNode(contract), path, linkingProvider, resolveFinalLink);
+        Object result;
+        try {
+            result = NodePathAccessor.get(blue.objectToNode(contract), path, linkingProvider, resolveFinalLink);
+        } catch (IllegalArgumentException ex) {
+            result = null;
+        }
         if (result instanceof Node) {
             result = NodeToMapListOrValue.get((Node) result, SIMPLE);
         } else if (result instanceof BigInteger) {

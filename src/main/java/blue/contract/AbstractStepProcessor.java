@@ -35,6 +35,26 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         this.expressionEvaluator = expressionEvaluator;
     }
 
+    @Override
+    public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+        if (shouldExecuteStep(context)) {
+            return executeHandleStep(event, context);
+        } else {
+            return handleNextStepByOrder(event, context);
+        }
+    }
+
+    @Override
+    public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
+        if (shouldExecuteStep(context)) {
+            return executeFinalizeStep(event, context);
+        } else {
+            return finalizeNextStepByOrder(event, context);
+        }
+    }
+    protected abstract Optional<WorkflowInstance> executeHandleStep(Node event, WorkflowProcessingContext context);
+    protected abstract Optional<WorkflowInstance> executeFinalizeStep(Node event, WorkflowProcessingContext context);
+
     protected Optional<WorkflowInstance> handleNextStepByOrder(Node event, WorkflowProcessingContext context) {
         return processNextStep(event, context, (processor, ctx) -> processor.handleEvent(event, context));
     }
@@ -45,16 +65,27 @@ public abstract class AbstractStepProcessor implements StepProcessor {
 
     private Optional<WorkflowInstance> processNextStep(Node event, WorkflowProcessingContext context,
                                                        BiFunction<StepProcessor, Node, Optional<WorkflowInstance>> stepFunction) {
-        Optional<Node> nextStep = Workflows.getNextStepByOrder(step, context.getWorkflowInstance().getWorkflow());
-        if (!nextStep.isPresent())
-            return completeWorkflow(context.getWorkflowInstance());
+        Optional<Node> nextStep;
+        Optional<StepProcessor> stepProcessor;
 
-        Optional<StepProcessor> stepProcessor = context.getStepProcessorProvider().getProcessor(nextStep.get());
-        if (!stepProcessor.isPresent())
-            throw new IllegalArgumentException("No StepProcessor found for event: " +
-                                               JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
+        do {
+            nextStep = Workflows.getNextStepByOrder(step, context.getWorkflowInstance().getWorkflow());
+            if (!nextStep.isPresent()) {
+                return completeWorkflow(context.getWorkflowInstance());
+            }
 
-        return stepFunction.apply(stepProcessor.get(), event);
+            stepProcessor = context.getStepProcessorProvider().getProcessor(nextStep.get());
+            if (!stepProcessor.isPresent()) {
+                throw new IllegalArgumentException("No StepProcessor found for event: " +
+                                                   JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
+            }
+
+            if (((AbstractStepProcessor) stepProcessor.get()).shouldExecuteStep(context)) {
+                return stepFunction.apply(stepProcessor.get(), event);
+            }
+
+            step = nextStep.get();
+        } while (true);
     }
 
     protected Optional<WorkflowInstance> completeWorkflow(WorkflowInstance workflowInstance) {
@@ -68,6 +99,17 @@ public abstract class AbstractStepProcessor implements StepProcessor {
 
     public Optional<String> getStepName() {
         return Optional.ofNullable(step.getName());
+    }
+
+    protected boolean shouldExecuteStep(WorkflowProcessingContext context) {
+        if (step.getProperties().containsKey("condition")) {
+            String value = (String) step.getProperties().get("condition").getValue();
+            if (value != null) {
+                Node result = (Node) evaluateExpression(value, context);
+                return !(result.getValue() != null && result.getValue() instanceof Boolean && Boolean.FALSE.equals(result.getValue()));
+            }
+        }
+        return true;
     }
 
     protected Object evaluateExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {

@@ -23,13 +23,13 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
     }
 
     @Override
-    public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeHandleStep(Node event, WorkflowProcessingContext context) {
         processEvent(event, context);
         return handleNextStepByOrder(event, context);
     }
 
     @Override
-    public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeFinalizeStep(Node event, WorkflowProcessingContext context) {
         processEvent(event, context);
         return finalizeNextStepByOrder(event, context);
     }

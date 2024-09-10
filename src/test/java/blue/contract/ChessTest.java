@@ -1,13 +1,10 @@
 package blue.contract;
 
 import blue.contract.model.ContractUpdateAction;
-import blue.contract.model.TimelineEntry;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.chess.Chess;
 import blue.contract.model.chess.ChessMove;
-import blue.contract.model.testcontract.SampleAPIContract;
-import blue.contract.simulator.ContractRunner;
 import blue.contract.simulator.ContractRunner2;
 import blue.contract.simulator.Simulator;
 import blue.language.Blue;
@@ -17,8 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_1;
-import static blue.contract.utils.SampleBlueIds.SAMPLE_BLUE_ID_2;
 import static blue.contract.utils.Utils.testBlue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

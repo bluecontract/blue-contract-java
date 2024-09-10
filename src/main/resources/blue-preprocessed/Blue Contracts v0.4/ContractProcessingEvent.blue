@@ -8,10 +8,6 @@ initiateContractEntry:
     type:
       blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
     value: Node
-workflowStepName:
-  description: The name of the workflow step where the event occurred.
-  type:
-    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
 initiateContractProcessingEntry:
   description: Entry for initiating the processing of the contract.
   type:
@@ -32,3 +28,7 @@ workflowInstanceId:
   description: Identifier for the workflow instance where the event occurred.
   type:
     blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+workflowStepName:
+  description: The name of the workflow step where the event occurred.
+  type:
+    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

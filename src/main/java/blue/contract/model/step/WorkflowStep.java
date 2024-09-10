@@ -8,6 +8,7 @@ import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 public abstract class WorkflowStep {
     protected String name;
     protected String description;
+    protected String condition;
 
     public String getName() {
         return name;
@@ -24,6 +25,15 @@ public abstract class WorkflowStep {
 
     public WorkflowStep description(String description) {
         this.description = description;
+        return this;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public WorkflowStep condition(String condition) {
+        this.condition = condition;
         return this;
     }
 }

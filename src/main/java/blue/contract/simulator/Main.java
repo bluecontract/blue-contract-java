@@ -1,6 +1,5 @@
 package blue.contract.simulator;
 
-import blue.contract.simulator.model.SimulatorTimelineEntry;
 import blue.language.Blue;
 
 import java.util.concurrent.CountDownLatch;

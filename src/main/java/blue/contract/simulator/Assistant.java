@@ -3,7 +3,7 @@ package blue.contract.simulator;
 import blue.contract.model.*;
 import blue.contract.model.step.ExpectEventStep;
 import blue.contract.processor.ExpectEventStepProcessor;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.language.Blue;
@@ -14,39 +14,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-public class AssistantMT {
+public class Assistant {
     private final Blue blue;
     private final String initiateContractEntryBlueId;
     private String assistantTimeline;
     private String runnerTimeline;
-    private SimulatorMT simulator;
+    private Simulator simulator;
     private Map<ProcessorKey, AssistantProcessor<?, ?>> processors = new HashMap<>();
-    private volatile boolean isRunning = true;
 
-    public AssistantMT(Blue blue, String initiateContractEntryBlueId) {
+    public Assistant(Blue blue, String initiateContractEntryBlueId) {
         this.blue = blue;
         this.initiateContractEntryBlueId = initiateContractEntryBlueId;
-        System.out.println("AssistantMT created with initiateContractEntryBlueId: " + initiateContractEntryBlueId);
+        System.out.println("Assistant created with initiateContractEntryBlueId: " + initiateContractEntryBlueId);
     }
 
-    public void start(String assistantTimeline, String runnerTimeline, SimulatorMT simulator) {
+    private boolean workedOnce = false;
+    public void start(String assistantTimeline, String runnerTimeline, Simulator simulator) {
         this.assistantTimeline = assistantTimeline;
         this.runnerTimeline = runnerTimeline;
         this.simulator = simulator;
 
-        System.out.println("AssistantMT started. Subscribing to ContractUpdateActions on runnerTimeline: " + runnerTimeline);
+        System.out.println("Assistant started. Subscribing to ContractUpdateActions on runnerTimeline: " + runnerTimeline);
         simulator.subscribe(
-                entry -> {
-                    System.out.println("Assistant is checking condition");
-                    boolean result = runnerTimeline.equals(entry.getTimeline()) && entry.getMessage() instanceof ContractUpdateAction;
-                    System.out.println("RunnerTimeline: " + runnerTimeline);
-                    System.out.println("Entry timeline: " + entry.getTimeline());
-                    System.out.println("Entry message: " + entry.getMessage().getClass());
-                    System.out.println("Result is " + result);
-                    return result;
-                },
+                entry -> runnerTimeline.equals(entry.getTimeline()) && entry.getMessage() instanceof ContractUpdateAction,
                 this::processContractUpdateAction
         );
     }
@@ -59,25 +50,22 @@ public class AssistantMT {
     }
 
     private void processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
-        if (!isRunning) return;
+        workedOnce = true;
+        System.out.println("Processing ContractUpdateAction");
+        ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
+        List<Node> pendingSteps = new ArrayList<>();
 
-        CompletableFuture.runAsync(() -> {
-            System.out.println("Processing ContractUpdateAction");
-            ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
-            List<Node> pendingSteps = new ArrayList<>();
-
-            processContractInstance(action.getContractInstance(), pendingSteps);
-            if (action.getContractInstance().getProcessingState().getLocalContractInstances() != null) {
-                for (ContractInstance localInstance : action.getContractInstance().getProcessingState().getLocalContractInstances()) {
-                    processContractInstance(localInstance, pendingSteps);
-                }
+        processContractInstance(action.getContractInstance(), pendingSteps, action.getIncomingEvent());
+        if (action.getContractInstance().getProcessingState().getLocalContractInstances() != null) {
+            for (ContractInstance localInstance : action.getContractInstance().getProcessingState().getLocalContractInstances()) {
+                processContractInstance(localInstance, pendingSteps, action.getIncomingEvent());
             }
+        }
 
-            System.out.println("Found " + pendingSteps.size() + " pending steps to process");
-            for (Node step : pendingSteps) {
-                processStep(step);
-            }
-        });
+        System.out.println("Found " + pendingSteps.size() + " pending steps to process");
+        for (Node step : pendingSteps) {
+            processStep(step);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -110,17 +98,17 @@ public class AssistantMT {
         }
     }
 
-    private void processContractInstance(ContractInstance instance, List<Node> pendingSteps) {
+    private void processContractInstance(ContractInstance instance, List<Node> pendingSteps, Node incomingEvent) {
         System.out.println("Processing ContractInstance");
         ProcessingState processingState = instance.getProcessingState();
         if (processingState != null && processingState.getWorkflowInstances() != null) {
             for (WorkflowInstance workflowInstance : processingState.getWorkflowInstances()) {
-                processWorkflowInstance(workflowInstance, instance, pendingSteps);
+                processWorkflowInstance(workflowInstance, instance, pendingSteps, incomingEvent);
             }
         }
     }
 
-    private void processWorkflowInstance(WorkflowInstance workflowInstance, ContractInstance contractInstance, List<Node> pendingSteps) {
+    private void processWorkflowInstance(WorkflowInstance workflowInstance, ContractInstance contractInstance, List<Node> pendingSteps, Node incomingEvent) {
         System.out.println("Processing WorkflowInstance: " + workflowInstance.getWorkflow().getName());
         if (!workflowInstance.isCompleted() && workflowInstance.getCurrentStepName() != null) {
             Node workflow = workflowInstance.getWorkflow();
@@ -133,7 +121,7 @@ public class AssistantMT {
                         }
                         Optional<Class<?>> stepClass = blue.determineClass(stepNode);
                         if (stepClass.isPresent() && stepClass.get() == ExpectEventStep.class) {
-                            Node evaluated = evaluateStep(stepNode, workflowInstance, contractInstance);
+                            Node evaluated = evaluateStep(stepNode, workflowInstance, contractInstance, incomingEvent);
                             if (evaluated != null && evaluated.getProperties().get("timeline").getBlueId().equals(assistantTimeline)) {
                                 System.out.println("Found pending step: " + evaluated.getName());
                                 pendingSteps.add(evaluated);
@@ -145,7 +133,7 @@ public class AssistantMT {
         }
     }
 
-    private Node evaluateStep(Node stepNode, WorkflowInstance workflowInstance, ContractInstance contractInstance) {
+    private Node evaluateStep(Node stepNode, WorkflowInstance workflowInstance, ContractInstance contractInstance, Node incomingEvent) {
         JSExecutor jsExecutor = new JSExecutor(blue);
         ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(jsExecutor);
         ExpectEventStepProcessor processor = new ExpectEventStepProcessor(stepNode, expressionEvaluator);
@@ -153,17 +141,13 @@ public class AssistantMT {
         ContractProcessingContext contractContext = new ContractProcessingContext()
                 .contract(contractInstance.getContractState())
                 .contractInstanceId(contractInstance.getId())
+                .incomingEvent(incomingEvent)
                 .blue(blue);
         WorkflowProcessingContext workflowContext = new WorkflowProcessingContext()
                 .workflowInstance(workflowInstance)
                 .contractProcessingContext(contractContext);
 
         return processor.extractExpectedEvent(workflowContext, blue);
-    }
-
-    public void stop() {
-        isRunning = false;
-        System.out.println("AssistantMT stopped");
     }
 
     private static class ProcessorKey {

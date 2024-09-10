@@ -1,4 +1,4 @@
-package blue.contract.simulator.model;
+package blue.contract.model.blink;
 
 import blue.contract.model.TimelineEntry;
 import blue.language.model.TypeBlueId;

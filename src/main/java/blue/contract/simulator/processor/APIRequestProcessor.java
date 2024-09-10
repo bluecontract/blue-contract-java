@@ -1,8 +1,8 @@
 package blue.contract.simulator.processor;
 
+import blue.contract.simulator.AssistantProcessor;
 import blue.contract.model.blink.APIRequest;
 import blue.contract.model.blink.APIResponse;
-import blue.contract.simulator.AssistantProcessor;
 import blue.language.Blue;
 import blue.language.utils.Nodes;
 

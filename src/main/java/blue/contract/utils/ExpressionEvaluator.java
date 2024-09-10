@@ -116,7 +116,20 @@ public class ExpressionEvaluator {
 
     private Map<String, Object> createBindings(WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Map<String, Object> bindings = new HashMap<>();
-        bindings.put("steps", context.getWorkflowInstance().getStepResults());
+
+        Map<String, Object> processedStepResults = new HashMap<>();
+        if (context.getWorkflowInstance().getStepResults() != null) {
+            for (Map.Entry<String, Object> entry : context.getWorkflowInstance().getStepResults().entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Node) {
+                    processedStepResults.put(entry.getKey(), NodeToMapListOrValue.get((Node) value));
+                } else {
+                    processedStepResults.put(entry.getKey(), value);
+                }
+            }
+        }
+        bindings.put("steps", processedStepResults);
+
         if (context.getContractProcessingContext().getIncomingEvent() != null) {
             bindings.put("event", NodeToMapListOrValue.get(context.getContractProcessingContext().getIncomingEvent(), SIMPLE));
         }

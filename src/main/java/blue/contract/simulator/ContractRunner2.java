@@ -1,24 +1,19 @@
 package blue.contract.simulator;
 
 import blue.contract.ContractProcessor;
-import blue.contract.SingleEventContractProcessor;
 import blue.contract.model.Contract;
-import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.processor.StandardProcessorsProvider;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
 import blue.contract.simulator.utils.ContractRunnerSubscriptionUtils;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToMapListOrValue;
-import blue.language.utils.NodeTypeMatcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static blue.contract.model.ContractProcessorConfig.EVENT_TARGET_TYPE_TRANSFORMER;
 import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
 import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
@@ -90,7 +85,7 @@ public class ContractRunner2 {
 
                     for (Node event : events) {
                         List<ContractUpdateAction> result = contractProcessor.processEvent(event,
-                                ((ContractUpdateAction) ((SimulatorTimelineEntry) simulator.getTimelines().get(runnerTimeline).get(simulator.getTimelines().get(runnerTimeline).size() - 1)).getMessage()).getContractInstance(),
+                                simulator.getMessageFromLastTimelineEntry(runnerTimeline, ContractUpdateAction.class).getContractInstance(),
                                 initiateContractEntryBlueId, initiateContractProcessingEntryBlueId, epoch + 1);
                         System.out.println("Event processed. Number of new update actions: " + result.size());
                         addContractUpdateActions(result);

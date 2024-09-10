@@ -10,10 +10,6 @@ headers:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
   valueType:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-responseTime:
-  description: The time taken (in milliseconds) for the API to respond.
-  type:
-    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
 body:
   description: "The response body. Can be a string for text data, a dictionary for\
     \ JSON data, or null if no body is returned."
@@ -25,6 +21,10 @@ contentType:
   description: "The content type of the response (e.g., application/json, text/plain)."
   type:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+responseTime:
+  description: The time taken (in milliseconds) for the API to respond.
+  type:
+    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
 statusCode:
   description: The HTTP status code of the response.
   type:

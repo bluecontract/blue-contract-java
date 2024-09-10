@@ -1,11 +1,8 @@
 package blue.contract.simulator;
 
-import blue.contract.simulator.model.InitiateTimelineAction;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
-import blue.contract.utils.RepositoryExportingTool;
+import blue.contract.model.blink.InitiateTimelineAction;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
-import blue.language.provider.DirectoryBasedNodeProvider;
-import blue.language.utils.TypeClassResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static blue.contract.utils.Utils.defaultTestingEnvironment;
 import static blue.contract.utils.Utils.testBlue;
 import static org.junit.jupiter.api.Assertions.*;
 

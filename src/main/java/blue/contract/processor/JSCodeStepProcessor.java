@@ -33,7 +33,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeHandleStep(Node event, WorkflowProcessingContext context) {
         try {
             Object result = processEvent(event, context);
             if (result instanceof ContractCompleteResult) {
@@ -46,7 +46,7 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeFinalizeStep(Node event, WorkflowProcessingContext context) {
         try {
             Object result = processEvent(event, context);
             if (result instanceof ContractCompleteResult) {

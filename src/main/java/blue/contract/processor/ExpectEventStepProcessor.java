@@ -17,7 +17,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeHandleStep(Node event, WorkflowProcessingContext context) {
         Blue blue = context.getContractProcessingContext().getBlue();
 
         Node expectedEventNode = extractExpectedEvent(context, blue);
@@ -55,7 +55,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
+    public Optional<WorkflowInstance> executeFinalizeStep(Node event, WorkflowProcessingContext workflowProcessingContext) {
         WorkflowInstance workflowInstance = workflowProcessingContext.getWorkflowInstance();
         workflowInstance.currentStepName(step.getName());
 
