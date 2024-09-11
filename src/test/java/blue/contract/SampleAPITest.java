@@ -8,16 +8,12 @@ import blue.contract.simulator.*;
 import blue.contract.simulator.processor.APIRequestProcessor;
 import blue.contract.simulator.processor.LLMRequestProcessor;
 import blue.language.Blue;
-import blue.language.model.Node;
-import org.gradle.internal.impldep.org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 
 import static blue.contract.utils.Utils.testBlue;
-import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class SampleAPITest {
 
@@ -56,6 +52,7 @@ public class SampleAPITest {
 //        contractRunner.save("src/test/resources", "api");
     }
 
+    @Test
     void testTask() throws IOException {
         String aliceId = "Alice";
         String aliceTimeline = simulator.createTimeline(aliceId);

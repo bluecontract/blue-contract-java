@@ -2,7 +2,7 @@ package blue.contract;
 
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
-import blue.contract.model.testcontract.TempSample;
+import blue.contract.model.testcontract.ConditionsContract;
 import blue.contract.simulator.ContractRunner2;
 import blue.contract.simulator.Simulator;
 import blue.language.Blue;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import static blue.contract.utils.Utils.testBlue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TempTest {
+public class ConditionsTest {
 
     private Simulator simulator;
     private Blue blue;
@@ -26,14 +26,11 @@ public class TempTest {
     }
 
     @Test
-    void testInitializationEvent() throws IOException {
+    void testConditions() throws IOException {
         String alice = "Alice";
         String aliceTimeline = simulator.createTimeline(alice);
 
-        String bob = "Bob";
-        String bobTimeline = simulator.createTimeline(bob);
-
-        TempSample contract = new TempSample(aliceTimeline, bobTimeline);
+        ConditionsContract contract = new ConditionsContract();
         InitiateContractAction initiateContractAction = new InitiateContractAction(contract);
         String initiateContractEntry = simulator.appendEntry(aliceTimeline, initiateContractAction);
 
@@ -46,9 +43,7 @@ public class TempTest {
         ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
-        simulator.appendEntry(bobTimeline, initiateContractEntry, "xyz");
-
-        System.out.println("x=" + contractRunner.getLastContractUpdate().getContractInstance().getContractState().getProperties().get("x").getValue());
+        assertEquals("z", contractRunner.getLastContractUpdate().getContractInstance().getContractState().getProperties().get("z").getValue());
     }
-
+    
 }

@@ -6,6 +6,8 @@ public class Request {
     private String model;
     private int max_tokens;
     private List<Message> messages;
+    private String system;
+    private double temperature;
 
     public String getModel() {
         return model;
@@ -31,6 +33,24 @@ public class Request {
 
     public Request messages(List<Message> messages) {
         this.messages = messages;
+        return this;
+    }
+
+    public String getSystem() {
+        return system;
+    }
+
+    public Request system(String system) {
+        this.system = system;
+        return this;
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public Request temperature(double temperature) {
+        this.temperature = temperature;
         return this;
     }
 }

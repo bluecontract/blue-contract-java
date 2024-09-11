@@ -7,7 +7,7 @@ import blue.contract.model.Participant;
 import blue.contract.model.subscription.AllEventsExternalContractSubscription;
 import blue.contract.simulator.Simulator;
 import blue.contract.simulator.SimulatorMT;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 
 import java.util.HashSet;
 import java.util.Set;

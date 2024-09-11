@@ -7,20 +7,32 @@ items:
     Chess:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 5UFbaxiqJHGzVgRcCpUy5H9YPXKnE7gKrq7RnvDsRa7E
+      value: Hc5B8mBmZP8bcfCAYWDvLT7miWPhZRM3gn2ytp8tbvD5
     Chess Assisted:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 9UsmSY3WzuyMksZfiTEivAomxRUY87dCFkoryXh5gC53
+      value: BSkSqEFHTNvbgjEqVPpegbvk6iRhfWa2R9sYCZmmXEwp
+    Chess Game Started Event:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: F1ms5GGG6wnH2giTFFxJ6H1o9BB5isFZHJoLHDkKXWWX
     Make Chess Move Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 7FPdGm3uazoX2Qjcy69npFiu9Kykx4RCiRLQWH8Vxiib
+    Processed Task:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: ETGaRzP5zWMEbGbkyKXYwAHWiLCTffiMe3skuPyj61fZ
     Chess Assisted Remotely:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: GT7CdQmhJMdXsstxaHzYHCtvJbdPgUubZuFXZyED6GgL
+      value: 2wDfZwD7XnFizVss5miF6P89s7AJgVzpffnS6b7s296d
     Chess Move:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+    Chess Game Move Made Event:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: EgyqonRWYcQGoQH1fHKgbRRp5XRzp7CHEpgcY1Cq2CgJ

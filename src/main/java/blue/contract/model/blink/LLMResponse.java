@@ -3,8 +3,6 @@ package blue.contract.model.blink;
 import blue.language.model.Node;
 import blue.language.model.TypeBlueId;
 
-import java.util.Map;
-
 @TypeBlueId(defaultValueRepositoryDir = "Blink", defaultValueRepositoryKey = "LLM Response")
 public class LLMResponse {
     private Node content;

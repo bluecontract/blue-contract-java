@@ -4,14 +4,14 @@ items:
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
-    Task:
-      type:
-        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 9ezs1hfNkqgDRV7UkKc9m7N8VJBLGNToYaabHaj5AGpx
     Sample API Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: G5CLHQEgttKhytsm1nVWMfFWy8AsrKX8GhNTpvpG5fBu
+    Task:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9ezs1hfNkqgDRV7UkKc9m7N8VJBLGNToYaabHaj5AGpx
     Sample API Contract 2:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -36,14 +36,14 @@ items:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 9nFWBvNxVD9fHsMFmqM5wxTGn36Q5Tw6dSDFnsnyF1w8
-    LLM Response:
-      type:
-        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 9Rie4HdYiHTEJRLF77d4VHmaQv43QJvdJ9oUrQy89hMn
     API Request:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 6QzWdtAdH7LGrhoBdTpCgDE188jp4MWuXv8tXJwK4RE5
+    LLM Response:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 9Rie4HdYiHTEJRLF77d4VHmaQv43QJvdJ9oUrQy89hMn
     Conversation Entry:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

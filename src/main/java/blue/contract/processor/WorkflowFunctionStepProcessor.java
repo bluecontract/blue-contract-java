@@ -31,7 +31,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> handleEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeHandleStep(Node event, WorkflowProcessingContext context) {
         ProcessingResult result = null;
         try {
             result = processEvent(event, context, ProcessingMode.HANDLE);
@@ -48,7 +48,7 @@ public class WorkflowFunctionStepProcessor extends AbstractStepProcessor {
     }
 
     @Override
-    public Optional<WorkflowInstance> finalizeEvent(Node event, WorkflowProcessingContext context) {
+    public Optional<WorkflowInstance> executeFinalizeStep(Node event, WorkflowProcessingContext context) {
         ProcessingResult result = null;
         try {
             result = processEvent(event, context, ProcessingMode.FINALIZE);

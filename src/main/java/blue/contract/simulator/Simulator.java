@@ -1,7 +1,7 @@
 package blue.contract.simulator;
 
-import blue.contract.simulator.model.InitiateTimelineAction;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.InitiateTimelineAction;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToMapListOrValue;

@@ -1,0 +1,19 @@
+name: Chess Game Move Made Event
+playerMakingMove:
+  type: Text
+  description: '"white" or "black"'
+from:
+  type: Text
+  description: e.g. e2
+to:
+  type: Text
+  description: e.g. e4
+chessboardAfterMove:
+  type: Text
+  description: fen position
+winner:
+  type: Text
+  description: '"white" or "black"'
+draw:
+gameOver:
+

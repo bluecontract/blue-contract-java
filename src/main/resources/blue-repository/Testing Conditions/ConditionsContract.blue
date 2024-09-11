@@ -1,0 +1,40 @@
+name: Conditions Contract
+type: Contract
+properties:
+  condition: false
+workflows:
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Update Step
+        condition: ${contract('/properties/condition')}
+        changeset:
+          - op: add
+            path: /properties/x
+            val: x
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/y
+            val: y
+
+      - type: Trigger Event Step
+        condition: ${contract('/properties/y') === 'y'}
+        event:
+          x: 1
+
+      - type: Expect Event Step
+        condition: ${contract('/properties/x') === 'x'}
+        event:
+          type: Timeline Entry
+          message:
+            a: 1
+            b: 2
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/z
+            val: z

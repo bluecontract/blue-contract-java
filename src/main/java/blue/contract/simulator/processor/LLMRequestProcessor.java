@@ -1,20 +1,20 @@
 package blue.contract.simulator.processor;
 
+import blue.contract.simulator.AssistantProcessor;
 import blue.contract.model.blink.LLMRequest;
 import blue.contract.model.blink.LLMResponse;
-import blue.contract.simulator.AssistantProcessor;
 import blue.contract.utils.anthropic.Anthropic;
+import blue.contract.utils.anthropic.AnthropicConfig;
 import blue.contract.utils.anthropic.model.Content;
 import blue.contract.utils.anthropic.model.Message;
 import blue.contract.utils.anthropic.model.Request;
 import blue.contract.utils.anthropic.model.Response;
 import blue.language.Blue;
-import blue.language.utils.NodeToMapListOrValue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
+import static blue.contract.utils.anthropic.AnthropicKey.ANTHROPIC_KEY;
 
 public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMResponse> {
 
@@ -34,8 +34,10 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
             List<Message> messages = new ArrayList<>();
             messages.add(new Message("user", buildPrompt(llmRequest, blue)));
             anthropicRequest.messages(messages);
+            anthropicRequest.system("Process this task according to instructions.");
+            anthropicRequest.temperature(0.0);
 
-            Response anthropicResponse = Anthropic.sendRequest(anthropicRequest);
+            Response anthropicResponse = new Anthropic(new AnthropicConfig(ANTHROPIC_KEY)).sendRequest(anthropicRequest);
 
             long endTime = System.currentTimeMillis();
             int responseTime = (int) (endTime - startTime);

@@ -5,7 +5,7 @@ import blue.contract.model.Contract;
 import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.processor.StandardProcessorsProvider;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.contract.simulator.utils.ContractRunnerSubscriptionUtils;
 import blue.language.Blue;
 import blue.language.model.Node;

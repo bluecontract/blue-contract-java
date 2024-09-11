@@ -3,7 +3,7 @@ package blue.contract.simulator;
 import blue.contract.model.*;
 import blue.contract.model.step.ExpectEventStep;
 import blue.contract.processor.ExpectEventStepProcessor;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.language.Blue;
@@ -80,10 +80,10 @@ public class Assistant {
 
     private List<Node> getPendingSteps(ContractUpdateAction action) {
         List<Node> pendingSteps = new ArrayList<>();
-        processContractInstance(action.getContractInstance(), pendingSteps);
+        processContractInstance(action.getContractInstance(), pendingSteps, action.getIncomingEvent());
         if (action.getContractInstance().getProcessingState().getLocalContractInstances() != null) {
             for (ContractInstance localInstance : action.getContractInstance().getProcessingState().getLocalContractInstances()) {
-                processContractInstance(localInstance, pendingSteps);
+                processContractInstance(localInstance, pendingSteps, action.getIncomingEvent());
             }
         }
         return pendingSteps;
@@ -117,17 +117,17 @@ public class Assistant {
         }
     }
 
-    private void processContractInstance(ContractInstance instance, List<Node> pendingSteps) {
+    private void processContractInstance(ContractInstance instance, List<Node> pendingSteps, Node incomingEvent) {
         System.out.println("Processing ContractInstance");
         ProcessingState processingState = instance.getProcessingState();
         if (processingState != null && processingState.getWorkflowInstances() != null) {
             for (WorkflowInstance workflowInstance : processingState.getWorkflowInstances()) {
-                processWorkflowInstance(workflowInstance, instance, pendingSteps);
+                processWorkflowInstance(workflowInstance, instance, pendingSteps, incomingEvent);
             }
         }
     }
 
-    private void processWorkflowInstance(WorkflowInstance workflowInstance, ContractInstance contractInstance, List<Node> pendingSteps) {
+    private void processWorkflowInstance(WorkflowInstance workflowInstance, ContractInstance contractInstance, List<Node> pendingSteps, Node incomingEvent) {
         System.out.println("Processing WorkflowInstance: " + workflowInstance.getWorkflow().getName());
         if (!workflowInstance.isCompleted() && workflowInstance.getCurrentStepName() != null) {
             System.out.println("Current Step Name: " + workflowInstance.getCurrentStepName());
@@ -141,7 +141,7 @@ public class Assistant {
                         }
                         Optional<Class<?>> stepClass = blue.determineClass(stepNode);
                         if (stepClass.isPresent() && stepClass.get() == ExpectEventStep.class) {
-                            Node evaluated = evaluateStep(stepNode, workflowInstance, contractInstance);
+                            Node evaluated = evaluateStep(stepNode, workflowInstance, contractInstance, incomingEvent);
                             if (evaluated != null && evaluated.getProperties().get("timeline").getBlueId().equals(assistantTimeline)) {
                                 System.out.println("Found pending step: " + evaluated.getName());
                                 pendingSteps.add(evaluated);
@@ -153,7 +153,7 @@ public class Assistant {
         }
     }
 
-    private Node evaluateStep(Node stepNode, WorkflowInstance workflowInstance, ContractInstance contractInstance) {
+    private Node evaluateStep(Node stepNode, WorkflowInstance workflowInstance, ContractInstance contractInstance, Node incomingEvent) {
         JSExecutor jsExecutor = new JSExecutor(blue);
         ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(jsExecutor);
         ExpectEventStepProcessor processor = new ExpectEventStepProcessor(stepNode, expressionEvaluator);
@@ -161,6 +161,7 @@ public class Assistant {
         ContractProcessingContext contractContext = new ContractProcessingContext()
                 .contract(contractInstance.getContractState())
                 .contractInstanceId(contractInstance.getId())
+                .incomingEvent(incomingEvent)
                 .blue(blue);
         WorkflowProcessingContext workflowContext = new WorkflowProcessingContext()
                 .workflowInstance(workflowInstance)

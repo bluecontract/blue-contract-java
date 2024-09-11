@@ -1,7 +1,7 @@
 package blue.contract.simulator;
 
-import blue.contract.simulator.model.InitiateTimelineAction;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.InitiateTimelineAction;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
 
 import java.util.*;
@@ -130,6 +130,10 @@ public class SimulatorMT {
 
         public String getLastThreadEntryId(String threadId) {
             return lastThreadEntryIds.get(threadId);
+        }
+
+        public BlockingQueue<SimulatorTimelineEntry<Object>> getEventQueue() {
+            return eventQueue;
         }
     }
 

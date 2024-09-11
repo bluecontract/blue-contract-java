@@ -37,6 +37,9 @@ method:
     - type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: OPTIONS
+body:
+  description: "The request body. Can be a string for text data, a dictionary for\
+    \ JSON data, or null if no body is required."
 queryParams:
   description: Key-value pairs representing query parameters to be appended to the
     URL.
@@ -44,9 +47,6 @@ queryParams:
     blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
   keyType:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-body:
-  description: "The request body. Can be a string for text data, a dictionary for\
-    \ JSON data, or null if no body is required."
 url:
   description: The full URL for the API endpoint.
   type:

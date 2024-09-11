@@ -3,7 +3,7 @@ package blue.contract.simulator;
 import blue.contract.model.*;
 import blue.contract.model.step.ExpectEventStep;
 import blue.contract.processor.ExpectEventStepProcessor;
-import blue.contract.simulator.model.SimulatorTimelineEntry;
+import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.JSExecutor;
 import blue.language.Blue;

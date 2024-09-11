@@ -1,7 +1,5 @@
 package blue.contract.model.blink;
 
-import java.util.List;
-
 public class SampleTaskProperties {
     private String assistantTimeline;
     private String fen;

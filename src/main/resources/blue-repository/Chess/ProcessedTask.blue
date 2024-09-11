@@ -1,0 +1,96 @@
+{
+  "name": "Processed Task",
+  "description": "Provides funny comments about every move in a chess game between Alice and Bob.",
+  "type": "Contract",
+  "messaging": {
+    "participants": {
+      "Assistant": {
+        "timeline": {
+          "blueId": "HN2QVkuyZEJ3hf4SPTiup62ZmsGvu9suJNTMbfyrLdJR"
+        }
+      },
+      "User": {
+        "timeline": {
+          "blueId": "9oNWmXTSy1x9XDNvyHt6j9CkcqJiEsCD9PHV4G1qy66y"
+        }
+      }
+    }
+  },
+  "subscriptions": [
+    {
+      "type": "All Events External Contract Subscription",
+      "initiateContractEntry": {
+        "blueId": "Cko9ix6TXfxF8kESravWT46yVEe9sHBj76GJXayZsRSV"
+      }
+    }
+  ],
+  "properties": {
+    "comments": {
+      "type": "List",
+      "itemType": "Text",
+      "description": "List of funny comments for each move"
+    }
+  },
+  "workflows": [
+    {
+      "name": "Generate Funny Comment",
+      "trigger": {
+        "event": {
+          "type": "Chess Game Move Made Event"
+        },
+        "contract": {
+          "type": "External Contract",
+          "initiateContractEntry": {
+            "blueId": "Cko9ix6TXfxF8kESravWT46yVEe9sHBj76GJXayZsRSV"
+          }
+        }
+      },
+      "steps": [
+        {
+          "name": "GenerateComment",
+          "type": "Expect Event Step",
+          "event": {
+            "type": "Timeline Entry",
+            "timeline": {
+              "blueId": "${contract('/messaging/participants/Assistant/timeline/blueId')}"
+            },
+            "message": {
+              "type": "Assistant Task",
+              "request": {
+                "type": "LLM Request",
+                "prompt": "Generate a short, funny comment (max 160 characters) about this chess move. Be creative and humorous!",
+                "promptParams": {
+                  "playerMakingMove": "${event.playerMakingMove}",
+                  "from": "${event.from}",
+                  "to": "${event.to}"
+                }
+              },
+              "response": {
+                "type": "LLM Response"
+              }
+            }
+          }
+        },
+        {
+          "name": "StoreComment",
+          "type": "Update Step",
+          "changeset": [
+            {
+              "op": "add",
+              "path": "/properties/comments/-",
+              "val": "${steps.GenerateComment.content}"
+            }
+          ]
+        },
+        {
+          "name": "SendComment",
+          "type": "Trigger Event Step",
+          "event": {
+            "type": "Assistant Message",
+            "message": "${steps.GenerateComment.content}"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 ---
 name: Sample API Contract
+properties:
+  result:
+    description: result
 workflows:
   items:
   - steps:
@@ -104,9 +107,6 @@ workflows:
       event:
         type:
           blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
-properties:
-  result:
-    description: result
 messaging:
   participants:
     Assistant:

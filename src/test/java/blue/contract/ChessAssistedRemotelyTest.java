@@ -1,9 +1,7 @@
 package blue.contract;
 
-import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
-import blue.contract.model.blink.SampleTask;
 import blue.contract.model.blink.Task;
 import blue.contract.model.chess.*;
 import blue.contract.simulator.ContractRunner2;
@@ -70,15 +68,13 @@ public class ChessAssistedRemotelyTest {
         chessRunner.startProcessingContract(chessContract, chessRunnerTimeline, simulator);
 
         // Starting assistance
-        MakeChessMoveTask task = new MakeChessMoveTask("e2", "e4");
-        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, blue.resolve(blue.objectToNode(task)));
-
+        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("e2", "e4"));
         simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("e7", "e5"));
-//        simulator.appendEntry(whiteTimeline, chessInitiateContractEntry, move("f1", "c4"));
-//        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a7", "a6"));
-//        simulator.appendEntry(whiteTimeline, chessInitiateContractEntry, move("d1", "h5"));
+        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("f1", "c4"));
+        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a7", "a6"));
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("d1", "h5"));
 //        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a6", "a5"));
-//        simulator.appendEntry(whiteTimeline, chessInitiateContractEntry, move("h5", "f7"));
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("h5", "f7"));
 //
 //        ContractUpdateAction action = simulator.getMessageFromLastTimelineEntry(chessRunnerTimeline, ContractUpdateAction.class);
 //        Chess finalAfterMoves = blue.convertObject(action.getContractInstance().getContractState(), Chess.class);
@@ -91,6 +87,11 @@ public class ChessAssistedRemotelyTest {
 
     private Node move(String from, String to) {
         return blue.objectToNode(new ChessMove(from, to));
+    }
+
+    private Node remoteMove(String from, String to) {
+        MakeChessMoveTask task = new MakeChessMoveTask(from, to);
+        return blue.resolve(blue.objectToNode(task));
     }
 
 }

@@ -1,0 +1,6 @@
+name: Chess Game Started Event
+description: Informs that the game has started
+playerWhiteTimeline:
+  description: White timeline
+playerBlackTimeline:
+  description: Black timeline
