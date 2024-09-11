@@ -29,6 +29,11 @@ public class Assistant {
         System.out.println("Assistant created with initiateContractEntryBlueId: " + initiateContractEntryBlueId);
     }
 
+    public Assistant(Blue blue, String initiateContractEntryBlueId, String assistantTimeline) {
+        this(blue, initiateContractEntryBlueId);
+        this.assistantTimeline = assistantTimeline;
+    }
+
     private boolean workedOnce = false;
     public void start(String assistantTimeline, String runnerTimeline, Simulator simulator) {
         this.assistantTimeline = assistantTimeline;
@@ -125,6 +130,7 @@ public class Assistant {
     private void processWorkflowInstance(WorkflowInstance workflowInstance, ContractInstance contractInstance, List<Node> pendingSteps) {
         System.out.println("Processing WorkflowInstance: " + workflowInstance.getWorkflow().getName());
         if (!workflowInstance.isCompleted() && workflowInstance.getCurrentStepName() != null) {
+            System.out.println("Current Step Name: " + workflowInstance.getCurrentStepName());
             Node workflow = workflowInstance.getWorkflow();
             if (workflow != null && workflow.getProperties() != null) {
                 Node stepsNode = workflow.getProperties().get("steps");
