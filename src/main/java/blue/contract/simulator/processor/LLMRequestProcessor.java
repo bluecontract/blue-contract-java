@@ -25,6 +25,11 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
 
     private static final String DEFAULT_MODEL = "claude-3-5-sonnet-20240620";
     private static final int DEFAULT_MAX_TOKENS = 2048;
+    private AnthropicConfig config;
+
+    public LLMRequestProcessor(AnthropicConfig config) {
+        this.config = config;
+    }
 
     @Override
     public LLMResponse process(LLMRequest llmRequest, Blue blue) {
@@ -42,7 +47,7 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
             anthropicRequest.system("Process this task according to instructions.");
             anthropicRequest.temperature(0.0);
 
-            Response anthropicResponse = new Anthropic(new AnthropicConfig(ANTHROPIC_KEY)).sendRequest(anthropicRequest);
+            Response anthropicResponse = new Anthropic(this.config).sendRequest(anthropicRequest);
 
             long endTime = System.currentTimeMillis();
             int responseTime = (int) (endTime - startTime);
