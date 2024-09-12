@@ -2,11 +2,6 @@ package blue.contract.simulator;
 
 import blue.contract.model.*;
 import blue.contract.model.event.ContractProcessingEvent;
-import blue.contract.model.step.ExpectEventStep;
-import blue.contract.processor.ExpectEventStepProcessor;
-import blue.contract.model.blink.SimulatorTimelineEntry;
-import blue.contract.utils.ExpressionEvaluator;
-import blue.contract.utils.JSExecutor;
 import blue.language.Blue;
 import blue.language.model.Node;
 
@@ -52,7 +47,7 @@ public class Assistant {
                            " and response type " + responseClass.getSimpleName());
     }
 
-    public <Req, Res> List<AssistantTask<Req, Res>> processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
+    public <Req, Res> List<AssistantTask<Req, Res>> processContractUpdateAction(TimelineEntry<Object> entry) {
         System.out.println("Processing ContractUpdateAction");
         ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
         List<AssistantTask<Req, Res>> results = new ArrayList<>();
@@ -62,7 +57,10 @@ public class Assistant {
                 Optional<Class<?>> eventClass = blue.determineClass(eventNode);
                 if (eventClass.isPresent() && ContractProcessingEvent.class.equals(eventClass.get())) {
                     ContractProcessingEvent contractProcessingEvent = blue.nodeToObject(eventNode, ContractProcessingEvent.class);
-                    results.add(processContractProcessingEvent(contractProcessingEvent));
+                    AssistantTask<Req, Res> task = processContractProcessingEvent(contractProcessingEvent);
+                    if (task != null) {
+                        results.add(task);
+                    }
                 }
             }
         }
