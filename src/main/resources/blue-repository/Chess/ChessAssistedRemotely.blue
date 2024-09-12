@@ -117,7 +117,7 @@ workflows:
           type: Chess Game Move Made Event
           playerMakingMove: ${contract("/properties/playerToMove")}
           from: ${event.message.from}
-          to: ${event.message.from}
+          to: ${event.message.to}
           chessboardAfterMove: ${steps.ProcessMove.result.position}
           winner: ${steps.ProcessMove.result.winner}
           draw: ${steps.ProcessMove.result.draw}

@@ -1,6 +1,7 @@
 package blue.contract.utils;
 
 import blue.contract.model.WorkflowProcessingContext;
+import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.NodeToMapListOrValue;
 
@@ -121,11 +122,8 @@ public class ExpressionEvaluator {
         if (context.getWorkflowInstance().getStepResults() != null) {
             for (Map.Entry<String, Object> entry : context.getWorkflowInstance().getStepResults().entrySet()) {
                 Object value = entry.getValue();
-                if (value instanceof Node) {
-                    processedStepResults.put(entry.getKey(), NodeToMapListOrValue.get((Node) value));
-                } else {
-                    processedStepResults.put(entry.getKey(), value);
-                }
+                Blue blue = context.getContractProcessingContext().getBlue();
+                processedStepResults.put(entry.getKey(), NodeToMapListOrValue.get(blue.objectToNode(value)));
             }
         }
         bindings.put("steps", processedStepResults);

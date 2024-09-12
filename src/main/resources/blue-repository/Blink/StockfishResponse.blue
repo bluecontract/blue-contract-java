@@ -1,0 +1,24 @@
+name: Stockfish Response
+description: Represents the response from a Stockfish chess engine analysis.
+text:
+  type: Text
+  description: A human-readable summary of the analysis.
+eval:
+  description: The numerical evaluation of the position. Positive values favor White, negative values favor Black.
+move:
+  type: Text
+  description: The best move found by the engine in long algebraic notation (LAN).
+fen:
+  type: Text
+  description: The Forsyth–Edwards Notation (FEN) string representing the analyzed chess position.
+depth:
+  type: Integer
+  description: The depth of analysis reached by the engine.
+winChance:
+  description: The estimated win probability for the side to move, expressed as a percentage.
+from:
+  type: Text
+  description: The starting square of the best move in algebraic notation.
+to:
+  type: Text
+  description: The ending square of the best move in algebraic notation.

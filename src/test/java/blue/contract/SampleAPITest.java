@@ -7,6 +7,7 @@ import blue.contract.model.testcontract.SampleAPIContract;
 import blue.contract.simulator.*;
 import blue.contract.simulator.processor.APIRequestProcessor;
 import blue.contract.simulator.processor.LLMRequestProcessor;
+import blue.contract.simulator.processor.StockfishRequestProcessor;
 import blue.language.Blue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ public class SampleAPITest {
         simulator = new Simulator(blue);
     }
 
+    @Test
     void testInitializationEvent() throws IOException {
         String assistantId = "Assistant";
         String assistantTimeline = simulator.createTimeline(assistantId);
@@ -43,13 +45,14 @@ public class SampleAPITest {
         Assistant assistant = new Assistant(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
         assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor());
+        assistant.registerProcessor(StockfishRequest.class, StockfishResponse.class, new StockfishRequestProcessor());
         assistant.start(assistantTimeline, runnerTimeline, simulator);
 
         ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
 //        System.out.println(blue.objectToSimpleYaml(contractRunner.getLastContractUpdate().getContractInstance().getContractState()));
-//        contractRunner.save("src/test/resources", "api");
+        contractRunner.save("src/test/resources", "api");
     }
 
     @Test
@@ -73,6 +76,7 @@ public class SampleAPITest {
         Assistant assistant = new Assistant(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
         assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor());
+        assistant.registerProcessor(StockfishRequest.class, StockfishResponse.class, new StockfishRequestProcessor());
         assistant.start(assistantTimeline, taskRunnerTimeline, simulator);
 
         ContractRunner2 taskRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);

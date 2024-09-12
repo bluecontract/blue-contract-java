@@ -1,0 +1,9 @@
+name: Task Defining Message
+type: Conversation Entry
+assistantInitialMessage:
+  type: Text
+message:
+  type: Text
+details:
+  type: List
+  itemType: Recommended User Action Message

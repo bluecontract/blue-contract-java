@@ -37,6 +37,7 @@ public class TriggerEventStepProcessor extends AbstractStepProcessor {
         ContractProcessingEvent processingEvent = Events.prepareContractProcessingEvent(eventNode, step.getName(), workflowProcessingContext);
         Node processingEventNode = workflowProcessingContext.getContractProcessingContext().getBlue().objectToNode(processingEvent);
         workflowProcessingContext.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
+        getStepName().ifPresent(s -> workflowProcessingContext.getWorkflowInstance().addStepResult(s, processingEventNode));
     }
 
 }

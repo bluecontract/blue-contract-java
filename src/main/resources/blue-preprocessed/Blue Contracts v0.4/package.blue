@@ -36,6 +36,10 @@ items:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: HdkTbotdG7d3mZZ5Ne3j3juCFshjHpuTsy1XVtfuisi5
+    Assistant Task Ready Event:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
     Workflow Function:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

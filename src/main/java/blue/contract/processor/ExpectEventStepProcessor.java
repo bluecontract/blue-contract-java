@@ -31,6 +31,7 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
                     return Optional.empty();
                 }
                 event = contractProcessingEvent.getEvent();
+                context.getContractProcessingContext().incomingEvent(event);
             } else if (contract != null) {
                 return Optional.empty();
             }

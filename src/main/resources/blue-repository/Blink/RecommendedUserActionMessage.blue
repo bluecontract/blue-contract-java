@@ -1,0 +1,6 @@
+name: Recommended User Action Message
+type: Conversation Entry
+message:
+  type: Text
+action:
+  type: Timeline Entry
