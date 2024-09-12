@@ -10,11 +10,16 @@ import blue.contract.utils.anthropic.model.Message;
 import blue.contract.utils.anthropic.model.Request;
 import blue.contract.utils.anthropic.model.Response;
 import blue.language.Blue;
+import blue.language.model.Node;
+import blue.language.utils.Properties;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static blue.contract.utils.anthropic.AnthropicKey.ANTHROPIC_KEY;
+import static blue.language.utils.Properties.TEXT_TYPE_BLUE_ID;
 
 public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMResponse> {
 
@@ -47,6 +52,9 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
             System.out.println("LLM error:");
             System.out.println(e.getMessage());
             return new LLMResponse()
+                    .content(new Node().value("Error when processing Anthropic request: " + e.getMessage()).type(
+                            new Node().blueId(TEXT_TYPE_BLUE_ID)
+                    ))
                     .responseTime(-1);
         }
     }
@@ -65,11 +73,18 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
     private LLMResponse buildLLMResponse(Response anthropicResponse, int responseTime, Blue blue) {
         LLMResponse llmResponse = new LLMResponse()
                 .responseTime(responseTime);
+        ObjectMapper objectMapper = new ObjectMapper();
 
         if (anthropicResponse.getContent() != null && !anthropicResponse.getContent().isEmpty()) {
             Content content = anthropicResponse.getContent().get(0);
             if (content != null && content.getText() != null) {
-                llmResponse.content(blue.jsonToNode(content.getText()));
+                String text = content.getText();
+                try {
+                    objectMapper.readTree(text);
+                    llmResponse.content(blue.jsonToNode(content.getText()));
+                } catch (Exception e) {
+                    llmResponse.content(new Node().value(text).type(new Node().blueId(TEXT_TYPE_BLUE_ID)));
+                }
             }
         }
 

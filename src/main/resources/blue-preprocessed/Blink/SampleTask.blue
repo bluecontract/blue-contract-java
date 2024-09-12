@@ -12,49 +12,49 @@ workflows:
   items:
   - steps:
       items:
-      - name: api
-        description: your task
+      - name: assistantStockfish
         type:
-          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
         event:
           type:
-            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
-          message:
+            blueId: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
+          task:
             type:
               blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
             request:
               type:
-                blueId: 6QzWdtAdH7LGrhoBdTpCgDE188jp4MWuXv8tXJwK4RE5
-              method:
+                blueId: 7ViSN3jxBZ9bgy764CyzduFgPxsYWCyArWYd2fibY8xC
+              fen:
                 type:
                   blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-                value: POST
-              body:
-                fen:
-                  type:
-                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-                  value: "${contract('/properties/fen')}"
-                depth:
-                  type:
-                    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-                  value: 10
-              url:
+                value: rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b -
+                  - 1 11
+              depth:
                 type:
-                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-                value: https://chess-api.com/v1
+                  blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+                value: 10
             response:
               type:
-                blueId: CT1QjaY8RYryxR596hph2SX6wwC1wGvipi1CjDRcJbd4
-          timeline:
-            blueId: "${contract('/properties/assistantTimeline')}"
-      - name: llm
-        description: your task
+                blueId: 2ahgTKYRtpEQ3eF9TqHB5RDg96nDzQDKPLWDBt3BmURi
+      - name: stockfish
         type:
           blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
         event:
           type:
-            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+            blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
           message:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${steps.assistantStockfish.event.task}"
+          timeline:
+            blueId: "${contract('/properties/assistantTimeline')}"
+      - name: assistantLlm
+        type:
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+        event:
+          type:
+            blueId: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
+          task:
             type:
               blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
             request:
@@ -84,10 +84,21 @@ workflows:
                 stockfishAnalysis:
                   type:
                     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-                  value: "${steps.api}"
+                  value: "${steps.stockfish}"
             response:
               type:
                 blueId: 9Rie4HdYiHTEJRLF77d4VHmaQv43QJvdJ9oUrQy89hMn
+      - name: llm
+        description: your task
+        type:
+          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+        event:
+          type:
+            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+          message:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${steps.assistantLlm.event.task}"
           timeline:
             blueId: "${contract('/properties/assistantTimeline')}"
       - name: Apply Changes

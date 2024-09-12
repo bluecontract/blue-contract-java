@@ -14,8 +14,6 @@ properties:
     itemType: Conversation Entry
   actualTask:
     type: Local Contract
-  contractDef:
-    type: Contract
 
 subscriptions:
   - type: Local Contract Subscription
@@ -70,12 +68,6 @@ workflows:
       - name: init
         type: Initialize Local Contract Step
         contract: ${event.message}
-
-      - type: Update Step
-        changeset:
-          - op: replace
-            path: /properties/actualTask
-            val: ${steps.init.localContract}
 
       - type: Update Step
         changeset:

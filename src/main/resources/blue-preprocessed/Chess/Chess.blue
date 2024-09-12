@@ -41,6 +41,7 @@ workflows:
           playerWhiteTimeline:
             blueId: "${contract('/messaging/participants/Player White/timeline/blueId')}"
     trigger:
+      name: TriggerStep
       event:
         type:
           blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
@@ -138,7 +139,7 @@ workflows:
           to:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: "${event.message.from}"
+            value: "${event.message.to}"
           draw:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -214,6 +215,7 @@ workflows:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
               value: /properties/playerToMove
     trigger:
+      name: TriggerStep
       event:
         type:
           blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC

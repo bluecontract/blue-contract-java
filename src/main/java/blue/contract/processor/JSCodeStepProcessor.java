@@ -62,7 +62,16 @@ public class JSCodeStepProcessor extends AbstractStepProcessor {
 
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("event", NodeToMapListOrValue.get(event, SIMPLE));
-        bindings.put("steps", context.getWorkflowInstance().getStepResults());
+        // TODO: remove duplications
+        Map<String, Object> processedStepResults = new HashMap<>();
+        if (context.getWorkflowInstance().getStepResults() != null) {
+            for (Map.Entry<String, Object> entry : context.getWorkflowInstance().getStepResults().entrySet()) {
+                Object value = entry.getValue();
+                Blue blue = context.getContractProcessingContext().getBlue();
+                processedStepResults.put(entry.getKey(), NodeToMapListOrValue.get(blue.objectToNode(value)));
+            }
+        }
+        bindings.put("steps", processedStepResults);
         bindings.put("contract", (java.util.function.Function<String, Object>) path ->
                 context.getContractProcessingContext().accessContract(path, true, true));
 

@@ -138,7 +138,7 @@ workflows:
           to:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: "${event.message.from}"
+            value: "${event.message.to}"
           draw:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

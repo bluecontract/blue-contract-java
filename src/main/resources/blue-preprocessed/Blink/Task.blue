@@ -98,22 +98,6 @@ workflows:
           items:
           - val:
               type:
-                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: "${steps.init.localContract}"
-            op:
-              type:
-                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: replace
-            path:
-              type:
-                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: /properties/actualTask
-      - type:
-          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
-        changeset:
-          items:
-          - val:
-              type:
                 blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
               contractInstanceId:
                 type:
@@ -137,9 +121,6 @@ properties:
   actualTask:
     type:
       blueId: 6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f
-  contractDef:
-    type:
-      blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
   conversation:
     type:
       blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB

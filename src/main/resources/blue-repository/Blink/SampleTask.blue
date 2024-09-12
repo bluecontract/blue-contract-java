@@ -11,33 +11,32 @@ workflows:
         type: Contract Initialization Event
     steps:
 
-      - name: api
-        type: Expect Event Step
-        description: your task
+      - name: assistantStockfish
+        type: Trigger Event Step
         event:
-          type: Timeline Entry
-          timeline:
-            blueId: ${contract('/properties/assistantTimeline')}
-          message:
+          type: Assistant Task Ready Event
+          task:
             type: Assistant Task
             request:
-              type: API Request
-              method: POST
-              url: https://chess-api.com/v1
-              body:
-                fen: ${contract('/properties/fen')}
-                depth: 10
+              type: Stockfish Request
+              fen: rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b - - 1 11
+              depth: 10
             response:
-              type: API Response
+              type: Stockfish Response
 
-      - name: llm
+      - name: stockfish
         type: Expect Event Step
-        description: your task
         event:
           type: Timeline Entry
           timeline:
             blueId: ${contract('/properties/assistantTimeline')}
-          message:
+          message: ${steps.assistantStockfish.event.task}
+
+      - name: assistantLlm
+        type: Trigger Event Step
+        event:
+          type: Assistant Task Ready Event
+          task:
             type: Assistant Task
             request:
               type: LLM Request
@@ -59,9 +58,18 @@ workflows:
                 'It's over now! We'll force mate in 3 moves. Let's start by taking this rook.'
                 those are just examples, be creative, don't use it as a pattern - your comments should be interesting and enjoying
               promptParams:
-                stockfishAnalysis: ${steps.api}
+                stockfishAnalysis: ${steps.stockfish}
             response:
               type: LLM Response
+
+      - name: llm
+        type: Expect Event Step
+        description: your task
+        event:
+          type: Simulator Timeline Entry
+          timeline:
+            blueId: ${contract('/properties/assistantTimeline')}
+          message: ${steps.assistantLlm.event.task}
 
       - name: Apply Changes
         type: Update Step

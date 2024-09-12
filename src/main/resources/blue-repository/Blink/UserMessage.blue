@@ -1,0 +1,4 @@
+name: User Message
+type: Conversation Entry
+message:
+  type: Text
