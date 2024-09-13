@@ -33,7 +33,6 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
 
     @Override
     public LLMResponse process(LLMRequest llmRequest, Blue blue) {
-        System.out.println("Processing LLM request");
         try {
             long startTime = System.currentTimeMillis();
 
@@ -54,8 +53,6 @@ public class LLMRequestProcessor implements AssistantProcessor<LLMRequest, LLMRe
 
             return buildLLMResponse(anthropicResponse, responseTime, blue);
         } catch (Exception e) {
-            System.out.println("LLM error:");
-            System.out.println(e.getMessage());
             return new LLMResponse()
                     .content(new Node().value("Error when processing Anthropic request: " + e.getMessage()).type(
                             new Node().blueId(TEXT_TYPE_BLUE_ID)

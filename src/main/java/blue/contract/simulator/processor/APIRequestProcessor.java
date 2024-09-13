@@ -28,7 +28,6 @@ public class APIRequestProcessor implements AssistantProcessor<APIRequest, APIRe
 
     @Override
     public APIResponse process(APIRequest apiRequest, Blue blue) {
-        System.out.println("Processing API request");
         try {
             URI uri = buildUri(apiRequest);
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(uri);
