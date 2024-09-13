@@ -8,6 +8,8 @@ import blue.contract.simulator.*;
 import blue.contract.simulator.processor.APIRequestProcessor;
 import blue.contract.simulator.processor.LLMRequestProcessor;
 import blue.contract.simulator.processor.StockfishRequestProcessor;
+import blue.contract.utils.anthropic.AnthropicConfig;
+import blue.contract.utils.anthropic.AnthropicKey;
 import blue.language.Blue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,7 @@ public class SampleAPITest {
 
         Assistant assistant = new Assistant(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
-        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor());
+        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor(new AnthropicConfig(AnthropicKey.ANTHROPIC_KEY)));
         assistant.registerProcessor(StockfishRequest.class, StockfishResponse.class, new StockfishRequestProcessor());
         assistant.start(assistantTimeline, runnerTimeline, simulator);
 
@@ -65,7 +67,7 @@ public class SampleAPITest {
 
         Task taskContract = new Task(aliceTimeline, assistantTimeline);
         InitiateContractAction initiateContractAction = new InitiateContractAction(taskContract);
-        String initiateContractEntry = simulator.appendEntry(assistantTimeline, initiateContractAction);
+        String initiateContractEntry = simulator.appendEntry(aliceTimeline, initiateContractAction);
 
         String taskRunnerId = "Task Contract Runner";
         String taskRunnerTimeline = simulator.createTimeline(taskRunnerId);
@@ -75,7 +77,7 @@ public class SampleAPITest {
 
         Assistant assistant = new Assistant(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
-        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor());
+        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor(new AnthropicConfig(AnthropicKey.ANTHROPIC_KEY)));
         assistant.registerProcessor(StockfishRequest.class, StockfishResponse.class, new StockfishRequestProcessor());
         assistant.start(assistantTimeline, taskRunnerTimeline, simulator);
 
@@ -112,7 +114,7 @@ public class SampleAPITest {
 
         AssistantMT assistant = new AssistantMT(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
-        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor());
+        assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor(new AnthropicConfig(AnthropicKey.ANTHROPIC_KEY)));
         assistant.start(assistantTimeline, taskRunnerTimeline, simulator);
 
         ContractRunnerMT taskRunner = new ContractRunnerMT(blue, initiateContractEntry, initiateContractProcessingEntry);

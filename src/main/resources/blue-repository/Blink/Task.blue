@@ -60,7 +60,7 @@ workflows:
   - name: contractDef
     trigger:
       event:
-        type: Simulator Timeline Entry
+        type: Timeline Entry
         timeline:
           blueId: ${contract('/messaging/participants/User/timeline/blueId')}
     steps:

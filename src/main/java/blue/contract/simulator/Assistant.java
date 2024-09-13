@@ -2,11 +2,6 @@ package blue.contract.simulator;
 
 import blue.contract.model.*;
 import blue.contract.model.event.ContractProcessingEvent;
-import blue.contract.model.step.ExpectEventStep;
-import blue.contract.processor.ExpectEventStepProcessor;
-import blue.contract.model.blink.SimulatorTimelineEntry;
-import blue.contract.utils.ExpressionEvaluator;
-import blue.contract.utils.JSExecutor;
 import blue.language.Blue;
 import blue.language.model.Node;
 
@@ -29,6 +24,11 @@ public class Assistant {
         System.out.println("Assistant created with initiateContractEntryBlueId: " + initiateContractEntryBlueId);
     }
 
+    public Assistant(Blue blue, String initiateContractEntryBlueId, String assistantTimeline) {
+        this(blue, initiateContractEntryBlueId);
+        this.assistantTimeline = assistantTimeline;
+    }
+
     public void start(String assistantTimeline, String runnerTimeline, Simulator simulator) {
         this.assistantTimeline = assistantTimeline;
         this.simulator = simulator;
@@ -47,47 +47,55 @@ public class Assistant {
                            " and response type " + responseClass.getSimpleName());
     }
 
-    private void processContractUpdateAction(SimulatorTimelineEntry<Object> entry) {
+    public <Req, Res> List<AssistantTask<Req, Res>> processContractUpdateAction(TimelineEntry<Object> entry) {
         System.out.println("Processing ContractUpdateAction");
         ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
+        List<AssistantTask<Req, Res>> results = new ArrayList<>();
 
         if (action.getEmittedEvents() != null) {
             for (Node eventNode : action.getEmittedEvents()) {
                 Optional<Class<?>> eventClass = blue.determineClass(eventNode);
                 if (eventClass.isPresent() && ContractProcessingEvent.class.equals(eventClass.get())) {
                     ContractProcessingEvent contractProcessingEvent = blue.nodeToObject(eventNode, ContractProcessingEvent.class);
-                    processContractProcessingEvent(contractProcessingEvent);
+                    AssistantTask<Req, Res> task = processContractProcessingEvent(contractProcessingEvent);
+                    if (task != null) {
+                        results.add(task);
+                    }
                 }
             }
         }
+        return results;
     }
 
-    private void processContractProcessingEvent(ContractProcessingEvent contractProcessingEvent) {
+    private <Req, Res> AssistantTask<Req, Res> processContractProcessingEvent(ContractProcessingEvent contractProcessingEvent) {
         Node actualEventNode = contractProcessingEvent.getEvent();
         if (actualEventNode != null) {
             Optional<Class<?>> actualEventClass = blue.determineClass(actualEventNode);
             if (actualEventClass.isPresent() && AssistantTaskReadyEvent.class.equals(actualEventClass.get())) {
                 AssistantTaskReadyEvent assistantTaskReadyEvent = blue.nodeToObject(actualEventNode, AssistantTaskReadyEvent.class);
-                processAssistantTaskReadyEvent(assistantTaskReadyEvent);
+                return processAssistantTaskReadyEvent(assistantTaskReadyEvent);
             } else {
                 System.out.println("Event is not an AssistantTaskReadyEvent: " + actualEventClass.orElse(null));
+                return null;
             }
         } else {
             System.out.println("ContractProcessingEvent contains no event");
+            return null;
         }
     }
 
-    private void processAssistantTaskReadyEvent(AssistantTaskReadyEvent event) {
+    private <Req, Res> AssistantTask<Req, Res> processAssistantTaskReadyEvent(AssistantTaskReadyEvent event) {
         System.out.println("Processing AssistantTaskReadyEvent");
         if (event.getTask() != null) {
-            processStep(blue.objectToNode(event.getTask()));
+            return processStep(blue.objectToNode(event.getTask()));
         } else {
             System.out.println("Warning: AssistantTaskReadyEvent contains no AssistantTask");
+            return null;
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <Req, Res> void processStep(Node step) {
+    private <Req, Res> AssistantTask<Req, Res> processStep(Node step) {
         System.out.println("Processing step: " + step.getDescription());
         AssistantTask<Req, Res> task = blue.nodeToObject(step, AssistantTask.class);
 
@@ -104,9 +112,12 @@ public class Assistant {
             Res response = processor.process(task.getRequest(), blue);
             AssistantTask<Req, Res> result = blue.clone(task);
             result.response(response);
-            System.out.println("Appending processed result to timeline:");
-            System.out.println(blue.objectToSimpleYaml(result));
-            simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, result);
+            if (simulator != null) {
+                System.out.println("Appending processed result to timeline:");
+                System.out.println(blue.objectToSimpleYaml(result));
+                simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, result);
+            }
+            return result;
         } else {
             System.out.println("Error: No processor found for the given request and response types");
             throw new RuntimeException("No processor found for request type " + requestClass.getSimpleName() +

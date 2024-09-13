@@ -4,6 +4,8 @@ text:
   type: Text
   description: A human-readable summary of the analysis.
 eval:
+  type:
+    blueId: 68ryJtnmui4j5rCZWUnkZ3DChtmEb7Z9F8atn1mBSM3L
   description: The numerical evaluation of the position. Positive values favor White, negative values favor Black.
 move:
   type: Text
@@ -15,6 +17,8 @@ depth:
   type: Integer
   description: The depth of analysis reached by the engine.
 winChance:
+  type:
+    blueId: 68ryJtnmui4j5rCZWUnkZ3DChtmEb7Z9F8atn1mBSM3L
   description: The estimated win probability for the side to move, expressed as a percentage.
 from:
   type: Text

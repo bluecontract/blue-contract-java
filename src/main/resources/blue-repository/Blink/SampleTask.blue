@@ -66,7 +66,7 @@ workflows:
         type: Expect Event Step
         description: your task
         event:
-          type: Simulator Timeline Entry
+          type: Timeline Entry
           timeline:
             blueId: ${contract('/properties/assistantTimeline')}
           message: ${steps.assistantLlm.event.task}
