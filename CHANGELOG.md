@@ -1,3 +1,20 @@
+## v0.4.0 (2024-09-13)
+
+### Feat
+
+- Assistant updates (#2)
+- WiP, assistant playing chess
+- WiP, assistant playing chess
+- WiP, assistant playing chess
+- object mapping in Chess
+
+### Fix
+
+- contract processing
+- contract processing
+- Anthropic moved to main + system support
+- WiP, assistant playing chess
+
 ## v0.3.0 (2024-08-08)
 
 ### Feat
