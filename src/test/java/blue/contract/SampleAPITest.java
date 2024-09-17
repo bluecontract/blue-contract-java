@@ -93,6 +93,7 @@ public class SampleAPITest {
 
     }
 
+    @Test
     void testTaskMT() throws IOException, InterruptedException {
         SimulatorMT simulator = new SimulatorMT(blue);
 
@@ -115,6 +116,7 @@ public class SampleAPITest {
         AssistantMT assistant = new AssistantMT(blue, initiateContractEntry);
         assistant.registerProcessor(APIRequest.class, APIResponse.class, new APIRequestProcessor());
         assistant.registerProcessor(LLMRequest.class, LLMResponse.class, new LLMRequestProcessor(new AnthropicConfig(AnthropicKey.ANTHROPIC_KEY)));
+        assistant.registerProcessor(StockfishRequest.class, StockfishResponse.class, new StockfishRequestProcessor());
         assistant.start(assistantTimeline, taskRunnerTimeline, simulator);
 
         ContractRunnerMT taskRunner = new ContractRunnerMT(blue, initiateContractEntry, initiateContractProcessingEntry);

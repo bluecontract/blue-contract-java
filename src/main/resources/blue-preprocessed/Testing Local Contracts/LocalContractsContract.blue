@@ -24,10 +24,6 @@ workflows:
             items:
             - type:
                 blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
-              contractInstanceId:
-                type:
-                  blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-                value: 0
               event:
                 type:
                   blueId: DgQKBxaG8m5xfuZSQDm3yJqGZusU8k7tuizzQgg2XMa5
@@ -37,6 +33,10 @@ workflows:
                       type:
                         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
                       value: /properties/x
+              contractInstanceId:
+                type:
+                  blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+                value: 0
           workflows:
             items:
             - steps:

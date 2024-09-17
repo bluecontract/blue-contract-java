@@ -1,7 +1,9 @@
 package blue.contract;
 
+import blue.contract.debug.DebugContext;
+import blue.contract.debug.DebugInfo;
+import blue.contract.debug.DebugContextAware;
 import blue.contract.exception.ContractProcessingException;
-import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
@@ -11,7 +13,6 @@ import blue.contract.utils.Events;
 import blue.contract.utils.ExpressionEvaluator;
 import blue.contract.utils.ExpressionEvaluator.ExpressionScope;
 import blue.contract.utils.JSExecutor;
-import blue.contract.utils.JSExecutor.ContractCompleteResult;
 import blue.contract.utils.JSExecutor.JSCriticalException;
 import blue.contract.utils.JSExecutor.RejectAndAwaitNextEventException;
 import blue.contract.utils.JSExecutor.TerminateContractWithErrorException;
@@ -21,14 +22,16 @@ import blue.language.model.Node;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import static blue.contract.WorkflowProcessor.ProcessingMode.FINALIZE;
+import static blue.contract.WorkflowProcessor.ProcessingMode.HANDLE;
 import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
-import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
-public abstract class AbstractStepProcessor implements StepProcessor {
+public abstract class AbstractStepProcessor implements StepProcessor, DebugContextAware {
 
     protected Node step;
     protected final ExpressionEvaluator expressionEvaluator;
+    protected DebugContext debugContext;
 
     public AbstractStepProcessor(Node step, ExpressionEvaluator expressionEvaluator) {
         this.step = step;
@@ -40,6 +43,7 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         if (shouldExecuteStep(context)) {
             return executeHandleStep(event, context);
         } else {
+            getDebugContext().skipWorkflowStep(HANDLE, getStepName().orElse("<StepWithNoName>"));
             return handleNextStepByOrder(event, context);
         }
     }
@@ -49,6 +53,7 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         if (shouldExecuteStep(context)) {
             return executeFinalizeStep(event, context);
         } else {
+            getDebugContext().skipWorkflowStep(FINALIZE, getStepName().orElse("<StepWithNoName>"));
             return finalizeNextStepByOrder(event, context);
         }
     }
@@ -80,8 +85,10 @@ public abstract class AbstractStepProcessor implements StepProcessor {
                                                    JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
             }
 
-            if (((AbstractStepProcessor) stepProcessor.get()).shouldExecuteStep(context)) {
-                return stepFunction.apply(stepProcessor.get(), event);
+            AbstractStepProcessor abstractStepProcessor = (AbstractStepProcessor) stepProcessor.get();
+            if (abstractStepProcessor.shouldExecuteStep(context)) {
+                abstractStepProcessor.setDebugContext(getDebugContext());
+                return stepFunction.apply(abstractStepProcessor, event);
             }
 
             step = nextStep.get();
@@ -182,6 +189,15 @@ public abstract class AbstractStepProcessor implements StepProcessor {
         workflowProcessingContext.getContractProcessingContext().getEmittedEvents().add(processingEventNode);
 
         throw new ContractProcessingException("Critical JS error", ex);
+    }
+
+    @Override
+    public DebugContext getDebugContext() {
+        return debugContext;
+    }
+
+    public void setDebugContext(DebugContext debugContext) {
+        this.debugContext = debugContext;
     }
 
 }

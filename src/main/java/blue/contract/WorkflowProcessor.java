@@ -1,12 +1,13 @@
 package blue.contract;
 
+import blue.contract.debug.DebugContext;
+import blue.contract.debug.DebugContextAware;
 import blue.contract.model.ContractProcessingContext;
 import blue.contract.model.WorkflowProcessingContext;
 import blue.contract.model.WorkflowInstance;
+import blue.contract.debug.DebugInfo;
 import blue.contract.model.step.ExpectEventStep;
-import blue.contract.processor.ExpectEventStepProcessor;
 import blue.contract.utils.Workflows;
-import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.BlueIds;
 
@@ -22,9 +23,15 @@ public class WorkflowProcessor {
     }
 
     private StepProcessorProvider stepProcessorProvider;
+    private DebugContext debugContext;
 
     public WorkflowProcessor(StepProcessorProvider stepProcessorProvider) {
+        this(stepProcessorProvider, new DebugContext(false));
+    }
+
+    public WorkflowProcessor(StepProcessorProvider stepProcessorProvider, DebugContext debugContext) {
         this.stepProcessorProvider = stepProcessorProvider;
+        this.debugContext = debugContext;
     }
 
     public Optional<WorkflowInstance> processEvent(Node event, Node workflow, ContractProcessingContext contractProcessingContext) {
@@ -64,6 +71,10 @@ public class WorkflowProcessor {
         if (!stepProcessor.isPresent())
             throw new IllegalArgumentException("No StepProcessor found for event: " +
                     JSON_MAPPER.disable(INDENT_OUTPUT).writeValueAsString(event));
+
+        if (stepProcessor.get() instanceof DebugContextAware) {
+            ((DebugContextAware) stepProcessor.get()).setDebugContext(debugContext);
+        }
 
         context.beginTransaction();
 

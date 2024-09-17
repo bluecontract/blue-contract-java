@@ -28,12 +28,11 @@ public class ContractRunnerMT {
     private List<ContractUpdateAction> contractUpdateActions = new CopyOnWriteArrayList<>();
     private SimulatorMT simulator;
     private volatile boolean isRunning = true;
-    private final BlockingQueue<SimulatorTimelineEntry<Object>> eventQueue;
+    private final BlockingQueue<Node> eventQueue;
     private Thread processingThread;
     private String runnerTimeline;
 
     public ContractRunnerMT(Blue blue, String initiateContractEntryBlueId, String initiateContractProcessingEntryBlueId) {
-        System.out.println("Initializing ContractRunnerMT");
         StandardProcessorsProvider provider = new StandardProcessorsProvider(blue);
         this.blue = blue;
         this.contractProcessor = new ContractProcessor(provider, blue);
@@ -42,33 +41,20 @@ public class ContractRunnerMT {
         this.eventQueue = new LinkedBlockingQueue<>();
         this.processingThread = new Thread(this::processEvents);
         this.processingThread.start();
-        System.out.println("ContractRunnerMT initialized with initiateContractEntryBlueId: " + initiateContractEntryBlueId +
-                           " and initiateContractProcessingEntryBlueId: " + initiateContractProcessingEntryBlueId);
     }
 
     public List<ContractUpdateAction> initiateContract(Object contract) {
-        System.out.println("Initiating contract from Object");
         return initiateContract(blue.objectToNode(contract));
     }
 
     public List<ContractUpdateAction> initiateContract(Node contract) {
-        System.out.println("Initiating contract from Node");
-        List<ContractUpdateAction> actions = contractProcessor.initiate(contract, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
-        System.out.println("Contract initiated. Number of update actions: " + actions.size());
-        return actions;
-    }
-
-    public List<ContractUpdateAction> getContractUpdates() {
-        System.out.println("Retrieving contract updates. Current count: " + contractUpdateActions.size());
-        return new ArrayList<>(contractUpdateActions);
+        return contractProcessor.initiate(contract, initiateContractEntryBlueId, initiateContractProcessingEntryBlueId);
     }
 
     public ContractUpdateAction getLastContractUpdate() {
         if (contractUpdateActions.isEmpty()) {
-            System.out.println("No contract updates available");
             return null;
         }
-        System.out.println("Retrieving last contract update");
         return contractUpdateActions.get(contractUpdateActions.size() - 1);
     }
 
@@ -76,55 +62,60 @@ public class ContractRunnerMT {
         this.simulator = simulator;
         this.runnerTimeline = runnerTimeline;
 
-        System.out.println("Setting up subscription for contract events");
         simulator.subscribe(
-                entry -> ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId, runnerTimeline, simulator).test(entry),
+                entry -> ContractRunnerSubscriptionUtils.createContractFilterForSimulatorMT(contract, initiateContractEntryBlueId, runnerTimeline, simulator).test(entry),
                 entry -> {
                     try {
-                        eventQueue.put(entry);
+                        List<Node> events = new ArrayList<>();
+                        if (initiateContractEntryBlueId.equals(entry.getThread())) {
+                            events.add(blue.objectToNode(entry));
+                        } else {
+                            ContractUpdateAction action = (ContractUpdateAction) entry.getMessage();
+                            if (action.getEmittedEvents() != null) {
+                                events.addAll(action.getEmittedEvents());
+                            }
+                        }
+                        for (Node event : events) {
+                            eventQueue.put(event);
+                        }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
                 }
         );
 
-        System.out.println("Starting to process contract on runnerTimeline: " + runnerTimeline);
         List<ContractUpdateAction> actions = initiateContract(contract);
         contractUpdateActions.addAll(actions);
-        System.out.println("Appending initial contract update actions to simulator");
         actions.forEach(action -> simulator.appendEntry(runnerTimeline, initiateContractProcessingEntryBlueId, action));
     }
 
     private void processEvents() {
         while (isRunning || !eventQueue.isEmpty()) {
             try {
-                SimulatorTimelineEntry<Object> entry = eventQueue.poll(100, TimeUnit.MILLISECONDS);
-                if (entry != null) {
-                    processContractEvent(entry);
+                Node event = eventQueue.poll(100, TimeUnit.MILLISECONDS);
+                if (event != null) {
+                    processContractEvent(event);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
         }
-        System.out.println("ContractRunnerMT event processing stopped");
     }
 
-    private void processContractEvent(SimulatorTimelineEntry<Object> entry) {
-        System.out.println("Processing new contract event");
+    private void processContractEvent(Node event) {
+        System.out.println("ContractRunner is processing new contract event");
         ContractUpdateAction lastUpdate = getLastContractUpdate();
         int epoch = lastUpdate != null ? lastUpdate.getEpoch() : 0;
-        System.out.println("Current epoch: " + epoch);
         List<ContractUpdateAction> result = contractProcessor.processEvent(
-                blue.objectToNode(entry),
-                lastUpdate != null ? lastUpdate.getContractInstance() : null,
+                event.clone(),
+                lastUpdate != null ? blue.clone(lastUpdate.getContractInstance()) : null,
                 initiateContractEntryBlueId,
                 initiateContractProcessingEntryBlueId,
                 epoch + 1
         );
         System.out.println("Event processed. Number of new update actions: " + result.size());
         contractUpdateActions.addAll(result);
-        System.out.println("Appending new contract update actions to simulator");
         result.forEach(action -> simulator.appendEntry(runnerTimeline, initiateContractProcessingEntryBlueId, action));
     }
 
@@ -132,29 +123,6 @@ public class ContractRunnerMT {
         isRunning = false;
         processingThread.join(5000); // Wait up to 5 seconds for processing to complete
         System.out.println("ContractRunnerMT stopped");
-    }
-
-    private void processContractEvent(SimulatorTimelineEntry<Object> entry, String runnerTimeline) {
-        System.out.println("isRunning:" + isRunning);
-        if (!isRunning) return;
-
-        CompletableFuture.runAsync(() -> {
-            System.out.println("Processing new contract event");
-            ContractUpdateAction lastUpdate = getLastContractUpdate();
-            int epoch = lastUpdate != null ? lastUpdate.getEpoch() : 0;
-            System.out.println("Current epoch: " + epoch);
-            List<ContractUpdateAction> result = contractProcessor.processEvent(
-                    blue.objectToNode(entry),
-                    lastUpdate != null ? lastUpdate.getContractInstance() : null,
-                    initiateContractEntryBlueId,
-                    initiateContractProcessingEntryBlueId,
-                    epoch + 1
-            );
-            System.out.println("Event processed. Number of new update actions: " + result.size());
-            contractUpdateActions.addAll(result);
-            System.out.println("Appending new contract update actions to simulator");
-            result.forEach(action -> simulator.appendEntry(runnerTimeline, initiateContractProcessingEntryBlueId, action));
-        });
     }
 
     public void save(String directory, String filePrefix) throws IOException {

@@ -35,7 +35,7 @@ workflows:
                 value: 10
             response:
               type:
-                blueId: 2ahgTKYRtpEQ3eF9TqHB5RDg96nDzQDKPLWDBt3BmURi
+                blueId: CBnTbyZvyrsGozRyUH4sUMHboJvP7a2fGGejyh2x1XWD
       - name: stockfish
         type:
           blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
@@ -94,7 +94,7 @@ workflows:
           blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
         event:
           type:
-            blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+            blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
           message:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -123,14 +123,14 @@ workflows:
         event:
           type:
             blueId: 2Dw47cJMtpB6BhRkA6DkAqrgc3NKFcHHoqwUy9z3Ts1x
-          message:
-            type:
-              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: "${steps.llm}"
           priority:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
             value: HIGH
+          message:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${steps.llm}"
     trigger:
       event:
         type:

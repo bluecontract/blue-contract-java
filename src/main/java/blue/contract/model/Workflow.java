@@ -10,7 +10,34 @@ import static blue.contract.utils.Constants.BLUE_CONTRACTS_V04;
 
 @TypeBlueId(defaultValueRepositoryDir = BLUE_CONTRACTS_V04)
 public class Workflow {
-    public String name;
-    public Node trigger;
-    public List<? extends WorkflowStep> steps;
+    private String name;
+    private Node trigger;
+    private List<? extends WorkflowStep> steps;
+
+    public String getName() {
+        return name;
+    }
+
+    public Workflow name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Node getTrigger() {
+        return trigger;
+    }
+
+    public Workflow trigger(Node trigger) {
+        this.trigger = trigger;
+        return this;
+    }
+
+    public List<? extends WorkflowStep> getSteps() {
+        return steps;
+    }
+
+    public Workflow steps(List<? extends WorkflowStep> steps) {
+        this.steps = steps;
+        return this;
+    }
 }

@@ -1,17 +1,17 @@
 ---
 items:
-- blueId: FJRgZKfmLfTffrUDv5gAGXEX2G7SVeYmuSeZyaf5fFh3
+- blueId: Eiw1ZSTRe1JVBJXxK4zvhjN6TyRSsXhX2PcJGrKdnLxY
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
     Recommended User Action Message:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 4BT7KuRciEhUceKhK2bkaHekHFgVA14Sk3Re687noH7R
+      value: HWvjD6iit7dToeSjMtCJWPCvuihZkBuuraDZin8DJAvi
     Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 3w9m1CYp8mekrCkcL2P1RnndCf8e1sHm74hnhXJf6TXW
+      value: HCsUa9aCQrh4NN8Fh2zNoNaRWoaeHmx9R7Sp6sKrRoZ9
     API Response:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -23,7 +23,7 @@ items:
     Stockfish Response:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 2ahgTKYRtpEQ3eF9TqHB5RDg96nDzQDKPLWDBt3BmURi
+      value: CBnTbyZvyrsGozRyUH4sUMHboJvP7a2fGGejyh2x1XWD
     Assistant Message:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -40,6 +40,10 @@ items:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 9nFWBvNxVD9fHsMFmqM5wxTGn36Q5Tw6dSDFnsnyF1w8
+    Task Defining Message:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: DiJtrmS4p5KnJQJcV5UpEqvEmtuy9DK5JruJc6wxVT9R
     LLM Response:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -51,7 +55,7 @@ items:
     Sample API Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: Ymjz4CyRoSLzqU5UreZqBQf6wyoidKF9qfG949nASmf
+      value: wdnhRDzkqrp3ZmnbvhZReKSeLaHcT9A37xnW1x7vwat
     Stockfish Request:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -63,4 +67,4 @@ items:
     Sample Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: GVFqUHuXGYyG6zBY2FqNGKZoJwbf65DSHbmNFR9Sk8dx
+      value: GyKGD2yS2mPyKi2BTrkcbFVc4hNB2gURohEhX3KwPB3L

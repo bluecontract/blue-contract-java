@@ -1,11 +1,14 @@
 package blue.contract.model.chess;
 
+import blue.language.model.BlueId;
+
 public class ChessProperties {
     private String chessboard;
     private String winner;
     private Boolean draw;
     private Boolean gameOver;
     private String playerToMove;
+    private String assistingContract;
 
     public String getChessboard() {
         return chessboard;
@@ -49,6 +52,15 @@ public class ChessProperties {
 
     public ChessProperties playerToMove(String playerToMove) {
         this.playerToMove = playerToMove;
+        return this;
+    }
+
+    public String getAssistingContract() {
+        return assistingContract;
+    }
+
+    public ChessProperties assistingContract(String assistingContract) {
+        this.assistingContract = assistingContract;
         return this;
     }
 }

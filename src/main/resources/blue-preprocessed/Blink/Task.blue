@@ -15,17 +15,7 @@ workflows:
   - name: Chat
     steps:
       items:
-      - name: BlinkResponse
-        type:
-          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
-        event:
-          type:
-            blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
-          timeline:
-            type:
-              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: "${contract('/messaging/participants/Assistant/timeline')}"
-      - name: Apply Changes
+      - name: AddUserMessageToConversation
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
         changeset:
@@ -33,7 +23,52 @@ workflows:
           - val:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: "${steps.BlinkResponse}"
+              value: "${steps.IncomingEntry.message}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/conversation/-
+      - name: TriggerAssistantRequest
+        type:
+          blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+        event:
+          type:
+            blueId: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
+          task:
+            type:
+              blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+            request:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.IncomingEntry.message}"
+            response:
+              type:
+                blueId: HWvjD6iit7dToeSjMtCJWPCvuihZkBuuraDZin8DJAvi
+      - name: ExpectAssistantResponse
+        type:
+          blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+        event:
+          type:
+            blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+          message:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${steps.TriggerAssistantRequest.event.task}"
+          timeline:
+            blueId: "${contract('/messaging/participants/Assistant/timeline/blueId')}"
+      - name: AddAssistantMessageToConversation
+        type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.ExpectAssistantResponse.message.response}"
             op:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -43,16 +78,15 @@ workflows:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
               value: /properties/conversation/-
     trigger:
+      name: IncomingEntry
       event:
         type:
           blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
         message:
           type:
-            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            blueId: 41Rbk8HoofpvDH8UeRHeeacQ1BHQsksj7MwGHJKZYefk
         timeline:
-          type:
-            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-          value: "${contract('/messaging/participants/User/timeline')}"
+          blueId: "${contract('/messaging/participants/User/timeline/blueId')}"
   - name: Messages from actualTask
     steps:
       items:
@@ -114,7 +148,10 @@ workflows:
     trigger:
       event:
         type:
-          blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
+          blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+        message:
+          type:
+            blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
         timeline:
           blueId: "${contract('/messaging/participants/User/timeline/blueId')}"
 properties:
@@ -124,8 +161,6 @@ properties:
   conversation:
     type:
       blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
-    itemType:
-      blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
 messaging:
   participants:
     Assistant:

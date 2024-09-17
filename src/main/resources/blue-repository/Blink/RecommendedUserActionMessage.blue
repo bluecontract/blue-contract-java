@@ -3,4 +3,4 @@ type: Conversation Entry
 message:
   type: Text
 action:
-  type: Timeline Entry
+  description: Recommended action

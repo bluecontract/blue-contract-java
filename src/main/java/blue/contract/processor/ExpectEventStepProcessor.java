@@ -1,6 +1,7 @@
 package blue.contract.processor;
 
 import blue.contract.AbstractStepProcessor;
+import blue.contract.debug.DebugUtils;
 import blue.contract.model.*;
 import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.utils.ExpressionEvaluator;
@@ -8,7 +9,13 @@ import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.utils.limits.PathLimits;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static blue.contract.debug.DebugUtils.contractProcessingEventMatchingDetails;
+import static blue.contract.debug.DebugUtils.nodeMatchingDetails;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 public class ExpectEventStepProcessor extends AbstractStepProcessor {
 
@@ -28,14 +35,27 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
             if (ContractProcessingEvent.class.equals(eventClass.get())) {
                 ContractProcessingEvent contractProcessingEvent = blue.nodeToObject(event, ContractProcessingEvent.class);
                 if (!matchesContract(contractProcessingEvent, contract, context)) {
+                    getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
+                            "contractProcessingEventMatch", FALSE,
+                            "details", contractProcessingEventMatchingDetails(contractProcessingEvent, contract, context)
+                    ));
                     return Optional.empty();
                 }
                 event = contractProcessingEvent.getEvent();
                 context.getContractProcessingContext().incomingEvent(event);
             } else if (contract != null) {
+                getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
+                        "contractProcessingEventMatch", FALSE,
+                        "reason", "contract is provided, but event is not ContractProcessingEvent",
+                        "eventClass", eventClass.get().getSimpleName()
+                ));
                 return Optional.empty();
             }
         } else if (contract != null) {
+            getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
+                    "contractProcessingEventMatch", FALSE,
+                    "reason", "contract is provided, but event class can't be determined"
+            ));
             return Optional.empty();
         }
 
@@ -48,9 +68,17 @@ public class ExpectEventStepProcessor extends AbstractStepProcessor {
             if (stepName.isPresent()) {
                 context.getWorkflowInstance().addStepResult(stepName.get(), event);
             }
+            getDebugContext().addWorkflowStepResult(stepName, Map.of(
+                    "nodeMatchesType", TRUE
+            ));
 
             return finalizeNextStepByOrder(event, context);
         } else {
+            getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
+                    "nodeMatchesType", FALSE,
+                    "nodes", nodeMatchingDetails(contractContext.getBlue(), event, expectedEventNode)
+
+            ));
             return Optional.empty();
         }
     }

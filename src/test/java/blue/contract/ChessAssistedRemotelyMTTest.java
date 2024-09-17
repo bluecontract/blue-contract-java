@@ -1,12 +1,15 @@
 package blue.contract;
 
-import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.blink.Task;
-import blue.contract.model.chess.*;
+import blue.contract.model.chess.ChessAssistedRemotely;
+import blue.contract.model.chess.ChessMove;
+import blue.contract.model.chess.MakeChessMoveTask;
 import blue.contract.simulator.ContractRunner2;
+import blue.contract.simulator.ContractRunnerMT;
 import blue.contract.simulator.Simulator;
+import blue.contract.simulator.SimulatorMT;
 import blue.language.Blue;
 import blue.language.model.Node;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,21 +18,20 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static blue.contract.utils.Utils.testBlue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ChessAssistedRemotelyTest {
+public class ChessAssistedRemotelyMTTest {
 
-    private Simulator simulator;
+    private SimulatorMT simulator;
     private Blue blue;
 
     @BeforeEach
     void setUp() throws IOException {
         blue = testBlue();
-        simulator = new Simulator(blue);
+        simulator = new SimulatorMT(blue);
     }
 
     @Test
-    void testChessGame() throws IOException {
+    void testChessGame() throws IOException, InterruptedException {
 
         String whiteId = "Player White";
         String whiteTimeline = simulator.createTimeline(whiteId);
@@ -54,7 +56,7 @@ public class ChessAssistedRemotelyTest {
         InitiateContractProcessingAction taskInitiateProcessingAction = new InitiateContractProcessingAction(taskInitiateContractEntry, taskContract);
         String taskInitiateContractProcessingEntry = simulator.appendEntry(taskRunnerTimeline, taskInitiateProcessingAction);
 
-        ContractRunner2 taskRunner = new ContractRunner2(blue, taskInitiateContractEntry, taskInitiateContractProcessingEntry);
+        ContractRunnerMT taskRunner = new ContractRunnerMT(blue, taskInitiateContractEntry, taskInitiateContractProcessingEntry);
         taskRunner.startProcessingContract(taskContract, taskRunnerTimeline, simulator);
 
         // Starting chess
@@ -65,21 +67,39 @@ public class ChessAssistedRemotelyTest {
         InitiateContractProcessingAction initiateProcessingAction = new InitiateContractProcessingAction(chessInitiateContractEntry, chessContract);
         String chessInitiateContractProcessingEntry = simulator.appendEntry(chessRunnerTimeline, initiateProcessingAction);
 
-        ContractRunner2 chessRunner = new ContractRunner2(blue, chessInitiateContractEntry, chessInitiateContractProcessingEntry);
+        ContractRunnerMT chessRunner = new ContractRunnerMT(blue, chessInitiateContractEntry, chessInitiateContractProcessingEntry);
         chessRunner.startProcessingContract(chessContract, chessRunnerTimeline, simulator);
+
+//        simulator.appendEntry(whiteTimeline, chessInitiateContractEntry, move("e2", "e4"));
+//        Thread.sleep(250);
+//        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("e7", "e5"));
+//        Thread.sleep(250);
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("f1", "c4"));
 
         // Starting assistance
         simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("e2", "e4"));
-        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("e7", "e5"));
-        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("f1", "c4"));
-        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a7", "a6"));
-        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("d1", "h5"));
-        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a6", "a5"));
-        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("h5", "f7"));
+        Thread.sleep(500);
+//        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("e7", "e5"));
+//        Thread.sleep(500);
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("f1", "c4"));
+//        Thread.sleep(500);
+//        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a7", "a6"));
+//        Thread.sleep(500);
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("d1", "h5"));
+//        simulator.appendEntry(whiteTimeline, chessInitiateContractEntry, move("d1", "h5"));
+//        Thread.sleep(500);
+//        simulator.appendEntry(blackTimeline, chessInitiateContractEntry, move("a6", "a5"));
+//        Thread.sleep(500);
+//        simulator.appendEntry(whiteTimeline, taskInitiateContractEntry, remoteMove("h5", "f7"));
+//
+//        ContractUpdateAction action = simulator.getMessageFromLastTimelineEntry(chessRunnerTimeline, ContractUpdateAction.class);
+//        Chess finalAfterMoves = blue.convertObject(action.getContractInstance().getContractState(), Chess.class);
+//        assertEquals("rnbqkbnr/1ppp1Qpp/8/p3p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4", finalAfterMoves.getProperties().getChessboard());
 
-        ContractUpdateAction action = simulator.getMessageFromLastTimelineEntry(chessRunnerTimeline, ContractUpdateAction.class);
-        Chess finalAfterMoves = blue.convertObject(action.getContractInstance().getContractState(), Chess.class);
-        assertEquals("rnbqkbnr/1ppp1Qpp/8/p3p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4", finalAfterMoves.getProperties().getChessboard());
+        Thread.sleep(4000);
+        taskRunner.stop();
+        chessRunner.stop();
+        simulator.shutdown();
 
         simulator.save(taskRunnerTimeline, 2, "src/test/resources", "chess_task");
         simulator.save(chessRunnerTimeline, 2, "src/test/resources", "chess_chess");

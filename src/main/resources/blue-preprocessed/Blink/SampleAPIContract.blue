@@ -30,7 +30,7 @@ workflows:
                 value: 10
             response:
               type:
-                blueId: 2ahgTKYRtpEQ3eF9TqHB5RDg96nDzQDKPLWDBt3BmURi
+                blueId: CBnTbyZvyrsGozRyUH4sUMHboJvP7a2fGGejyh2x1XWD
       - name: stockfish
         type:
           blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g

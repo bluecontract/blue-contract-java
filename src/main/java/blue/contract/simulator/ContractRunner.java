@@ -159,7 +159,7 @@ public class ContractRunner {
         initiateAction.epoch(0);
         simulator.appendEntry(runnerTimeline, initiateContractProcessingEntryBlueId, initiateAction);
         simulator.subscribe(
-                ContractRunnerSubscriptionUtils.createContractFilter(contract, initiateContractEntryBlueId, runnerTimeline, simulator),
+                ContractRunnerSubscriptionUtils.createContractFilterForSimulator(contract, initiateContractEntryBlueId, runnerTimeline, simulator),
                 entry -> {
                     int epoch = getLastContractUpdate().getEpoch();
                     addEvent(entry);

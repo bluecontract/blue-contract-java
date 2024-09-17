@@ -1,8 +1,10 @@
 package blue.contract;
 
+import blue.contract.debug.DebugContext;
 import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.GenericContract;
+import blue.contract.debug.DebugInfo;
 import blue.contract.model.event.AgreedUponSimulatedEvent;
 import blue.contract.model.event.ContractProcessingEvent;
 import blue.contract.model.subscription.ContractSubscription;
@@ -16,10 +18,16 @@ public class ContractProcessor {
 
     private final SingleEventContractProcessor singleEventProcessor;
     private final Blue blue;
+    private final DebugContext debugContext;
 
     public ContractProcessor(StepProcessorProvider stepProcessorProvider, Blue blue) {
-        this.singleEventProcessor = new SingleEventContractProcessor(stepProcessorProvider, blue);
+        this(stepProcessorProvider, blue, new DebugContext(false));
+    }
+
+    public ContractProcessor(StepProcessorProvider stepProcessorProvider, Blue blue, DebugContext debugContext) {
+        this.singleEventProcessor = new SingleEventContractProcessor(stepProcessorProvider, blue, debugContext);
         this.blue = blue;
+        this.debugContext = debugContext;
     }
 
     public List<ContractUpdateAction> initiate(Node contract,
@@ -70,7 +78,7 @@ public class ContractProcessor {
         int currentEpoch = startingEpoch;
 
         while (!eventsToProcess.isEmpty()) {
-            Node event = eventsToProcess.poll();
+            Node event = eventsToProcess.poll().clone();
             Optional<AgreedUponSimulatedEvent> agreedUponEvent = extractAgreedUponSimulatedEvent(event);
             boolean isAgreedUponEvent = agreedUponEvent.isPresent();
 

@@ -3,11 +3,18 @@ package blue.contract.simulator;
 import blue.contract.model.blink.InitiateTimelineAction;
 import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
+import blue.language.model.Node;
+import blue.language.utils.NodeToMapListOrValue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+
+import static blue.language.utils.UncheckedObjectMapper.JSON_MAPPER;
+import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 
 public class SimulatorMT {
     private final Map<String, Timeline> timelines;
@@ -22,7 +29,6 @@ public class SimulatorMT {
         this.globalTickSequence = new AtomicInteger(0);
         this.blue = blue;
         this.executorService = Executors.newCachedThreadPool();
-        System.out.println("SimulatorMT initialized with Blue instance");
     }
 
     public String createTimeline(String owner) {
@@ -62,11 +68,8 @@ public class SimulatorMT {
     }
 
     private void notifySubscribers(SimulatorTimelineEntry<Object> entry) {
-        System.out.println("Notifying subscribers [" + subscriptions.size() + "] for entry: " + blue.calculateBlueId(entry));
         for (Subscription subscription : subscriptions) {
             if (subscription.filter.test(entry)) {
-                System.out.println("Subscription matched. Executing consumer.");
-                // Execute the consumer synchronously
                 subscription.consumer.accept(entry);
             }
         }
@@ -89,7 +92,6 @@ public class SimulatorMT {
 
     public void subscribe(Predicate<SimulatorTimelineEntry<Object>> filter, TimelineEntryConsumer consumer) {
         subscriptions.add(new Subscription(filter, consumer));
-        System.out.println("New subscription added. Total subscriptions: " + subscriptions.size());
     }
 
     public void shutdown() {
@@ -101,6 +103,62 @@ public class SimulatorMT {
         } catch (InterruptedException ex) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
+        }
+    }
+
+    public <T> T getMessageFromLastTimelineEntry(String timelineId, Class<T> clazz) {
+        Timeline timeline = timelines.get(timelineId);
+        if (timeline == null) {
+            return null;
+        }
+
+        BlockingQueue<SimulatorTimelineEntry<Object>> eventQueue = timeline.getEventQueue();
+        if (eventQueue.isEmpty()) {
+            return null;
+        }
+
+        SimulatorTimelineEntry<Object> lastEntry = null;
+        for (SimulatorTimelineEntry<Object> entry : eventQueue) {
+            lastEntry = entry;
+        }
+
+        if (lastEntry == null) {
+            return null;
+        }
+
+        Object message = lastEntry.getMessage();
+
+        if (message == null) {
+            return null;
+        }
+
+        if (!clazz.isInstance(message)) {
+            return null;
+        }
+
+        return clazz.cast(message);
+    }
+
+    public void save(String timelineId, int skipEntries, String directory, String filePrefix) throws IOException {
+        Timeline timeline = timelines.get(timelineId);
+        if (timeline == null) {
+            throw new IllegalArgumentException("Timeline with ID " + timelineId + " does not exist");
+        }
+
+        File dir = new File(directory);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        BlockingQueue<SimulatorTimelineEntry<Object>> eventQueue = timeline.getEventQueue();
+        List<SimulatorTimelineEntry<Object>> entries = new ArrayList<>(eventQueue);
+
+        for (int i = skipEntries; i < entries.size(); i++) {
+            SimulatorTimelineEntry<Object> entry = entries.get(i);
+            Node entryNode = JSON_MAPPER.convertValue(entry, Node.class);
+
+            File outputFile = new File(directory + "/" + filePrefix + "_" + (i - skipEntries + 1) + "_entry.blue");
+            YAML_MAPPER.writeValue(outputFile, NodeToMapListOrValue.get(entryNode, NodeToMapListOrValue.Strategy.SIMPLE));
         }
     }
 

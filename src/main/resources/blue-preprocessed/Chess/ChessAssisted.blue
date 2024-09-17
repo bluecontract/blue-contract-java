@@ -13,15 +13,15 @@ properties:
       \ the game is not over or ended in a draw)"
     type:
       blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+  draw:
+    description: Indicates whether the game ended in a draw (true) or not (false)
+    type:
+      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
   chessboard:
     description: Chessboard state in FEN notation
     type:
       blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
     value: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-  draw:
-    description: Indicates whether the game ended in a draw (true) or not (false)
-    type:
-      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
   gameOver:
     description: Indicates whether the game has ended (true) or is still in progress
       (false)
@@ -135,14 +135,14 @@ workflows:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
             value: "${event.message.from}"
-          to:
-            type:
-              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-            value: "${event.message.to}"
           draw:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
             value: "${steps.ProcessMove.result.draw}"
+          to:
+            type:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            value: "${event.message.to}"
           gameOver:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

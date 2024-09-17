@@ -149,7 +149,7 @@ workflows:
       contract:
         type: External Contract
         initiateContractEntry:
-          blueId: 3Uuf57nfGypCUQQZQ7SSDQsGdg3dikzrAFQAzZZMQKXJ
+          blueId: ${contract('/properties/assistingContract')}
     steps:
       - type: Trigger Event Step
         event:
@@ -160,5 +160,5 @@ workflows:
               blueId: ${contract('/messaging/participants/Player White/timeline/blueId')}
             message:
               type: Chess Move
-              from: ${event.event.from}
-              to: ${event.event.to}
+              from: ${event.from}
+              to: ${event.to}

@@ -4,9 +4,12 @@ import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.chess.Chess;
+import blue.contract.model.chess.ChessAssisted;
 import blue.contract.model.chess.ChessMove;
 import blue.contract.simulator.ContractRunner2;
+import blue.contract.simulator.ContractRunnerMT;
 import blue.contract.simulator.Simulator;
+import blue.contract.simulator.SimulatorMT;
 import blue.language.Blue;
 import blue.language.model.Node;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,22 +18,21 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static blue.contract.utils.Utils.testBlue;
-import static blue.language.utils.UncheckedObjectMapper.YAML_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ChessTest {
+public class ChessAssistedMTTest {
 
-    private Simulator simulator;
+    private SimulatorMT simulator;
     private Blue blue;
 
     @BeforeEach
     void setUp() throws IOException {
         blue = testBlue();
-        simulator = new Simulator(blue);
+        simulator = new SimulatorMT(blue);
     }
 
     @Test
-    void testChessGame() throws IOException {
+    void testChessGame() throws IOException, InterruptedException {
 
         String whiteId = "Player White";
         String whiteTimeline = simulator.createTimeline(whiteId);
@@ -38,7 +40,10 @@ public class ChessTest {
         String blackId = "Player Black";
         String blackTimeline = simulator.createTimeline(blackId);
 
-        Chess contract = new Chess(whiteTimeline, blackTimeline);
+        String assistantId = "Assistant";
+        String assistantTimeline = simulator.createTimeline(assistantId);
+
+        ChessAssisted contract = new ChessAssisted(whiteTimeline, blackTimeline, assistantTimeline);
         InitiateContractAction initiateContractAction = new InitiateContractAction(contract);
         String initiateContractEntry = simulator.appendEntry(whiteTimeline, initiateContractAction);
 
@@ -48,16 +53,21 @@ public class ChessTest {
         InitiateContractProcessingAction initiateProcessingAction = new InitiateContractProcessingAction(initiateContractEntry, contract);
         String initiateContractProcessingEntry = simulator.appendEntry(runnerTimeline, initiateProcessingAction);
 
-        ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
+        ContractRunnerMT contractRunner = new ContractRunnerMT(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
-        simulator.appendEntry(whiteTimeline, initiateContractEntry, move("e2", "e4"));
+        simulator.appendEntry(assistantTimeline, initiateContractEntry, move("e2", "e4"));
         simulator.appendEntry(blackTimeline, initiateContractEntry, move("e7", "e5"));
-        simulator.appendEntry(whiteTimeline, initiateContractEntry, move("f1", "c4"));
+        simulator.appendEntry(assistantTimeline, initiateContractEntry, move("f1", "c4"));
         simulator.appendEntry(blackTimeline, initiateContractEntry, move("a7", "a6"));
-        simulator.appendEntry(whiteTimeline, initiateContractEntry, move("d1", "h5"));
+        simulator.appendEntry(assistantTimeline, initiateContractEntry, move("d1", "h5"));
         simulator.appendEntry(blackTimeline, initiateContractEntry, move("a6", "a5"));
-        simulator.appendEntry(whiteTimeline, initiateContractEntry, move("h5", "f7"));
+        simulator.appendEntry(assistantTimeline, initiateContractEntry, move("h5", "f7"));
+
+
+        Thread.sleep(4000);
+        contractRunner.stop();
+        simulator.shutdown();
 
         ContractUpdateAction action = simulator.getMessageFromLastTimelineEntry(runnerTimeline, ContractUpdateAction.class);
         Chess finalAfterMoves = blue.convertObject(action.getContractInstance().getContractState(), Chess.class);

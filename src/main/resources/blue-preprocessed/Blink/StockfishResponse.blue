@@ -8,6 +8,8 @@ move:
 eval:
   description: "The numerical evaluation of the position. Positive values favor White,\
     \ negative values favor Black."
+  type:
+    blueId: 68ryJtnmui4j5rCZWUnkZ3DChtmEb7Z9F8atn1mBSM3L
 depth:
   description: The depth of analysis reached by the engine.
   type:
@@ -15,6 +17,8 @@ depth:
 winChance:
   description: "The estimated win probability for the side to move, expressed as a\
     \ percentage."
+  type:
+    blueId: 68ryJtnmui4j5rCZWUnkZ3DChtmEb7Z9F8atn1mBSM3L
 from:
   description: The starting square of the best move in algebraic notation.
   type:

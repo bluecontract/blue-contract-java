@@ -30,4 +30,5 @@ public class Chess extends Contract {
         this.properties = properties;
         return this;
     }
+
 }

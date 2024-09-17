@@ -115,7 +115,7 @@ public class Assistant {
             if (simulator != null) {
                 System.out.println("Appending processed result to timeline:");
                 System.out.println(blue.objectToSimpleYaml(result));
-                simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, result);
+                simulator.appendEntry(assistantTimeline, initiateContractEntryBlueId, blue.objectToNode(result));
             }
             return result;
         } else {

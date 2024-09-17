@@ -26,6 +26,9 @@ public class ChessAssistedRemotely extends Contract {
         List<ContractSubscription> subscriptions = new ArrayList<>();
         subscriptions.add(new AllEventsExternalContractSubscription(externalContractId));
         subscriptions(subscriptions);
+
+        this.properties = new ChessProperties()
+                .assistingContract(externalContractId);
     }
 
     private ChessProperties properties;

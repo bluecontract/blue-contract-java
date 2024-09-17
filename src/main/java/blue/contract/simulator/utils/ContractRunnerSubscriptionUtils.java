@@ -5,6 +5,7 @@ import blue.contract.model.ContractInstance;
 import blue.contract.model.ContractUpdateAction;
 import blue.contract.model.Participant;
 import blue.contract.model.subscription.AllEventsExternalContractSubscription;
+import blue.contract.simulator.LastEntryMessageRetriever;
 import blue.contract.simulator.Simulator;
 import blue.contract.simulator.SimulatorMT;
 import blue.contract.model.blink.SimulatorTimelineEntry;
@@ -16,7 +17,7 @@ import java.util.function.Predicate;
 public class ContractRunnerSubscriptionUtils {
 
     public static Predicate<SimulatorTimelineEntry<Object>> createContractFilter(Contract contract, String initiateContractEntryId,
-                                                                                 String runnerTimeline, Simulator simulator) {
+                                                                                 String runnerTimeline, LastEntryMessageRetriever messageRetriever) {
         return entry -> {
             boolean timelineMatches = false;
             System.out.println("Worker is checking condition");
@@ -38,7 +39,7 @@ public class ContractRunnerSubscriptionUtils {
             if (entry.getMessage() instanceof ContractUpdateAction) {
                 ContractUpdateAction theirAction = (ContractUpdateAction) entry.getMessage();
 
-                ContractUpdateAction ourLastAction = simulator.getMessageFromLastTimelineEntry(runnerTimeline, ContractUpdateAction.class);
+                ContractUpdateAction ourLastAction = messageRetriever.getMessageFromLastTimelineEntry(runnerTimeline, ContractUpdateAction.class);
                 ContractInstance contractInstance = ourLastAction.getContractInstance();
 
                 Set<String> initiateContractEntries = new HashSet<>();
@@ -69,9 +70,16 @@ public class ContractRunnerSubscriptionUtils {
         };
     }
 
-    public static Predicate<SimulatorTimelineEntry<Object>> createContractFilter(Contract contract, String initiateContractEntryId,
-                                                                                 String runnerTimeline, SimulatorMT simulator) {
-        throw new RuntimeException("Not implemented");
+    public static Predicate<SimulatorTimelineEntry<Object>> createContractFilterForSimulator(Contract contract, String initiateContractEntryId,
+                                                                                             String runnerTimeline, Simulator simulator) {
+        LastEntryMessageRetriever retriever = simulator::getMessageFromLastTimelineEntry;
+        return createContractFilter(contract, initiateContractEntryId, runnerTimeline, retriever);
+    }
+
+    public static Predicate<SimulatorTimelineEntry<Object>> createContractFilterForSimulatorMT(Contract contract, String initiateContractEntryId,
+                                                                                               String runnerTimeline, SimulatorMT simulatorMT) {
+        LastEntryMessageRetriever retriever = simulatorMT::getMessageFromLastTimelineEntry;
+        return createContractFilter(contract, initiateContractEntryId, runnerTimeline, retriever);
     }
 
 }

@@ -11,7 +11,6 @@ messaging:
 properties:
   conversation:
     type: List
-    itemType: Conversation Entry
   actualTask:
     type: Local Contract
 
@@ -23,25 +22,45 @@ workflows:
 
   - name: Chat
     trigger:
+      name: IncomingEntry
       event:
         type: Timeline Entry
-        timeline: ${contract('/messaging/participants/User/timeline')}
+        timeline:
+          blueId: ${contract('/messaging/participants/User/timeline/blueId')}
         message:
-          type: Text
+          type: User Message
     steps:
-      - name: BlinkResponse
-        type: Expect Event Step
-        event:
-          type: Timeline Entry
-          timeline: ${contract('/messaging/participants/Assistant/timeline')}
-
-      - name: Apply Changes
+      - name: AddUserMessageToConversation
         type: Update Step
         changeset:
           - op: add
             path: /properties/conversation/-
-            val: ${steps.BlinkResponse}
+            val: ${steps.IncomingEntry.message}
 
+      - name: TriggerAssistantRequest
+        type: Trigger Event Step
+        event:
+          type: Assistant Task Ready Event
+          task:
+            type: Assistant Task
+            request: ${steps.IncomingEntry.message}
+            response:
+              type: Recommended User Action Message
+
+      - name: ExpectAssistantResponse
+        type: Expect Event Step
+        event:
+          type: Timeline Entry
+          timeline:
+            blueId: ${contract('/messaging/participants/Assistant/timeline/blueId')}
+          message: ${steps.TriggerAssistantRequest.event.task}
+
+      - name: AddAssistantMessageToConversation
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/conversation/-
+            val: ${steps.ExpectAssistantResponse.message.response}
 
   - name: Messages from actualTask
     trigger:
@@ -63,6 +82,8 @@ workflows:
         type: Timeline Entry
         timeline:
           blueId: ${contract('/messaging/participants/User/timeline/blueId')}
+        message:
+          type: Contract
     steps:
 
       - name: init

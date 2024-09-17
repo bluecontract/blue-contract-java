@@ -1,6 +1,6 @@
 ---
 items:
-- blueId: FJRgZKfmLfTffrUDv5gAGXEX2G7SVeYmuSeZyaf5fFh3
+- blueId: Eiw1ZSTRe1JVBJXxK4zvhjN6TyRSsXhX2PcJGrKdnLxY
 - type:
     blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
   mappings:
@@ -27,7 +27,7 @@ items:
     Chess Assisted Remotely:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: CBBaCbQ2wUyAodk22ED1A4hhWvZ3bRFkYoDuVQAFM4eC
+      value: AfG6nZXCcF17gBjQrjy1U1VnJ5RZiBs3aVX6a6rWdbJZ
     Chess Move:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
