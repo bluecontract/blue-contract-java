@@ -1,3 +1,11 @@
+## v0.4.1 (2024-09-18)
+
+### Fix
+
+- Upgrade blue-language-java
+- contract processing
+- contract processing
+
 ## v0.4.0 (2024-09-13)
 
 ### Feat
