@@ -11,7 +11,7 @@ items:
     Task:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: HCsUa9aCQrh4NN8Fh2zNoNaRWoaeHmx9R7Sp6sKrRoZ9
+      value: B7oaMWdyAVwFjLdMua9P6AVmokf3Ve42ca68Fp16Te5w
     API Response:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -19,7 +19,7 @@ items:
     User Message:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-      value: 41Rbk8HoofpvDH8UeRHeeacQ1BHQsksj7MwGHJKZYefk
+      value: 9ax84BeyUL3MGsDdrrQEdQGDb21oKpbHSDsWUy45Cded
     Stockfish Response:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -52,6 +52,10 @@ items:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
       value: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+    Processed Conversation Pair:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 57QWF6DcvCoTiSjSC41EjEede9uB21sVoVD6uUj1QRTz
     Sample API Contract:
       type:
         blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

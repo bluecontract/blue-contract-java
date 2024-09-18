@@ -39,16 +39,18 @@ workflows:
 
       - name: TriggerAssistantRequest
         type: Trigger Event Step
+        condition: ${steps.IncomingEntry.message.generateResponse}
         event:
           type: Assistant Task Ready Event
           task:
             type: Assistant Task
             request: ${steps.IncomingEntry.message}
             response:
-              type: Recommended User Action Message
+              type: Conversation Entry
 
       - name: ExpectAssistantResponse
         type: Expect Event Step
+        condition: ${steps.IncomingEntry.message.generateResponse}
         event:
           type: Timeline Entry
           timeline:
@@ -57,6 +59,7 @@ workflows:
 
       - name: AddAssistantMessageToConversation
         type: Update Step
+        condition: ${steps.IncomingEntry.message.generateResponse}
         changeset:
           - op: add
             path: /properties/conversation/-
@@ -97,3 +100,20 @@ workflows:
             val:
               type: Local Contract Subscription
               contractInstanceId: ${steps.init.localContract.id}
+
+  - name: AssistantResponse
+    trigger:
+      name: IncomingEntry
+      event:
+        type: Timeline Entry
+        timeline:
+          blueId: ${contract('/messaging/participants/Assistant/timeline/blueId')}
+        message:
+          type: Conversation Entry
+    steps:
+      - name: AddUserMessageToConversation
+        type: Update Step
+        changeset:
+          - op: add
+            path: /properties/conversation/-
+            val: ${steps.IncomingEntry.message}

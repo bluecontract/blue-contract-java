@@ -23,6 +23,10 @@ properties:
   playerToMove:
     value: white
     description: Indicates whose move it is ('white' or 'black')
+  movesHistory:
+    description: History of moves made
+    type: List
+    itemType: Chess Move
 
 workflows:
 
@@ -141,6 +145,9 @@ workflows:
           - op: replace
             path: /properties/playerToMove
             val: '${(contract("/properties/playerToMove") === "white") ? "black" : "white"}'
+          - op: add
+            path: /properties/movesHistory/-
+            val: ${event.message}
 
   - name: assistant move
     trigger:

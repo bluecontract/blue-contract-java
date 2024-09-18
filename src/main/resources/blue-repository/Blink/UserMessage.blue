@@ -2,3 +2,11 @@ name: User Message
 type: Conversation Entry
 message:
   type: Text
+contracts:
+  description: Mappings between contract description and contract id
+  type: Dictionary
+  keyType: Text
+  valueType: Text
+generateResponse:
+  description: Informs assistant that it should provide a response to this request; alternatively, it will be just stored
+  type: Boolean

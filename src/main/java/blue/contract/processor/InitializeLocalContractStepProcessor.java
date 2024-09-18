@@ -64,9 +64,11 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         contractProcessingContext.startedLocalContracts(contractProcessingContext.getStartedLocalContracts() + 1);
 
         Optional<String> stepName = getStepName();
-        getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
-                "contractInitializationDebug", blue.objectToSimpleYaml(newDebugContext.getDebugInfo())
-        ));
+        if (newDebugContext.getDebugInfo() != null) {
+            getDebugContext().addWorkflowStepResult(getStepName(), Map.of(
+                    "contractInitializationDebug", blue.objectToSimpleYaml(newDebugContext.getDebugInfo())
+            ));
+        }
         if (stepName.isPresent()) {
             LocalContract result = new LocalContract()
                     .id(instance.getId());

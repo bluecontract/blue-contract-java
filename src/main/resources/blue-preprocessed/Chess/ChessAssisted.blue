@@ -22,6 +22,12 @@ properties:
     type:
       blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
     value: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  movesHistory:
+    description: History of moves made
+    type:
+      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+    itemType:
+      blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
   gameOver:
     description: Indicates whether the game has ended (true) or is still in progress
       (false)
@@ -213,6 +219,18 @@ workflows:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
               value: /properties/playerToMove
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${event.message}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/movesHistory/-
     trigger:
       event:
         type:

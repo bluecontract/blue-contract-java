@@ -47,7 +47,11 @@ workflows:
               value: "${steps.IncomingEntry.message}"
             response:
               type:
-                blueId: HWvjD6iit7dToeSjMtCJWPCvuihZkBuuraDZin8DJAvi
+                blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+        condition:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${steps.IncomingEntry.message.generateResponse}"
       - name: ExpectAssistantResponse
         type:
           blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
@@ -60,9 +64,17 @@ workflows:
             value: "${steps.TriggerAssistantRequest.event.task}"
           timeline:
             blueId: "${contract('/messaging/participants/Assistant/timeline/blueId')}"
+        condition:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${steps.IncomingEntry.message.generateResponse}"
       - name: AddAssistantMessageToConversation
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        condition:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${steps.IncomingEntry.message.generateResponse}"
         changeset:
           items:
           - val:
@@ -84,7 +96,7 @@ workflows:
           blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
         message:
           type:
-            blueId: 41Rbk8HoofpvDH8UeRHeeacQ1BHQsksj7MwGHJKZYefk
+            blueId: 9ax84BeyUL3MGsDdrrQEdQGDb21oKpbHSDsWUy45Cded
         timeline:
           blueId: "${contract('/messaging/participants/User/timeline/blueId')}"
   - name: Messages from actualTask
@@ -154,6 +166,36 @@ workflows:
             blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
         timeline:
           blueId: "${contract('/messaging/participants/User/timeline/blueId')}"
+  - name: AssistantResponse
+    steps:
+      items:
+      - name: AddUserMessageToConversation
+        type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.IncomingEntry.message}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/conversation/-
+    trigger:
+      name: IncomingEntry
+      event:
+        type:
+          blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+        message:
+          type:
+            blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+        timeline:
+          blueId: "${contract('/messaging/participants/Assistant/timeline/blueId')}"
 properties:
   actualTask:
     type:
