@@ -1,5 +1,10 @@
 name: Local Contracts Contract
 type: Contract
+messaging:
+  participants:
+    Alice:
+      timeline:
+        blueId: main-contract-participant-id
 subscriptions:
   - type: Local Contract Subscription
     contractInstanceId: 22
@@ -13,6 +18,11 @@ workflows:
         contract:
           name: My Local Contract
           type: Contract
+          messaging:
+            participants:
+              Alice:
+                timeline:
+                  description: should populate from main contract
           subscriptions:
             - type: Local Contract Subscription
               contractInstanceId: 0

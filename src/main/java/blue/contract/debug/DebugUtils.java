@@ -21,8 +21,8 @@ public class DebugUtils {
 
         Node extendedNode = event.clone();
         blue.extend(extendedNode, compositeLimits);
-        Node resolvedNode = blue.resolve(extendedNode, compositeLimits);
-        Node resolvedType = blue.resolve(expectedEvent, compositeLimits);
+        Node resolvedNode = blue.resolve(extendedNode);
+        Node resolvedType = blue.resolve(expectedEvent);
 
         return Map.of("resolvedEvent", blue.nodeToSimpleYaml(resolvedNode), "resolvedType", blue.nodeToSimpleYaml(resolvedType));
 

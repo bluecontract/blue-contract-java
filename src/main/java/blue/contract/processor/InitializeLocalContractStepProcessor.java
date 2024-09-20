@@ -98,6 +98,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
             Participant participantToCopy = currentParticipants.get(key);
             participantsToInitialize.put(key, participantToCopy);
         }
+        contractToInitializeNode.getProperties().put("messaging", blue.objectToNode(contractToInitialize.getMessaging()));
     }
 
     public Node extractContract(WorkflowProcessingContext context, Blue blue) {

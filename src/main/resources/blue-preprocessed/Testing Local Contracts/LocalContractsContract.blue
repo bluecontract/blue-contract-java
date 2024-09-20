@@ -54,6 +54,11 @@ workflows:
                 event:
                   type:
                     blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
+          messaging:
+            participants:
+              Alice:
+                timeline:
+                  description: should populate from main contract
       - type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
         changeset:
@@ -74,3 +79,8 @@ workflows:
       event:
         type:
           blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
+messaging:
+  participants:
+    Alice:
+      timeline:
+        blueId: main-contract-participant-id

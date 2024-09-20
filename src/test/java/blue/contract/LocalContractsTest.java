@@ -1,5 +1,6 @@
 package blue.contract;
 
+import blue.contract.model.GenericContract;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.testcontract.LocalContractsContract;
@@ -43,6 +44,9 @@ public class LocalContractsTest {
 
         ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
+
+        GenericContract genericContract = blue.nodeToObject(contractRunner.getLastContractUpdate().getContractInstance().getProcessingState().getLocalContractInstances().get(0).getContractState(), GenericContract.class);
+        assertEquals("main-contract-participant-id", genericContract.getMessaging().getParticipants().get("Alice").getTimeline());
 
 //        contractRunner.save("src/test/resources", "local");
     }
