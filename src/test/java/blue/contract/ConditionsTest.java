@@ -1,5 +1,6 @@
 package blue.contract;
 
+import blue.contract.model.GenericContract;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.testcontract.ConditionsContract;
@@ -43,7 +44,8 @@ public class ConditionsTest {
         ContractRunner2 contractRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
-        assertEquals("z", contractRunner.getLastContractUpdate().getContractInstance().getContractState().getProperties().get("z").getValue());
+        GenericContract genericContract = blue.nodeToObject(contractRunner.getLastContractUpdate().getContractInstance().getContractState(), GenericContract.class);
+        assertEquals("z", genericContract.getProperties().get("z").getValue());
     }
     
 }

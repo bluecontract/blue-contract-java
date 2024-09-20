@@ -1,5 +1,6 @@
 package blue.contract;
 
+import blue.contract.model.GenericContract;
 import blue.contract.model.action.InitiateContractAction;
 import blue.contract.model.action.InitiateContractProcessingAction;
 import blue.contract.model.testcontract.DelegationTestingContract;
@@ -49,10 +50,11 @@ public class DelegationsTest {
         contractRunner.startProcessingContract(contract, runnerTimeline, simulator);
 
 //        simulator.appendEntry(aliceTimeline, initiateContractEntry, "abc");
-        simulator.appendEntry(bobTimeline, initiateContractEntry, "abc");
-//        simulator.appendEntry(bobTimeline, initiateContractEntry, BigInteger.ONE);
+//        simulator.appendEntry(bobTimeline, initiateContractEntry, "abc");
+        simulator.appendEntry(bobTimeline, initiateContractEntry, BigInteger.ONE);
 
-        System.out.println("x = " + contractRunner.getLastContractUpdate().getContractInstance().getContractState().getProperties().get("x").getValue());
+        GenericContract genericContract = blue.nodeToObject(contractRunner.getLastContractUpdate().getContractInstance().getContractState(), GenericContract.class);
+        System.out.println("x = " + genericContract.getProperties().get("x").getValue());
     }
     
 }

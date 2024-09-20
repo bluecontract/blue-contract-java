@@ -99,7 +99,7 @@ public class UpdateStepProcessor extends AbstractStepProcessor {
 
             JsonNode result = patch.apply(objNode);
             Node updatedContract = JSON_MAPPER.convertValue(result, Node.class);
-            context.getContractProcessingContext().contract(blue.nodeToObject(updatedContract, GenericContract.class));
+            context.getContractProcessingContext().contract(updatedContract);
 
             List<Map<String, Object>> eventChangeset = prepareChangeset(evaluatedChangeset, true);
             ContractUpdateEvent updateEvent = new ContractUpdateEvent()

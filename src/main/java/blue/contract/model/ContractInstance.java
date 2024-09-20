@@ -1,16 +1,18 @@
 package blue.contract.model;
 
+import blue.language.model.Node;
+
 public class ContractInstance {
 
     private int id;
-    private GenericContract contractState;
+    private Node contractState;
     private ProcessingState processingState;
 
     public int getId() {
         return id;
     }
 
-    public GenericContract getContractState() {
+    public Node getContractState() {
         return contractState;
     }
 
@@ -23,7 +25,7 @@ public class ContractInstance {
         return this;
     }
 
-    public ContractInstance contractState(GenericContract contractState) {
+    public ContractInstance contractState(Node contractState) {
         this.contractState = contractState;
         return this;
     }

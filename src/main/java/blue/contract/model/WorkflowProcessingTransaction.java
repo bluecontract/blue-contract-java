@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WorkflowProcessingTransaction {
-    private GenericContract contract;
+    private Node contract;
     private List<Node> emittedEvents = new ArrayList<>();
     private List<ContractInstance> contractInstances;
     private int startedLocalContracts;
@@ -18,7 +18,7 @@ public class WorkflowProcessingTransaction {
     private boolean workflowCompleted;
     private WorkflowInstance workflowNestedWorkflowInstance;
 
-    public GenericContract getContract() {
+    public Node getContract() {
         return contract;
     }
 
@@ -58,7 +58,7 @@ public class WorkflowProcessingTransaction {
         return workflowNestedWorkflowInstance;
     }
 
-    public WorkflowProcessingTransaction contract(GenericContract contract) {
+    public WorkflowProcessingTransaction contract(Node contract) {
         this.contract = contract;
         return this;
     }

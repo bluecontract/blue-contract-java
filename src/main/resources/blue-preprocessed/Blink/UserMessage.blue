@@ -2,6 +2,16 @@
 name: User Message
 type:
   blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+relevantContractTypes:
+  type:
+    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+  itemType:
+    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+relevantAssistantTypes:
+  type:
+    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+  itemType:
+    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
 message:
   type:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

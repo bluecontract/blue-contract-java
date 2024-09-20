@@ -32,7 +32,7 @@ public class FlowsTest {
         ContractRunner simulator = new ContractRunner(blue, SAMPLE_BLUE_ID_1, SAMPLE_BLUE_ID_2);
 //
 //        simulator.initiateContract(contract);
-////        simulator.processEmittedEventsOnly();
+//        simulator.processEmittedEventsOnly();
 //
 //        simulator.save("src/test/resources", "f1");
 

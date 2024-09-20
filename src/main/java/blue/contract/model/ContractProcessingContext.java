@@ -16,7 +16,7 @@ import static blue.contract.utils.Constants.ROOT_INSTANCE_ID;
 import static blue.language.utils.NodeToMapListOrValue.Strategy.SIMPLE;
 
 public class ContractProcessingContext {
-    private GenericContract contract;
+    private Node contract;
     private int contractInstanceId;
     private List<Node> emittedEvents = new ArrayList<>();;
     private List<ContractInstance> contractInstances;
@@ -30,7 +30,7 @@ public class ContractProcessingContext {
     private ContractProcessorConfig config;
     private Node incomingEvent;
 
-    public GenericContract getContract() {
+    public Node getContract() {
         return contract;
     }
 
@@ -82,7 +82,7 @@ public class ContractProcessingContext {
         return config;
     }
 
-    public ContractProcessingContext contract(GenericContract contract) {
+    public ContractProcessingContext contract(Node contract) {
         this.contract = contract;
         return this;
     }
@@ -170,14 +170,11 @@ public class ContractProcessingContext {
                     .orElseThrow(() -> new IllegalStateException("LocalContract class must have @BlueId annotation properly set."));
             if (localContractBlueId.equals(node.getType().get("/blueId"))) {
                 BigInteger id = (BigInteger) node.getProperties().get("id").getValue();
-                Contract contractState = contractInstances.stream()
+                return contractInstances.stream()
                         .filter(instance -> instance.getId() == id.intValue())
                         .findFirst()
                         .map(ContractInstance::getContractState)
                         .orElse(null);
-                if (contractState != null) {
-                    return blue.objectToNode(contractState);
-                }
             }
         }
         return null;

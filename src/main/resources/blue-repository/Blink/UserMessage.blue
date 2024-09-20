@@ -10,3 +10,9 @@ contracts:
 generateResponse:
   description: Informs assistant that it should provide a response to this request; alternatively, it will be just stored
   type: Boolean
+relevantAssistantTypes:
+  type: List
+  itemType: Text
+relevantContractTypes:
+  type: List
+  itemType: Text

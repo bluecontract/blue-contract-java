@@ -63,7 +63,7 @@ public class ContractRunnerMT {
         this.runnerTimeline = runnerTimeline;
 
         simulator.subscribe(
-                entry -> ContractRunnerSubscriptionUtils.createContractFilterForSimulatorMT(contract, initiateContractEntryBlueId, runnerTimeline, simulator).test(entry),
+                entry -> ContractRunnerSubscriptionUtils.createContractFilterForSimulatorMT(contract, initiateContractEntryBlueId, runnerTimeline, simulator, blue).test(entry),
                 entry -> {
                     try {
                         List<Node> events = new ArrayList<>();

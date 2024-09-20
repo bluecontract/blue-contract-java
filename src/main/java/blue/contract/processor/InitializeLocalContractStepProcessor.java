@@ -36,14 +36,13 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
 
     private void processEvent(Node event, WorkflowProcessingContext workflowProcessingContext) {
         Blue blue = workflowProcessingContext.getContractProcessingContext().getBlue();
-        Node extracted = extractContract(workflowProcessingContext, blue);
-        GenericContract contractToInitialize = blue.nodeToObject(extracted, GenericContract.class);
+        Node contractToInitialize = extractContract(workflowProcessingContext, blue);
 
         ContractProcessingContext contractProcessingContext = workflowProcessingContext.getContractProcessingContext();
-        assignParticipants(contractToInitialize, contractProcessingContext.getContract());
+        assignParticipants(contractToInitialize, contractProcessingContext.getContract(), blue);
         int instanceId = contractProcessingContext.getStartedLocalContracts() + 1;
         int currentContractInstanceId = contractProcessingContext.getContractInstanceId();
-        GenericContract currentContract = contractProcessingContext.getContract();
+        Node currentContract = contractProcessingContext.getContract();
         contractProcessingContext.contractInstanceId(instanceId);
         contractProcessingContext.contract(contractToInitialize);
 
@@ -51,7 +50,7 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
         SingleEventContractProcessor singleEventContractProcessor =
                 new SingleEventContractProcessor(contractProcessingContext.getStepProcessorProvider(), blue, newDebugContext);
         ContractUpdateAction update = singleEventContractProcessor
-                .initiate(extracted,
+                .initiate(contractToInitialize,
                         contractProcessingContext,
                         contractProcessingContext.getInitiateContractEntryBlueId(),
                         contractProcessingContext.getInitiateContractProcessingEntryBlueId());
@@ -79,7 +78,10 @@ public class InitializeLocalContractStepProcessor extends AbstractStepProcessor 
 
     }
 
-    private void assignParticipants(GenericContract contractToInitialize, GenericContract mainContract) {
+    private void assignParticipants(Node contractToInitializeNode, Node mainContractNode, Blue blue) {
+
+        GenericContract contractToInitialize = blue.nodeToObject(contractToInitializeNode, GenericContract.class);
+        GenericContract mainContract = blue.nodeToObject(mainContractNode, GenericContract.class);
 
         if (contractToInitialize.getMessaging() == null || contractToInitialize.getMessaging().getParticipants() == null) {
             return;

@@ -96,7 +96,7 @@ workflows:
           blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
         message:
           type:
-            blueId: 9ax84BeyUL3MGsDdrrQEdQGDb21oKpbHSDsWUy45Cded
+            blueId: CDX6FY7NR1ezZ1CnZRqGyqQ4SLj6u3W8ZWEL6oaRtpr8
         timeline:
           blueId: "${contract('/messaging/participants/User/timeline/blueId')}"
   - name: Messages from actualTask

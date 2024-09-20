@@ -67,7 +67,7 @@ public class ContractRunner2 {
 
         System.out.println("Setting up subscription for contract events");
         simulator.subscribe(
-                ContractRunnerSubscriptionUtils.createContractFilterForSimulator(contract, initiateContractEntryBlueId, runnerTimeline, simulator),
+                ContractRunnerSubscriptionUtils.createContractFilterForSimulator(contract, initiateContractEntryBlueId, runnerTimeline, simulator, blue),
                 entry -> {
                     System.out.println("Processing new contract event");
                     int epoch = getLastContractUpdate().getEpoch();

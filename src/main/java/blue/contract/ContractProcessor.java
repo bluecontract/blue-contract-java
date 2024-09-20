@@ -122,13 +122,14 @@ public class ContractProcessor {
 
     private List<ContractSubscription> mergeSubscriptions(ContractInstance contractInstance) {
         List<ContractSubscription> mergedSubscriptions = new ArrayList<>();
-        if (contractInstance.getContractState().getSubscriptions() != null) {
-            mergedSubscriptions.addAll(contractInstance.getContractState().getSubscriptions());
+        GenericContract mainContract = blue.nodeToObject(contractInstance.getContractState(), GenericContract.class);
+        if (mainContract.getSubscriptions() != null) {
+            mergedSubscriptions.addAll(mainContract.getSubscriptions());
         }
 
         if (contractInstance.getProcessingState().getLocalContractInstances() != null) {
             for (ContractInstance localInstance : contractInstance.getProcessingState().getLocalContractInstances()) {
-                GenericContract localContract = localInstance.getContractState();
+                GenericContract localContract = blue.nodeToObject(localInstance.getContractState(), GenericContract.class);
                 if (localContract.getSubscriptions() != null) {
                     mergedSubscriptions.addAll(localContract.getSubscriptions());
                 }
