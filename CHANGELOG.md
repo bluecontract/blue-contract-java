@@ -1,3 +1,13 @@
+## v0.4.2 (2024-09-23)
+
+### Fix
+
+- Upgrade blue-language-java
+- blink messages
+- test
+- participants in subcontracts
+- maintaining contract type
+
 ## v0.4.1 (2024-09-18)
 
 ### Fix
