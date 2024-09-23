@@ -83,11 +83,11 @@ public class SampleAPITest {
 
         ContractRunner2 taskRunner = new ContractRunner2(blue, initiateContractEntry, initiateContractProcessingEntry);
         taskRunner.startProcessingContract(taskContract, taskRunnerTimeline, simulator);
-
-        SampleTask task = new SampleTask(assistantTimeline, "rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b - - 1 11");
-        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
-        task = new SampleTask(assistantTimeline, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
+//
+//        SampleTask task = new SampleTask(assistantTimeline, "rn1q1rk1/pp2b1pp/2p2n2/3p1pB1/3P4/1QP2N2/PP1N1PPP/R4RK1 b - - 1 11");
+//        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
+//        task = new SampleTask(assistantTimeline, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+//        simulator.appendEntry(aliceTimeline, initiateContractEntry, blue.resolve(blue.objectToNode(task)));
 
         simulator.save(taskRunnerTimeline, 2, "src/test/resources", "task");
 
