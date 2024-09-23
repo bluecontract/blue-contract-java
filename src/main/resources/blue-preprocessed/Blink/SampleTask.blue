@@ -122,7 +122,7 @@ workflows:
           blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
         event:
           type:
-            blueId: 2Dw47cJMtpB6BhRkA6DkAqrgc3NKFcHHoqwUy9z3Ts1x
+            blueId: AKUEwDRue5k66kqfT6CszvRbNFNj9hwABKcsHR1WfMHx
           priority:
             type:
               blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

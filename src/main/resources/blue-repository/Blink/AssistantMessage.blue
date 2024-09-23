@@ -4,3 +4,14 @@ message:
   type: Text
 priority:
   type: Text
+contracts:
+  description: Mappings between contract description and contract id
+  type: Dictionary
+  keyType: Text
+  valueType: List
+relevantAssistantTypes:
+  type: List
+  itemType: Text
+relevantContractTypes:
+  type: List
+  itemType: Text

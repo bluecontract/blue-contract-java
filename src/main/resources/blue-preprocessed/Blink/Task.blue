@@ -15,6 +15,38 @@ workflows:
   - name: Chat
     steps:
       items:
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.IncomingEntry}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${contract('/properties/lastConversationEntry/blueId')}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry/message/entryId
       - name: AddUserMessageToConversation
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
@@ -23,7 +55,7 @@ workflows:
           - val:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: "${steps.IncomingEntry.message}"
+              value: "${contract('/properties/lastConversationEntry/message')}"
             op:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -68,6 +100,38 @@ workflows:
           type:
             blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
           value: "${steps.IncomingEntry.message.generateResponse}"
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.ExpectAssistantResponse}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${contract('/properties/lastConversationEntry/blueId')}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry/message/response/entryId
       - name: AddAssistantMessageToConversation
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
@@ -80,7 +144,7 @@ workflows:
           - val:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: "${steps.ExpectAssistantResponse.message.response}"
+              value: "${contract('/properties/lastConversationEntry/message/response')}"
             op:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
@@ -169,6 +233,38 @@ workflows:
   - name: AssistantResponse
     steps:
       items:
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${steps.IncomingEntry}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry
+      - type:
+          blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        changeset:
+          items:
+          - val:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: "${contract('/properties/lastConversationEntry/blueId')}"
+            op:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: add
+            path:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              value: /properties/lastConversationEntry/message/entryId
       - name: AddUserMessageToConversation
         type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
@@ -177,7 +273,7 @@ workflows:
           - val:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-              value: "${steps.IncomingEntry.message}"
+              value: "${contract('/properties/lastConversationEntry/message')}"
             op:
               type:
                 blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

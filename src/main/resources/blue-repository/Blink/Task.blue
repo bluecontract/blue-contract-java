@@ -30,12 +30,25 @@ workflows:
         message:
           type: User Message
     steps:
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry
+            val: ${steps.IncomingEntry}
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry/message/entryId
+            val: ${contract('/properties/lastConversationEntry/blueId')}
+
       - name: AddUserMessageToConversation
         type: Update Step
         changeset:
           - op: add
             path: /properties/conversation/-
-            val: ${steps.IncomingEntry.message}
+            val: ${contract('/properties/lastConversationEntry/message')}
 
       - name: TriggerAssistantRequest
         type: Trigger Event Step
@@ -57,13 +70,25 @@ workflows:
             blueId: ${contract('/messaging/participants/Assistant/timeline/blueId')}
           message: ${steps.TriggerAssistantRequest.event.task}
 
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry
+            val: ${steps.ExpectAssistantResponse}
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry/message/response/entryId
+            val: ${contract('/properties/lastConversationEntry/blueId')}
+
       - name: AddAssistantMessageToConversation
         type: Update Step
         condition: ${steps.IncomingEntry.message.generateResponse}
         changeset:
           - op: add
             path: /properties/conversation/-
-            val: ${steps.ExpectAssistantResponse.message.response}
+            val: ${contract('/properties/lastConversationEntry/message/response')}
 
   - name: Messages from actualTask
     trigger:
@@ -111,9 +136,22 @@ workflows:
         message:
           type: Conversation Entry
     steps:
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry
+            val: ${steps.IncomingEntry}
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/lastConversationEntry/message/entryId
+            val: ${contract('/properties/lastConversationEntry/blueId')}
+
       - name: AddUserMessageToConversation
         type: Update Step
         changeset:
           - op: add
             path: /properties/conversation/-
-            val: ${steps.IncomingEntry.message}
+            val: ${contract('/properties/lastConversationEntry/message')}
