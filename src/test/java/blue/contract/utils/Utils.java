@@ -1,5 +1,6 @@
 package blue.contract.utils;
 
+import blue.contract.model.TimelineEntry;
 import blue.contract.model.blink.SimulatorTimelineEntry;
 import blue.language.Blue;
 import blue.language.NodeProvider;
@@ -45,7 +46,7 @@ public class Utils {
                     new TypeClassResolver("blue.contract.model")
             );
             blue.setGlobalLimits(new TypeSpecificPropertyFilter(
-                    BlueIds.getBlueId(SimulatorTimelineEntry.class).orElseThrow(() -> new RuntimeException("No Simulator Timeline Entry blueId found.")),
+                    BlueIds.getBlueId(TimelineEntry.class).orElseThrow(() -> new RuntimeException("No Simulator Timeline Entry blueId found.")),
                     ImmutableSet.of("timeline", "timelinePrev", "thread", "threadPrev", "signature")));
             return blue;
         } catch (IOException e) {

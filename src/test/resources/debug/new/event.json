@@ -1,0 +1,21 @@
+{
+    "type": {
+        "blueId": "HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC"
+    },
+    "timeline": {
+        "blueId": "8PYXoMW7HwUQFp6dmDyHtkz9njbyj6iC9qzNheXm2wLY"
+    },
+    "timelinePrev": {
+        "blueId": "E2ux86tE4xn82VR4wN6C91utJ7iCu4rk5Y5CcdwMj7BX"
+    },
+    "message": {
+        "type": {
+            "blueId": "CDX6FY7NR1ezZ1CnZRqGyqQ4SLj6u3W8ZWEL6oaRtpr8"
+        },
+        "message": "I would like to play a poker game",
+        "generateResponse": false
+    },
+    "thread": {
+        "blueId": "E2ux86tE4xn82VR4wN6C91utJ7iCu4rk5Y5CcdwMj7BX"
+    }
+}

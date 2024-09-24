@@ -2,11 +2,6 @@
 name: Delegation Testing Contract
 type:
   blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
-properties:
-  x:
-    type:
-      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-    value: 0
 workflows:
   items:
   - name: change x
@@ -72,6 +67,11 @@ workflows:
         message:
           type:
             blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+properties:
+  x:
+    type:
+      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+    value: 0
 messaging:
   participants:
     Bob:

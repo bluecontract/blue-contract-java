@@ -2,11 +2,6 @@
 name: Temp Sample
 type:
   blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
-properties:
-  x:
-    type:
-      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-    value: 0
 workflows:
   items:
   - name: Chat
@@ -35,6 +30,11 @@ workflows:
           blueId: AUNmTVheLJGNsHwnh7s1VHBRyANRxL8E1qdDZBApyvCf
         timeline:
           blueId: "${contract('/messaging/participants/Bob/timeline/blueId')}"
+properties:
+  x:
+    type:
+      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+    value: 0
 messaging:
   participants:
     Bob:

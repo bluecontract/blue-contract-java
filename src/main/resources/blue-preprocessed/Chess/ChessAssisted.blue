@@ -2,37 +2,6 @@
 name: Chess Assisted
 type:
   blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
-properties:
-  playerToMove:
-    description: Indicates whose move it is ('white' or 'black')
-    type:
-      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-    value: white
-  winner:
-    description: "Indicates who won the game (e.g., 'White', 'Black', or 'None' if\
-      \ the game is not over or ended in a draw)"
-    type:
-      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-  draw:
-    description: Indicates whether the game ended in a draw (true) or not (false)
-    type:
-      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
-  chessboard:
-    description: Chessboard state in FEN notation
-    type:
-      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-    value: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-  movesHistory:
-    description: History of moves made
-    type:
-      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
-    itemType:
-      blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
-  gameOver:
-    description: Indicates whether the game has ended (true) or is still in progress
-      (false)
-    type:
-      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
 workflows:
   items:
   - steps:
@@ -271,11 +240,42 @@ workflows:
             blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
         timeline:
           blueId: "${contract('/messaging/participants/Assistant/timeline/blueId')}"
+properties:
+  winner:
+    description: "Indicates who won the game (e.g., 'White', 'Black', or 'None' if\
+      \ the game is not over or ended in a draw)"
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+  movesHistory:
+    description: History of moves made
+    type:
+      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+    itemType:
+      blueId: 8jZbrfLeR9hmGRarz7N5wqpFVnrWwhA4Gb2UfwZqzpsX
+  playerToMove:
+    description: Indicates whose move it is ('white' or 'black')
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: white
+  draw:
+    description: Indicates whether the game ended in a draw (true) or not (false)
+    type:
+      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
+  chessboard:
+    description: Chessboard state in FEN notation
+    type:
+      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+    value: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  gameOver:
+    description: Indicates whether the game has ended (true) or is still in progress
+      (false)
+    type:
+      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
 messaging:
   participants:
-    Player White:
-      description: Player White timeline
     Player Black:
       description: Player Black timeline
+    Player White:
+      description: Player White timeline
     Assistant:
       description: Assistant timeline

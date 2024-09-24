@@ -1,0 +1,2002 @@
+type:
+  blueId: 2ZAaS6aFz4NKLk6uQLUmsozwqXnThqsK1jNN6EnQAMq3
+initiateContractEntry:
+  blueId: E2ux86tE4xn82VR4wN6C91utJ7iCu4rk5Y5CcdwMj7BX
+contractInstance:
+  processingState:
+    terminatedWithError: false
+    startedLocalContractCount: 0
+    completed: false
+    startedWorkflowCount: 0
+  id: 0
+  contractState:
+    name: Task
+    type:
+      name: Task
+      type:
+        name: Contract
+        description: (full documentation goes here)
+        blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
+        subscriptions:
+          type:
+            blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+          itemType:
+            blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+        workflows:
+          description: workflows part
+          type:
+            blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+          itemType:
+            blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+        properties:
+          description: properties part
+        messaging:
+          secureChannel:
+            description: channel part
+          participants:
+            type:
+              blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+            keyType:
+              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            valueType:
+              blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+      blueId: 3HXhxa5ejuGSqZfJxHSsD17saSpnfUxnBtWzhNvwbzmB
+      subscriptions:
+        type:
+          blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+        itemType:
+          blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+        items:
+          - type:
+              name: Local Contract Subscription
+              description: Represents a subscription to a local contract.
+              type:
+                name: Contract Subscription
+                description: Represents a subscription to a contract.
+                blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+              blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+              contractInstanceId:
+                description: >
+                  Identifier for the specific contract instance this
+                  subscription is associated with.
+
+                  If null, the subscription applies to all contract instances.
+              event:
+                description: >-
+                  Represents the event this subscription is interested in.
+
+                  If null, the subscription applies to all events within the
+                  specified contract instance.
+              workflowInstanceId:
+                description: >
+                  Identifier for the specific workflow instance this
+                  subscription is associated with.
+
+                  If null, the subscription applies to all workflow instances
+                  within the specified contract instance.
+            contractInstanceId:
+              description: >
+                Identifier for the specific contract instance this subscription
+                is associated with.
+
+                If null, the subscription applies to all contract instances.
+              type:
+                blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+              value: 100000
+            event:
+              description: >-
+                Represents the event this subscription is interested in.
+
+                If null, the subscription applies to all events within the
+                specified contract instance.
+            workflowInstanceId:
+              description: >
+                Identifier for the specific workflow instance this subscription
+                is associated with.
+
+                If null, the subscription applies to all workflow instances
+                within the specified contract instance.
+      workflows:
+        description: workflows part
+        type:
+          blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+        itemType:
+          blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+        items:
+          - name: Chat
+            steps:
+              items:
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: ${steps.IncomingEntry}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/lastConversationEntry
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/blueId')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/lastConversationEntry/message/entryId
+                - name: AddUserMessageToConversation
+                  type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/message')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/conversation/-
+                - name: TriggerAssistantRequest
+                  type:
+                    name: Trigger Event Step
+                    description: >
+                      A specialized workflow step designed to generate and emit
+                      a specific event. 
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+                    event:
+                      description: >-
+                        Defines the event to be triggered. 
+
+
+                        Important: Any ${} expressions within the event object
+                        will be evaluated 
+
+                        at runtime. The actual triggered event will contain the
+                        evaluated values, 
+
+                        not the raw template expressions.
+                  event:
+                    description: >-
+                      Defines the event to be triggered. 
+
+
+                      Important: Any ${} expressions within the event object
+                      will be evaluated 
+
+                      at runtime. The actual triggered event will contain the
+                      evaluated values, 
+
+                      not the raw template expressions.
+                    type:
+                      name: Assistant Task Ready Event
+                      blueId: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
+                      task:
+                        type:
+                          name: Assistant Task
+                          blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+                          request:
+                            description: Task definition.
+                          response:
+                            description: Result
+                        request:
+                          description: Task definition.
+                        response:
+                          description: Result
+                    task:
+                      type:
+                        name: Assistant Task
+                        blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+                        request:
+                          description: Task definition.
+                        response:
+                          description: Result
+                      request:
+                        description: Task definition.
+                        type:
+                          blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                        value: ${steps.IncomingEntry.message}
+                      response:
+                        description: Result
+                        type:
+                          name: Conversation Entry
+                          blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+                  condition:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    value: ${steps.IncomingEntry.message.generateResponse}
+                - name: ExpectAssistantResponse
+                  type:
+                    name: Expect Event Step
+                    description: >
+                      A specialized workflow step designed to wait for and
+                      process a specific event. 
+
+                      This step acts as a gatekeeper, allowing the workflow to
+                      pause until a 
+
+                      particular event occurs, then facilitating the event's
+                      progression through 
+
+                      subsequent workflow steps.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+                    event:
+                      description: >-
+                        Defines the expected event characteristics. This object
+                        specifies the 
+
+                        criteria that an incoming event must meet to be
+                        considered a match and 
+
+                        trigger the continuation of the workflow.
+
+
+                        Important: Any ${} expressions within the event object
+                        will be evaluated 
+
+                        at runtime. The incoming event will be compared against
+                        this evaluated 
+
+                        version of the criteria, not the raw template.
+                  event:
+                    description: >-
+                      Defines the expected event characteristics. This object
+                      specifies the 
+
+                      criteria that an incoming event must meet to be considered
+                      a match and 
+
+                      trigger the continuation of the workflow.
+
+
+                      Important: Any ${} expressions within the event object
+                      will be evaluated 
+
+                      at runtime. The incoming event will be compared against
+                      this evaluated 
+
+                      version of the criteria, not the raw template.
+                    type:
+                      name: Timeline Entry
+                      blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+                      threadPrev:
+                        description: Previous entry in the thread
+                      signature:
+                        type:
+                          blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                      timeline:
+                        description: Timeline this entry belongs to
+                      thread:
+                        description: Optional thread
+                      timelinePrev:
+                        description: Previous entry
+                      message:
+                        description: Message
+                    threadPrev:
+                      description: Previous entry in the thread
+                    signature:
+                      type:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    timeline:
+                      description: Timeline this entry belongs to
+                      blueId: >-
+                        ${contract('/messaging/participants/Assistant/timeline/blueId')}
+                    thread:
+                      description: Optional thread
+                    timelinePrev:
+                      description: Previous entry
+                    message:
+                      description: Message
+                      type:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                      value: ${steps.TriggerAssistantRequest.event.task}
+                  condition:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    value: ${steps.IncomingEntry.message.generateResponse}
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: ${steps.ExpectAssistantResponse}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/lastConversationEntry
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/blueId')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            /properties/lastConversationEntry/message/response/entryId
+                - name: AddAssistantMessageToConversation
+                  type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  condition:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    value: ${steps.IncomingEntry.message.generateResponse}
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/message/response')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/conversation/-
+            trigger:
+              name: IncomingEntry
+              event:
+                type:
+                  name: Timeline Entry
+                  blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+                  threadPrev:
+                    description: Previous entry in the thread
+                  signature:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  timeline:
+                    description: Timeline this entry belongs to
+                  thread:
+                    description: Optional thread
+                  timelinePrev:
+                    description: Previous entry
+                  message:
+                    description: Message
+                threadPrev:
+                  description: Previous entry in the thread
+                signature:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                timeline:
+                  description: Timeline this entry belongs to
+                  blueId: ${contract('/messaging/participants/User/timeline/blueId')}
+                thread:
+                  description: Optional thread
+                timelinePrev:
+                  description: Previous entry
+                message:
+                  description: Message
+                  type:
+                    name: User Message
+                    type:
+                      name: Conversation Entry
+                      blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+                    blueId: CDX6FY7NR1ezZ1CnZRqGyqQ4SLj6u3W8ZWEL6oaRtpr8
+                    relevantContractTypes:
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    relevantAssistantTypes:
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    message:
+                      type:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    contracts:
+                      description: Mappings between contract description and contract id
+                      type:
+                        blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                      keyType:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                      valueType:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    generateResponse:
+                      description: >-
+                        Informs assistant that it should provide a response to
+                        this request; alternatively, it will be just stored
+                      type:
+                        blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
+                  relevantContractTypes:
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  relevantAssistantTypes:
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  message:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  contracts:
+                    description: Mappings between contract description and contract id
+                    type:
+                      blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                    keyType:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    valueType:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  generateResponse:
+                    description: >-
+                      Informs assistant that it should provide a response to
+                      this request; alternatively, it will be just stored
+                    type:
+                      blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
+          - name: Messages from actualTask
+            steps:
+              items:
+                - name: Apply Changes
+                  type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: ${steps.incomingConversationEntry}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/conversation/-
+            trigger:
+              name: incomingConversationEntry
+              event:
+                type:
+                  name: Conversation Entry
+                  blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+              contract:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                value: ${contract('/properties/actualTask')}
+          - name: contractDef
+            steps:
+              items:
+                - name: init
+                  type:
+                    name: Initialize Local Contract Step
+                    description: >
+                      A specialized workflow step designed to create and
+                      initialize a new local 
+
+                      instance.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: D7bzHri8CT5j7aZtWVLcTAXkVdrrhe9inGbQopszrtbB
+                    contract:
+                      description: >
+                        Specifies the content of the contract that will be
+                        initialized.
+                  contract:
+                    description: >
+                      Specifies the content of the contract that will be
+                      initialized.
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    value: ${event.message}
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            name: Local Contract Subscription
+                            description: Represents a subscription to a local contract.
+                            type:
+                              name: Contract Subscription
+                              description: Represents a subscription to a contract.
+                              blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+                            blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+                            contractInstanceId:
+                              description: >
+                                Identifier for the specific contract instance
+                                this subscription is associated with.
+
+                                If null, the subscription applies to all
+                                contract instances.
+                            event:
+                              description: >-
+                                Represents the event this subscription is
+                                interested in.
+
+                                If null, the subscription applies to all events
+                                within the specified contract instance.
+                            workflowInstanceId:
+                              description: >
+                                Identifier for the specific workflow instance
+                                this subscription is associated with.
+
+                                If null, the subscription applies to all
+                                workflow instances within the specified contract
+                                instance.
+                          contractInstanceId:
+                            description: >
+                              Identifier for the specific contract instance this
+                              subscription is associated with.
+
+                              If null, the subscription applies to all contract
+                              instances.
+                            type:
+                              blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                            value: ${steps.init.localContract.id}
+                          event:
+                            description: >-
+                              Represents the event this subscription is
+                              interested in.
+
+                              If null, the subscription applies to all events
+                              within the specified contract instance.
+                          workflowInstanceId:
+                            description: >
+                              Identifier for the specific workflow instance this
+                              subscription is associated with.
+
+                              If null, the subscription applies to all workflow
+                              instances within the specified contract instance.
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /subscriptions/-
+            trigger:
+              event:
+                type:
+                  name: Timeline Entry
+                  blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+                  threadPrev:
+                    description: Previous entry in the thread
+                  signature:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  timeline:
+                    description: Timeline this entry belongs to
+                  thread:
+                    description: Optional thread
+                  timelinePrev:
+                    description: Previous entry
+                  message:
+                    description: Message
+                threadPrev:
+                  description: Previous entry in the thread
+                signature:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                timeline:
+                  description: Timeline this entry belongs to
+                  blueId: ${contract('/messaging/participants/User/timeline/blueId')}
+                thread:
+                  description: Optional thread
+                timelinePrev:
+                  description: Previous entry
+                message:
+                  description: Message
+                  type:
+                    name: Contract
+                    description: (full documentation goes here)
+                    blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
+                    subscriptions:
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+                    workflows:
+                      description: workflows part
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+                    properties:
+                      description: properties part
+                    messaging:
+                      secureChannel:
+                        description: channel part
+                      participants:
+                        type:
+                          blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                        keyType:
+                          blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                        valueType:
+                          blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+                  subscriptions:
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+                  workflows:
+                    description: workflows part
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+                  properties:
+                    description: properties part
+                  messaging:
+                    secureChannel:
+                      description: channel part
+                    participants:
+                      type:
+                        blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                      keyType:
+                        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                      valueType:
+                        blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+          - name: AssistantResponse
+            steps:
+              items:
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: ${steps.IncomingEntry}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/lastConversationEntry
+                - type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/blueId')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/lastConversationEntry/message/entryId
+                - name: AddUserMessageToConversation
+                  type:
+                    name: Update Step
+                    description: >
+                      A specialized workflow step responsible for executing
+                      changes to the contract. 
+
+                      This is the sole step type authorized to modify contract
+                      content.
+                    type:
+                      name: Workflow Step
+                      description: Represents a single step within a workflow.
+                      blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+                    blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+                    changeset:
+                      description: >-
+                        An ordered list of JSON Patch operations to be applied
+                        sequentially.
+
+                        Each operation modifies the contract's content
+                        atomically.
+                      type:
+                        blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                      itemType:
+                        blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                  changeset:
+                    description: >-
+                      An ordered list of JSON Patch operations to be applied
+                      sequentially.
+
+                      Each operation modifies the contract's content atomically.
+                    type:
+                      blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                    itemType:
+                      blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+                    items:
+                      - val:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: >-
+                            ${contract('/properties/lastConversationEntry/message')}
+                        op:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: add
+                        path:
+                          type:
+                            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                          value: /properties/conversation/-
+            trigger:
+              name: IncomingEntry
+              event:
+                type:
+                  name: Timeline Entry
+                  blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+                  threadPrev:
+                    description: Previous entry in the thread
+                  signature:
+                    type:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  timeline:
+                    description: Timeline this entry belongs to
+                  thread:
+                    description: Optional thread
+                  timelinePrev:
+                    description: Previous entry
+                  message:
+                    description: Message
+                threadPrev:
+                  description: Previous entry in the thread
+                signature:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                timeline:
+                  description: Timeline this entry belongs to
+                  blueId: >-
+                    ${contract('/messaging/participants/Assistant/timeline/blueId')}
+                thread:
+                  description: Optional thread
+                timelinePrev:
+                  description: Previous entry
+                message:
+                  description: Message
+                  type:
+                    name: Conversation Entry
+                    blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+      properties:
+        description: properties part
+        actualTask:
+          type:
+            name: Local Contract
+            description: >-
+              Pointer to a local contract instance within the parent contract.
+              It uniquely identifies the local contract instance.
+            blueId: 6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f
+            id:
+              description: >-
+                The unique identifier for the local contract instance. The main
+                contract instance has id=0. Instances created within this
+                contract will have ids starting from 1 and will be stored within
+                localContractInstances.
+              type:
+                blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+          id:
+            description: >-
+              The unique identifier for the local contract instance. The main
+              contract instance has id=0. Instances created within this contract
+              will have ids starting from 1 and will be stored within
+              localContractInstances.
+            type:
+              blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+        conversation:
+          type:
+            blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+      messaging:
+        secureChannel:
+          description: channel part
+        participants:
+          type:
+            blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+          keyType:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          valueType:
+            blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+          Assistant:
+            description: Someone processing a task
+          User:
+            description: Someone providing a task
+    subscriptions:
+      - type:
+          name: Local Contract Subscription
+          description: Represents a subscription to a local contract.
+          type:
+            name: Contract Subscription
+            description: Represents a subscription to a contract.
+            blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+          blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+          contractInstanceId:
+            description: >
+              Identifier for the specific contract instance this subscription is
+              associated with.
+
+              If null, the subscription applies to all contract instances.
+          event:
+            description: >-
+              Represents the event this subscription is interested in.
+
+              If null, the subscription applies to all events within the
+              specified contract instance.
+          workflowInstanceId:
+            description: >
+              Identifier for the specific workflow instance this subscription is
+              associated with.
+
+              If null, the subscription applies to all workflow instances within
+              the specified contract instance.
+        contractInstanceId: 100000
+        event:
+          description: >-
+            Represents the event this subscription is interested in.
+
+            If null, the subscription applies to all events within the specified
+            contract instance.
+        workflowInstanceId:
+          description: >
+            Identifier for the specific workflow instance this subscription is
+            associated with.
+
+            If null, the subscription applies to all workflow instances within
+            the specified contract instance.
+    workflows:
+      - name: Chat
+        steps:
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${steps.IncomingEntry}
+                op: add
+                path: /properties/lastConversationEntry
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${contract('/properties/lastConversationEntry/blueId')}
+                op: add
+                path: /properties/lastConversationEntry/message/entryId
+          - name: AddUserMessageToConversation
+            type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${contract('/properties/lastConversationEntry/message')}
+                op: add
+                path: /properties/conversation/-
+          - name: TriggerAssistantRequest
+            type:
+              name: Trigger Event Step
+              description: >
+                A specialized workflow step designed to generate and emit a
+                specific event. 
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 3uFwcdCx8Sdw43hGbBL3t9YGRocLbAewHzzxbrKAkUKF
+              event:
+                description: >-
+                  Defines the event to be triggered. 
+
+
+                  Important: Any ${} expressions within the event object will be
+                  evaluated 
+
+                  at runtime. The actual triggered event will contain the
+                  evaluated values, 
+
+                  not the raw template expressions.
+            event:
+              description: >-
+                Defines the event to be triggered. 
+
+
+                Important: Any ${} expressions within the event object will be
+                evaluated 
+
+                at runtime. The actual triggered event will contain the
+                evaluated values, 
+
+                not the raw template expressions.
+              type:
+                name: Assistant Task Ready Event
+                blueId: 5Q1m2vuLKyuSLGK2YAEgqw52kZNWBRx4SC5gHzgzcANf
+                task:
+                  type:
+                    name: Assistant Task
+                    blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+                    request:
+                      description: Task definition.
+                    response:
+                      description: Result
+                  request:
+                    description: Task definition.
+                  response:
+                    description: Result
+              task:
+                type:
+                  name: Assistant Task
+                  blueId: 7vshb7SKU42xGbchkfGJbvT6cQSBpAKQJ14iwKZX6nir
+                  request:
+                    description: Task definition.
+                  response:
+                    description: Result
+                request: ${steps.IncomingEntry.message}
+                response:
+                  description: Result
+                  type:
+                    name: Conversation Entry
+                    blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+            condition: ${steps.IncomingEntry.message.generateResponse}
+          - name: ExpectAssistantResponse
+            type:
+              name: Expect Event Step
+              description: >
+                A specialized workflow step designed to wait for and process a
+                specific event. 
+
+                This step acts as a gatekeeper, allowing the workflow to pause
+                until a 
+
+                particular event occurs, then facilitating the event's
+                progression through 
+
+                subsequent workflow steps.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+              event:
+                description: >-
+                  Defines the expected event characteristics. This object
+                  specifies the 
+
+                  criteria that an incoming event must meet to be considered a
+                  match and 
+
+                  trigger the continuation of the workflow.
+
+
+                  Important: Any ${} expressions within the event object will be
+                  evaluated 
+
+                  at runtime. The incoming event will be compared against this
+                  evaluated 
+
+                  version of the criteria, not the raw template.
+            event:
+              description: >-
+                Defines the expected event characteristics. This object
+                specifies the 
+
+                criteria that an incoming event must meet to be considered a
+                match and 
+
+                trigger the continuation of the workflow.
+
+
+                Important: Any ${} expressions within the event object will be
+                evaluated 
+
+                at runtime. The incoming event will be compared against this
+                evaluated 
+
+                version of the criteria, not the raw template.
+              type:
+                name: Timeline Entry
+                blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+                threadPrev:
+                  description: Previous entry in the thread
+                signature:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                timeline:
+                  description: Timeline this entry belongs to
+                thread:
+                  description: Optional thread
+                timelinePrev:
+                  description: Previous entry
+                message:
+                  description: Message
+              threadPrev:
+                description: Previous entry in the thread
+              signature:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              timeline:
+                description: Timeline this entry belongs to
+                blueId: >-
+                  ${contract('/messaging/participants/Assistant/timeline/blueId')}
+              thread:
+                description: Optional thread
+              timelinePrev:
+                description: Previous entry
+              message: ${steps.TriggerAssistantRequest.event.task}
+            condition: ${steps.IncomingEntry.message.generateResponse}
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${steps.ExpectAssistantResponse}
+                op: add
+                path: /properties/lastConversationEntry
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${contract('/properties/lastConversationEntry/blueId')}
+                op: add
+                path: /properties/lastConversationEntry/message/response/entryId
+          - name: AddAssistantMessageToConversation
+            type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            condition: ${steps.IncomingEntry.message.generateResponse}
+            changeset:
+              - val: >-
+                  ${contract('/properties/lastConversationEntry/message/response')}
+                op: add
+                path: /properties/conversation/-
+        trigger:
+          name: IncomingEntry
+          type:
+            blueId: 81yruzcExdbod4xZ49qxZpnaWEnDEiGZ7xe5sh13AQ7g
+          event:
+            type:
+              name: Timeline Entry
+              blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+              threadPrev:
+                description: Previous entry in the thread
+              signature:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              timeline:
+                description: Timeline this entry belongs to
+              thread:
+                description: Optional thread
+              timelinePrev:
+                description: Previous entry
+              message:
+                description: Message
+            threadPrev:
+              description: Previous entry in the thread
+            signature:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            timeline:
+              description: Timeline this entry belongs to
+              blueId: ${contract('/messaging/participants/User/timeline/blueId')}
+            thread:
+              description: Optional thread
+            timelinePrev:
+              description: Previous entry
+            message:
+              description: Message
+              type:
+                name: User Message
+                type:
+                  name: Conversation Entry
+                  blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+                blueId: CDX6FY7NR1ezZ1CnZRqGyqQ4SLj6u3W8ZWEL6oaRtpr8
+                relevantContractTypes:
+                  type:
+                    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                  itemType:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                relevantAssistantTypes:
+                  type:
+                    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                  itemType:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                message:
+                  type:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                contracts:
+                  description: Mappings between contract description and contract id
+                  type:
+                    blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                  keyType:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  valueType:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                generateResponse:
+                  description: >-
+                    Informs assistant that it should provide a response to this
+                    request; alternatively, it will be just stored
+                  type:
+                    blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
+              relevantContractTypes:
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              relevantAssistantTypes:
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              message:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              contracts:
+                description: Mappings between contract description and contract id
+                type:
+                  blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                keyType:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                valueType:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              generateResponse:
+                description: >-
+                  Informs assistant that it should provide a response to this
+                  request; alternatively, it will be just stored
+                type:
+                  blueId: EL6AjrbJsxTWRTPzY8WR8Y2zAMXRbydQj83PcZwuAHbo
+      - name: Messages from actualTask
+        steps:
+          - name: Apply Changes
+            type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${steps.incomingConversationEntry}
+                op: add
+                path: /properties/conversation/-
+        trigger:
+          name: incomingConversationEntry
+          event:
+            type:
+              name: Conversation Entry
+              blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+          contract: ${contract('/properties/actualTask')}
+      - name: contractDef
+        steps:
+          - name: init
+            type:
+              name: Initialize Local Contract Step
+              description: >
+                A specialized workflow step designed to create and initialize a
+                new local 
+
+                instance.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: D7bzHri8CT5j7aZtWVLcTAXkVdrrhe9inGbQopszrtbB
+              contract:
+                description: >
+                  Specifies the content of the contract that will be
+                  initialized.
+            contract: ${event.message}
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val:
+                  type:
+                    name: Local Contract Subscription
+                    description: Represents a subscription to a local contract.
+                    type:
+                      name: Contract Subscription
+                      description: Represents a subscription to a contract.
+                      blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+                    blueId: FtP9G2GnGiWDGn4jzPp9x4o2Hwat11VyWkbqdJ1DPvNw
+                    contractInstanceId:
+                      description: >
+                        Identifier for the specific contract instance this
+                        subscription is associated with.
+
+                        If null, the subscription applies to all contract
+                        instances.
+                    event:
+                      description: >-
+                        Represents the event this subscription is interested in.
+
+                        If null, the subscription applies to all events within
+                        the specified contract instance.
+                    workflowInstanceId:
+                      description: >
+                        Identifier for the specific workflow instance this
+                        subscription is associated with.
+
+                        If null, the subscription applies to all workflow
+                        instances within the specified contract instance.
+                  contractInstanceId: ${steps.init.localContract.id}
+                  event:
+                    description: >-
+                      Represents the event this subscription is interested in.
+
+                      If null, the subscription applies to all events within the
+                      specified contract instance.
+                  workflowInstanceId:
+                    description: >
+                      Identifier for the specific workflow instance this
+                      subscription is associated with.
+
+                      If null, the subscription applies to all workflow
+                      instances within the specified contract instance.
+                op: add
+                path: /subscriptions/-
+        trigger:
+          event:
+            type:
+              name: Timeline Entry
+              blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+              threadPrev:
+                description: Previous entry in the thread
+              signature:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              timeline:
+                description: Timeline this entry belongs to
+              thread:
+                description: Optional thread
+              timelinePrev:
+                description: Previous entry
+              message:
+                description: Message
+            threadPrev:
+              description: Previous entry in the thread
+            signature:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            timeline:
+              description: Timeline this entry belongs to
+              blueId: ${contract('/messaging/participants/User/timeline/blueId')}
+            thread:
+              description: Optional thread
+            timelinePrev:
+              description: Previous entry
+            message:
+              description: Message
+              type:
+                name: Contract
+                description: (full documentation goes here)
+                blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
+                subscriptions:
+                  type:
+                    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                  itemType:
+                    blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+                workflows:
+                  description: workflows part
+                  type:
+                    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                  itemType:
+                    blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+                properties:
+                  description: properties part
+                messaging:
+                  secureChannel:
+                    description: channel part
+                  participants:
+                    type:
+                      blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                    keyType:
+                      blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                    valueType:
+                      blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+              subscriptions:
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: BnzvPoTRbeT8JmH6rDn3Sh9f2gfCNBTm58WVxdUcorXr
+              workflows:
+                description: workflows part
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 9JQcxofDEFQR5jGxxyTSB4Nz7k3SSkzt3CTBGGKFokRC
+              properties:
+                description: properties part
+              messaging:
+                secureChannel:
+                  description: channel part
+                participants:
+                  type:
+                    blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+                  keyType:
+                    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+                  valueType:
+                    blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+      - name: AssistantResponse
+        steps:
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${steps.IncomingEntry}
+                op: add
+                path: /properties/lastConversationEntry
+          - type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${contract('/properties/lastConversationEntry/blueId')}
+                op: add
+                path: /properties/lastConversationEntry/message/entryId
+          - name: AddUserMessageToConversation
+            type:
+              name: Update Step
+              description: >
+                A specialized workflow step responsible for executing changes to
+                the contract. 
+
+                This is the sole step type authorized to modify contract
+                content.
+              type:
+                name: Workflow Step
+                description: Represents a single step within a workflow.
+                blueId: H5YcJM1fBf57BjYjc7hXbotGh5RuD8bwXLTVY4PA353u
+              blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+              changeset:
+                description: >-
+                  An ordered list of JSON Patch operations to be applied
+                  sequentially.
+
+                  Each operation modifies the contract's content atomically.
+                type:
+                  blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+                itemType:
+                  blueId: 4eHyQgPrziZkS9ins71KmWn9AiXaYPXAmAhEei9ZGcYR
+            changeset:
+              - val: ${contract('/properties/lastConversationEntry/message')}
+                op: add
+                path: /properties/conversation/-
+        trigger:
+          name: IncomingEntry
+          event:
+            type:
+              name: Timeline Entry
+              blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
+              threadPrev:
+                description: Previous entry in the thread
+              signature:
+                type:
+                  blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+              timeline:
+                description: Timeline this entry belongs to
+              thread:
+                description: Optional thread
+              timelinePrev:
+                description: Previous entry
+              message:
+                description: Message
+            threadPrev:
+              description: Previous entry in the thread
+            signature:
+              type:
+                blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+            timeline:
+              description: Timeline this entry belongs to
+              blueId: ${contract('/messaging/participants/Assistant/timeline/blueId')}
+            thread:
+              description: Optional thread
+            timelinePrev:
+              description: Previous entry
+            message:
+              description: Message
+              type:
+                name: Conversation Entry
+                blueId: 6vXs1bm6wdzhFhmcs1yGtwrcC2xXFRmVyPTgBzu9Vyhy
+    properties:
+      description: properties part
+      actualTask:
+        type:
+          name: Local Contract
+          description: >-
+            Pointer to a local contract instance within the parent contract. It
+            uniquely identifies the local contract instance.
+          blueId: 6gBMYGeWw1Cutbsrzj3c98RH4VrSJNvPsgZ4F4A19i3f
+          id:
+            description: >-
+              The unique identifier for the local contract instance. The main
+              contract instance has id=0. Instances created within this contract
+              will have ids starting from 1 and will be stored within
+              localContractInstances.
+            type:
+              blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+        id:
+          description: >-
+            The unique identifier for the local contract instance. The main
+            contract instance has id=0. Instances created within this contract
+            will have ids starting from 1 and will be stored within
+            localContractInstances.
+          type:
+            blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+      conversation:
+        type:
+          blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
+    messaging:
+      secureChannel:
+        description: channel part
+      participants:
+        type:
+          blueId: 294NBTj2mFRL3RB4kDRUSckwGg7Kzj6T8CTAFeR1kcSA
+        keyType:
+          blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+        valueType:
+          blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+        Assistant:
+          description: Someone processing a task
+          type:
+            name: Participant
+            blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+            timeline:
+              description: (docs)
+          timeline:
+            description: (docs)
+            blueId: FJq9SLyMM13Gp74eDdanruA6daVtHNdoQQwjJxeyW6PV
+        User:
+          description: Someone providing a task
+          type:
+            name: Participant
+            blueId: B12ov2o8fMv2W9PVCy6FDivfCu8LHrxkHnZXvaL5uLEe
+            timeline:
+              description: (docs)
+          timeline:
+            description: (docs)
+            blueId: 8PYXoMW7HwUQFp6dmDyHtkz9njbyj6iC9qzNheXm2wLY
+epoch: 0
+incomingEvent:
+  type:
+    blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
+initiateContractProcessingEntry:
+  blueId: EHYvBQXeprJDYFaVej7gUWmchdEWxKQ5YQvYjYpasrsW
