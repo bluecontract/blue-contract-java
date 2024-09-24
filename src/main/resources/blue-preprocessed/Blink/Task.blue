@@ -102,6 +102,10 @@ workflows:
           value: "${steps.IncomingEntry.message.generateResponse}"
       - type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        condition:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${steps.IncomingEntry.message.generateResponse}"
         changeset:
           items:
           - val:
@@ -118,6 +122,10 @@ workflows:
               value: /properties/lastConversationEntry
       - type:
           blueId: 6PsXX3HF74kESc6eg58z8kNwzqD64xQ3PjGPUppzcWg6
+        condition:
+          type:
+            blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+          value: "${steps.IncomingEntry.message.generateResponse}"
         changeset:
           items:
           - val:

@@ -71,12 +71,14 @@ workflows:
           message: ${steps.TriggerAssistantRequest.event.task}
 
       - type: Update Step
+        condition: ${steps.IncomingEntry.message.generateResponse}
         changeset:
           - op: add
             path: /properties/lastConversationEntry
             val: ${steps.ExpectAssistantResponse}
 
       - type: Update Step
+        condition: ${steps.IncomingEntry.message.generateResponse}
         changeset:
           - op: add
             path: /properties/lastConversationEntry/message/response/entryId
