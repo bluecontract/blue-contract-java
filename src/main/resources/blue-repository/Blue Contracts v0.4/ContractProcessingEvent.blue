@@ -10,11 +10,8 @@ workflowStepName:
   type: Text
   description: The name of the workflow step where the event occurred.
 initiateContractEntry:
-  type: Node
   description: Entry for initiating the contract.
 initiateContractProcessingEntry:
-  type: Node
   description: Entry for initiating the processing of the contract.
 event:
-  type: Node
   description: The actual event that was triggered when processing the contract.

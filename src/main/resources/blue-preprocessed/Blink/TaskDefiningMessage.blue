@@ -5,11 +5,11 @@ type:
 assistantInitialMessage:
   type:
     blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
-message:
-  type:
-    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
 details:
   type:
     blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
   itemType:
     blueId: HWvjD6iit7dToeSjMtCJWPCvuihZkBuuraDZin8DJAvi
+message:
+  type:
+    blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP

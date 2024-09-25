@@ -9,6 +9,13 @@ startedLocalContractCount:
   description: The number of local contract instances that have been initiated.
   type:
     blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+localContractInstances:
+  description: "The list of active local contract instances that are currently running\
+    \ within this contract. Once a contract is terminated, it is removed from this\
+    \ list."
+contract:
+  description: "The contract associated with this instance, reflecting any changes\
+    \ due to workflow executions."
 id:
   description: The unique identifier for the contract instance. The main contract
     instance has id=0. Instances created within this contract will have ids starting
@@ -19,10 +26,3 @@ startedWorkflowCount:
   description: The number of workflow instances that have been initiated.
   type:
     blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-localContractInstances:
-  description: "The list of active local contract instances that are currently running\
-    \ within this contract. Once a contract is terminated, it is removed from this\
-    \ list."
-contract:
-  description: "The contract associated with this instance, reflecting any changes\
-    \ due to workflow executions."

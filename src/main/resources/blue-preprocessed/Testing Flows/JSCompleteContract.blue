@@ -2,11 +2,6 @@
 name: JS Complete Contract
 type:
   blueId: 6F9bjtAd85XgPGvzh7zcZp92tdR4mTcQcMUC8VuPYgZb
-properties:
-  abc:
-    type:
-      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
-    value: 234
 workflows:
   items:
   - steps:
@@ -55,6 +50,11 @@ workflows:
       event:
         type:
           blueId: 3uzSCGkrdX4hTFGuLbyZES7NQmiuFskCpUy572GxNQuC
+properties:
+  abc:
+    type:
+      blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
+    value: 234
 messaging:
   participants:
     Alice:
