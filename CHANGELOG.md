@@ -1,3 +1,10 @@
+## v0.4.3 (2024-09-25)
+
+### Fix
+
+- Remove Node types from ContractProcessingEvent
+- Task
+
 ## v0.4.2 (2024-09-23)
 
 ### Fix
