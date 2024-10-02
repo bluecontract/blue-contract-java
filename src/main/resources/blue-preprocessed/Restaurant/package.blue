@@ -1,0 +1,22 @@
+---
+items:
+- blueId: Hoxuc89jud2SAegVYfCpcttVjLXZVwGpFcwD8FNvUFU5
+- type:
+    blueId: 648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4
+  mappings:
+    Restaurant Menu Dish:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: FSJRd4DZCHRZnc5j2KvzQDuQRJXnkdJAvUAF7b7gSyxk
+    Restaurant Menu Category:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 7VK1FiVu5x81ayA67eLmw86HAMHL8dKHE3C8iaee8nMG
+    Trattoria da Luigi - Menu:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: 2by314WUW9udhGHYpZiW4xkEg4iksGi5UkWrn7KZU2tR
+    Categorized Restaurant Menu:
+      type:
+        blueId: F92yo19rCcbBoBSpUA5LRxpfDejJDAaP1PRxxbWAraVP
+      value: AE5unV6a3YRwsDTLK2xuMjv6waHPoWzNwDpSc5RKQvs2

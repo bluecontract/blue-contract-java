@@ -1,0 +1,6 @@
+name: Categorized Restaurant Menu
+description: A menu organized by categories, typically found in restaurants.
+categories:
+  description: List of categories within the menu.
+  type: List
+  itemType: Restaurant Menu Category

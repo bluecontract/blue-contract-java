@@ -10,7 +10,6 @@ properties:
   chessboard:
     description: Chessboard state in FEN notation
     type: Text
-    value: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   winner:
     description: Indicates who won the game (e.g., 'White', 'Black', or 'None' if the game is not over or ended in a draw)
     type: Text
@@ -18,10 +17,9 @@ properties:
     description: Indicates whether the game ended in a draw (true) or not (false)
     type: Boolean
   gameOver:
-    description:  Indicates whether the game has ended (true) or is still in progress (false)
+    description: Indicates whether the game has ended (true) or is still in progress (false)
     type: Boolean
   playerToMove:
-    value: white
     description: Indicates whose move it is ('white' or 'black')
   movesHistory:
     description: History of moves made
@@ -29,12 +27,19 @@ properties:
     itemType: Chess Move
 
 workflows:
-
   - trigger:
       name: TriggerStep
       event:
         type: Contract Initialization Event
     steps:
+      - type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/chessboard
+            val: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+          - op: replace
+            path: /properties/playerToMove
+            val: white
       - type: Trigger Event Step
         event:
           type: Chess Game Started Event
@@ -51,7 +56,6 @@ workflows:
         message:
           type: Chess Move
     steps:
-
       - name: Check Player
         type: JavaScript Code Step
         code: |
@@ -60,7 +64,7 @@ workflows:
               contract("/messaging/participants/Player White/timeline") :
               contract("/messaging/participants/Player Black/timeline")
           let timeline = event.timeline;
-          
+
           if (timeline.blueId != expectedTimeline.blueId) {                   
             throw new RejectAndAwaitNextEventException('Not your move!');
           }
@@ -106,11 +110,11 @@ workflows:
           let result;
 
           result = checkMove(from, to, position);
-          
+
           if (!result.legal) {
             throw new RejectAndAwaitNextEventException('Illegal move');
           }
-          
+
           if (result.winner === null) {
             result.winner = 'None';
           }

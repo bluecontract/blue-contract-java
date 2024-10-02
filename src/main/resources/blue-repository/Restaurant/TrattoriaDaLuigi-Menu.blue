@@ -1,0 +1,140 @@
+name: Trattoria da Luigi - Menu
+type: Categorized Restaurant Menu
+categories:
+  - name: Antipasti (Starters)
+    photo: /images/starters.webp
+    type: Restaurant Menu Category
+    dishes:
+      - name: Bruschetta al Pomodoro
+        type: Restaurant Menu Dish
+        description: Grilled bread rubbed with garlic and topped with diced tomatoes, olive oil, and fresh basil.
+        price: 7.5
+        image: /images/bruschetta.webp
+      - name: Caprese Salad
+        type: Restaurant Menu Dish
+        description: Slices of fresh mozzarella and tomatoes, with basil and balsamic glaze.
+        price: 9
+        image: /images/caprese.webp
+      - name: Arancini
+        type: Restaurant Menu Dish
+        description: Crispy fried risotto balls filled with mozzarella and served with marinara sauce.
+        price: 8
+        image: /images/arancini.webp
+
+  - name: Zuppe e Insalate (Soups and Salads)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Minestrone
+        type: Restaurant Menu Dish
+        description: Classic Italian vegetable soup with pasta.
+        price: 6.5
+        image: /images/minestrone.webp
+      - name: Insalata Mista
+        type: Restaurant Menu Dish
+        description: Mixed greens with tomatoes, cucumbers, and a house vinaigrette.
+        price: 5.5
+        image: /images/salad-mista.webp
+
+  - name: Primi (First Courses)
+    type: Restaurant Menu Category
+    photo: /images/first-course.webp
+    dishes:
+      - name: Spaghetti alla Carbonara
+        type: Restaurant Menu Dish
+        description: Pasta with eggs, cheese, pancetta, and pepper.
+        price: 13
+        image: /images/carbonara.webp
+      - name: Lasagna alla Bolognese
+        type: Restaurant Menu Dish
+        description: Layered pasta with bolognese sauce and béchamel, baked to perfection.
+        price: 14
+        image: /images/lasagna.webp
+
+  - name: Secondi (Main Courses)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Osso Buco
+        type: Restaurant Menu Dish
+        description: Tender veal shanks braised with vegetables, white wine, and broth.
+        price: 24
+        image: /images/ossobuco.webp
+      - name: Pollo alla Parmigiana
+        type: Restaurant Menu Dish
+        description: Breaded chicken breast topped with marinara sauce and mozzarella cheese.
+        price: 18
+        image: /images/chicken-parm.webp
+
+  - name: Contorni (Sides)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Verdure Grigliate
+        type: Restaurant Menu Dish
+        description: Grilled seasonal vegetables with extra virgin olive oil.
+        price: 5
+        image: /images/grilled-veggies.webp
+
+  - name: Dolci (Desserts)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Tiramisu
+        type: Restaurant Menu Dish
+        description: Coffee-flavored Italian dessert made of ladyfingers dipped in coffee, layered with a whipped mixture of eggs, sugar, and mascarpone cheese.
+        price: 7
+        image: /images/tiramisu.webp
+      - name: Panna Cotta
+        type: Restaurant Menu Dish
+        description: Italian cooked cream dessert with strawberry coulis.
+        price: 6
+        image: /images/panna-cotta.webp
+
+  - name: Pizze (Pizzas)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Margherita
+        type: Restaurant Menu Dish
+        description: Tomato sauce, mozzarella, fresh basil, and extra virgin olive oil.
+        price: 12
+        image: /images/pizza-margherita.webp
+      - name: Quattro Stagioni
+        type: Restaurant Menu Dish
+        description: Divided in four sections with diverse toppings for each - artichokes, salami, mushrooms, and olives.
+        price: 14
+        image: /images/pizza-quattro.webp
+
+  - name: Pasta
+    type: Restaurant Menu Category
+    dishes:
+      - name: Penne all'Arrabbiata
+        type: Restaurant Menu Dish
+        description: Penne pasta in a spicy tomato sauce with garlic and parsley.
+        price: 11
+        image: /images/penne-arrabbiata.webp
+      - name: Fettuccine Alfredo
+        type: Restaurant Menu Dish
+        description: Flat thick noodles with a creamy cheese sauce.
+        price: 12
+        image: /images/fettuccine-alfredo.webp
+      - name: Ravioli di Spinaci e Ricotta
+        type: Restaurant Menu Dish
+        description: Spinach and ricotta filled ravioli served in a butter and sage sauce.
+        price: 15
+        image: /images/ravioli-spinach.webp
+      - name: Linguine al Pesto
+        type: Restaurant Menu Dish
+        description: Linguine pasta with homemade basil pesto sauce.
+        price: 12
+        image: /images/linguine-pesto.webp
+
+  - name: Risotti (Risottos)
+    type: Restaurant Menu Category
+    dishes:
+      - name: Risotto al Funghi Porcini
+        type: Restaurant Menu Dish
+        description: Creamy risotto with porcini mushrooms.
+        price: 16
+        image: /images/risotto-porcini.webp
+      - name: Risotto al Nero di Seppia
+        type: Restaurant Menu Dish
+        description: Black squid ink risotto with cuttlefish.
+        price: 18
+        image: /images/risotto-nero.webp

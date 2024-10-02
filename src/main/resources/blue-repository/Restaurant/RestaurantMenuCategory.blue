@@ -1,0 +1,6 @@
+name: Restaurant Menu Category
+description: A category within a restaurant menu, containing a list of dishes.
+dishes:
+  description: List of dishes in the category.
+  type: List
+  itemType: Restaurant Menu Dish

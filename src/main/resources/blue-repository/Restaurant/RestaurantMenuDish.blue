@@ -1,0 +1,8 @@
+name: Restaurant Menu Dish
+description: A dish in the restaurant menu.
+price:
+  type: Integer
+  description: The price of the dish.
+image:
+  type: Text
+  description: The filename of the image representing the dish.
