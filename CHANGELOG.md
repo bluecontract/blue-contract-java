@@ -1,3 +1,9 @@
+## v0.4.4 (2024-10-02)
+
+### Fix
+
+- Update Chess contracts and add Restaurant menu structure
+
 ## v0.4.3 (2024-09-25)
 
 ### Fix
