@@ -3,7 +3,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-!**/src/main/resources/blue-preprocessed/
+src/main/resources/blue-preprocessed
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

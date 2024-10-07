@@ -9,6 +9,8 @@ public class ChessProperties {
     private Boolean gameOver;
     private String playerToMove;
     private String assistingContract;
+    private String assistingContractWhite;
+    private String assistingContractBlack;
 
     public String getChessboard() {
         return chessboard;
@@ -61,6 +63,24 @@ public class ChessProperties {
 
     public ChessProperties assistingContract(String assistingContract) {
         this.assistingContract = assistingContract;
+        return this;
+    }
+
+    public String getAssistingContractWhite() {
+        return assistingContractWhite;
+    }
+
+    public ChessProperties assistingContractWhite(String assistingContractWhite) {
+        this.assistingContractWhite = assistingContractWhite;
+        return this;
+    }
+
+    public String getAssistingContractBlack() {
+        return assistingContractBlack;
+    }
+
+    public ChessProperties assistingContractBlack(String assistingContractBlack) {
+        this.assistingContractBlack = assistingContractBlack;
         return this;
     }
 }

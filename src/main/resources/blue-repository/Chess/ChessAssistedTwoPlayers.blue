@@ -1,0 +1,198 @@
+name: Chess Assisted Two Players
+type: Contract
+messaging:
+  participants:
+    Player White:
+      description: Player White timeline
+    Player Black:
+      description: Player Black timeline
+properties:
+  chessboard:
+    description: Chessboard state in FEN notation
+    type: Text
+  winner:
+    description: Indicates who won the game (e.g., 'White', 'Black', or 'None' if the game is not over or ended in a draw)
+    type: Text
+  draw:
+    description: Indicates whether the game ended in a draw (true) or not (false)
+    type: Boolean
+  gameOver:
+    description:  Indicates whether the game has ended (true) or is still in progress (false)
+    type: Boolean
+  playerToMove:
+    description: Indicates whose move it is ('white' or 'black')
+  movesHistory:
+    description: History of moves made
+    type: List
+    itemType: Chess Move
+
+workflows:
+
+  - trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/chessboard
+            val: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+          - op: replace
+            path: /properties/playerToMove
+            val: white
+      - type: Trigger Event Step
+        event:
+          type: Chess Game Started Event
+          playerWhiteTimeline:
+            blueId: ${contract('/messaging/participants/Player White/timeline/blueId')}
+          playerBlackTimeline:
+            blueId: ${contract('/messaging/participants/Player Black/timeline/blueId')}
+
+  - name: Move
+    trigger:
+      event:
+        type: Timeline Entry
+        message:
+          type: Chess Move
+    steps:
+
+      - name: Check Player
+        type: JavaScript Code Step
+        code: |
+          let playerToMove = contract("/properties/playerToMove");
+          let expectedTimeline = (playerToMove === 'white') ? 
+              contract("/messaging/participants/Player White/timeline") :
+              contract("/messaging/participants/Player Black/timeline")
+          let timeline = event.timeline;
+          
+          if (timeline.blueId != expectedTimeline.blueId) {                   
+            throw new RejectAndAwaitNextEventException('Not your move!');
+          }
+          return { }
+
+      - name: ProcessMove
+        type: JavaScript Code Step
+        code: |
+          const chessModule = importBlueESModule('blue:FQP53g6UNu75EeEDmTX8mKHqoNSLQgYxQxpFhAzKyHhJ');
+          const Chess = chessModule.Chess;
+
+          function checkMove(from, to, position) {
+              const game = new Chess(position);
+
+              try {
+                  const move = game.move({ from, to });
+                  if (move === null) {
+                      return { legal: false, position: game.fen(), gameOver: false, winner: null, draw: false };
+                  }
+                  const newPosition = game.fen();
+
+                  let gameOver = game.isGameOver();
+                  let winner = null;
+                  let draw = false;
+
+                  if (gameOver) {
+                      if (game.isCheckmate()) {
+                          winner = game.turn() === 'w' ? 'black' : 'white';
+                      } else if (game.isDraw()) {
+                          draw = true;
+                      }
+                  }
+
+                  return { legal: true, position: newPosition, gameOver: gameOver, winner: winner, draw: draw };
+              } catch (error) {
+                  return { legal: false, position: game.fen(), error: error.message, gameOver: false, winner: null, draw: false };
+              }
+          }
+
+          let position = contract("/properties/chessboard");
+          let from = event.message.from;
+          let to = event.message.to;
+          let result;
+
+          result = checkMove(from, to, position);
+          
+          if (!result.legal) {
+            throw new RejectAndAwaitNextEventException('Illegal move');
+          }
+          
+          if (result.winner === null) {
+            result.winner = 'None';
+          }
+
+          return { result };
+
+      - name: Emit Event
+        type: Trigger Event Step
+        event:
+          type: Chess Game Move Made Event
+          playerMakingMove: ${contract("/properties/playerToMove")}
+          from: ${event.message.from}
+          to: ${event.message.to}
+          chessboardAfterMove: ${steps.ProcessMove.result.position}
+          winner: ${steps.ProcessMove.result.winner}
+          draw: ${steps.ProcessMove.result.draw}
+          gameOver: ${steps.ProcessMove.result.gameOver}
+
+      - name: Apply Changes
+        type: Update Step
+        changeset:
+          - op: replace
+            path: /properties/chessboard
+            val: ${steps.ProcessMove.result.position}
+          - op: replace
+            path: /properties/draw
+            val: ${steps.ProcessMove.result.draw}
+          - op: replace
+            path: /properties/winner
+            val: ${steps.ProcessMove.result.winner}
+          - op: replace
+            path: /properties/gameOver
+            val: ${steps.ProcessMove.result.gameOver}
+          - op: replace
+            path: /properties/playerToMove
+            val: '${(contract("/properties/playerToMove") === "white") ? "black" : "white"}'
+          - op: add
+            path: /properties/movesHistory/-
+            val: ${event.message}
+
+  - name: white assistant move
+    trigger:
+      event:
+        type: Chess Move
+      contract:
+        type: External Contract
+        initiateContractEntry:
+          blueId: ${contract('/properties/assistingContractWhite')}
+    steps:
+      - type: Trigger Event Step
+        event:
+          type: Agreed Upon Simulated Event
+          event:
+            type: Simulator Timeline Entry
+            timeline:
+              blueId: ${contract('/messaging/participants/Player White/timeline/blueId')}
+            message:
+              type: Chess Move
+              from: ${event.from}
+              to: ${event.to}
+
+  - name: black assistant move
+    trigger:
+      event:
+        type: Chess Move
+      contract:
+        type: External Contract
+        initiateContractEntry:
+          blueId: ${contract('/properties/assistingContractBlack')}
+    steps:
+      - type: Trigger Event Step
+        event:
+          type: Agreed Upon Simulated Event
+          event:
+            type: Simulator Timeline Entry
+            timeline:
+              blueId: ${contract('/messaging/participants/Player Black/timeline/blueId')}
+            message:
+              type: Chess Move
+              from: ${event.from}
+              to: ${event.to}
