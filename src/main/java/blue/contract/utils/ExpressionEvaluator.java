@@ -21,7 +21,7 @@ public class ExpressionEvaluator {
         CURRENT_CONTRACT
     }
 
-    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("^\\$\\{(.+)\\}$");
+    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
     private final JSExecutor jsExecutor;
 
@@ -31,31 +31,42 @@ public class ExpressionEvaluator {
 
     public Object evaluate(String expression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
+
         if (matcher.matches()) {
-            String jsExpression = matcher.group(1);
-            return evaluateJSExpression(jsExpression, context, scope, resolveFinalLink);
+            return evaluateSimpleExpression(matcher.group(1), context, scope, resolveFinalLink);
         }
+
+        if (matcher.find()) {
+            return evaluateInterpolatedExpression(expression, context, scope, resolveFinalLink);
+        }
+
         return expression;
     }
 
-    private Object evaluateJSExpression(String jsExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+    private Object evaluateSimpleExpression(String jsExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         Map<String, Object> bindings = createBindings(context, scope, resolveFinalLink);
-
         try {
             return jsExecutor.executeExpression(jsExpression, bindings);
         } catch (Exception e) {
-            throw new RuntimeException("Error evaluating JS expression: " + jsExpression, e);
+            throw new RuntimeException("Error evaluating simple JS expression: " + jsExpression, e);
+        }
+    }
+
+    private Object evaluateInterpolatedExpression(String jsExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
+        Map<String, Object> bindings = createBindings(context, scope, resolveFinalLink);
+        String wrappedExpression = "`" + jsExpression + "`";
+        try {
+            Object result = jsExecutor.executeExpression(wrappedExpression, bindings);
+            return context.getContractProcessingContext().getBlue().objectToNode(result);
+        } catch (Exception e) {
+            throw new RuntimeException("Error evaluating interpolated JS expression: " + jsExpression, e);
         }
     }
 
     public Object evaluateIfExpression(Object potentialExpression, WorkflowProcessingContext context, ExpressionScope scope, boolean resolveFinalLink) {
         if (potentialExpression instanceof String) {
             String strExpression = (String) potentialExpression;
-            Matcher matcher = EXPRESSION_PATTERN.matcher(strExpression);
-            if (matcher.matches()) {
-                String jsExpression = matcher.group(1);
-                return evaluateJSExpression(jsExpression, context, scope, resolveFinalLink);
-            }
+            return evaluate(strExpression, context, scope, resolveFinalLink);
         }
         return potentialExpression;
     }
