@@ -1,9 +1,0 @@
----
-name: Categorized Restaurant Menu
-description: "A menu organized by categories, typically found in restaurants."
-categories:
-  description: List of categories within the menu.
-  type:
-    blueId: G8wmfjEqugPEEXByMYWJXiEdbLToPRWNQEekNxrxfQWB
-  itemType:
-    blueId: 7VK1FiVu5x81ayA67eLmw86HAMHL8dKHE3C8iaee8nMG

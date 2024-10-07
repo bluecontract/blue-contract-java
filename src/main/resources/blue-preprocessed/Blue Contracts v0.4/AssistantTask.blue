@@ -1,6 +1,0 @@
----
-name: Assistant Task
-request:
-  description: Task definition.
-response:
-  description: Result

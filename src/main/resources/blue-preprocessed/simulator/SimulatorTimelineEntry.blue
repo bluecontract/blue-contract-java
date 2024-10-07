@@ -1,9 +1,0 @@
----
-name: Simulator Timeline Entry
-type:
-  blueId: HWeoWDoYuMGdfzrCJoy58LeH9pFuPQXE9ioHvxVNBcPC
-tickSequence:
-  description: A global sequential identifier representing the order of events across
-    all timelines in the simulation.
-  type:
-    blueId: DHmxTkFbXePZHCHCYmQr2dSzcNLcryFVjXVHkdQrrZr8
