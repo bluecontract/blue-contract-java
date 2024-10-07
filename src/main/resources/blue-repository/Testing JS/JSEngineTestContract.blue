@@ -1,0 +1,277 @@
+name: JS Engine Test Contract
+type: Contract
+messaging:
+  participants:
+    Tester:
+      timeline: 100
+properties:
+  initialValue: 42
+  nested:
+    prop: 123
+workflows:
+  - name: JS Main Test
+    trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/testStarted
+            val: true
+
+      - type: JavaScript Code Step
+        code: |
+          // Run tests and return results
+          const testResults = {
+            passedTests: 0,
+            totalTests: 0,
+            errors: [],
+          };
+
+          try {
+            const describe = (_, testSuite) => testSuite();
+            const test = (name, testFunc) => {
+              testResults.totalTests++;
+              try {
+                testFunc();
+                testResults.passedTests++;
+              } catch (error) {
+                testResults.errors.push(`${name}: ${error.message}`);
+              }
+            };
+            const expect = (actual) => ({
+              toBe: (expected) => {
+                if (actual !== expected)
+                  throw new Error(`Expected ${expected}, but got ${actual}`);
+              },
+              toEqual: (expected) => {
+                if (JSON.stringify(actual) !== JSON.stringify(expected))
+                  throw new Error(
+                    `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(
+                      actual
+                    )}`
+                  );
+              },
+              toThrow: (expectedError) => {
+                try {
+                  actual();
+                  throw new Error(
+                    `Expected function to throw "${expectedError}", but it didn't throw`
+                  );
+                } catch (error) {
+                  if (error.message !== expectedError)
+                    throw new Error(
+                      `Expected "${expectedError}", but got "${error.message}"`
+                    );
+                }
+              },
+            });
+
+            describe("JavaScript Engine Test", () => {
+              test("Variables and data types", () => {
+                const num = 42;
+                const str = "Hello, world!";
+                const bool = true;
+                const arr = [1, 2, 3, 4, 5];
+                const obj = { key: "value", nested: { prop: 123 } };
+
+                expect(typeof num).toBe("number");
+                expect(typeof str).toBe("string");
+                expect(typeof bool).toBe("boolean");
+                expect(Array.isArray(arr)).toBe(true);
+                expect(typeof obj).toBe("object");
+              });
+
+              test("String concatenation", () => {
+                const str1 = "Hello";
+                const str2 = "world";
+                const result = str1 + " " + str2;
+                expect(result).toBe("Hello world");
+              });
+
+              test("Template literals", () => {
+                const num = 42;
+                const result = `The answer is ${num}`;
+                expect(result).toBe("The answer is 42");
+              });
+
+              test("Conversion between string and number", () => {
+                const str = "42";
+                const num = Number(str);
+                expect(num).toBe(42);
+              });
+
+              test("String and number comparison", () => {
+                const str = "42";
+                const num = 42;
+                expect(str == num).toBe(true);
+                expect(str === num).toBe(false);
+              });
+
+              test("String and number concatenation", () => {
+                const str = "42";
+                const num = 42;
+                const result = str + num;
+                expect(result).toBe("4242");
+              });
+
+              test("Arrow functions", () => {
+                const arrowFunc = (x, y) => x + y;
+                expect(arrowFunc(2, 3)).toBe(5);
+              });
+
+              test("Destructuring and spread operator", () => {
+                const obj = { key: "value", nested: { prop: 123 } };
+                const arr = [1, 2, 3, 4, 5];
+
+                const {
+                  key,
+                  nested: { prop },
+                } = obj;
+                expect(key).toBe("value");
+                expect(prop).toBe(123);
+
+                const newArr = [...arr, 6, 7];
+                expect(newArr).toEqual([1, 2, 3, 4, 5, 6, 7]);
+              });
+
+              test("Error handling", () => {
+                expect(() => {
+                  throw new Error("Test error");
+                }).toThrow("Test error");
+              });
+
+              test("Control structures", () => {
+                const arr = [1, 2, 3, 4, 5];
+                let result = 0;
+                for (let i = 0; i < arr.length; i++) {
+                  if (arr[i] % 2 === 0) {
+                    result += arr[i];
+                  } else {
+                    continue;
+                  }
+                }
+                expect(result).toBe(6);
+              });
+
+              test("Switch statement", () => {
+                const testSwitch = (num) => {
+                  switch (num) {
+                    case 41:
+                      return "Wrong answer";
+                    case 42:
+                      return "Correct answer";
+                    default:
+                      return "Unknown answer";
+                  }
+                };
+                expect(testSwitch(42)).toBe("Correct answer");
+              });
+
+              test("Object methods and this keyword", () => {
+                const testObject = {
+                  value: 10,
+                  increment() {
+                    this.value++;
+                  },
+                  getValue() {
+                    return this.value;
+                  },
+                };
+                testObject.increment();
+                expect(testObject.getValue()).toBe(11);
+              });
+
+              test("JSON operations", () => {
+                const obj = { key: "value", nested: { prop: 123 } };
+                const jsonStr = JSON.stringify(obj);
+                const parsedObj = JSON.parse(jsonStr);
+                expect(parsedObj).toEqual(obj);
+              });
+
+              test("Regular expressions", () => {
+                const regex = /^[a-z]+$/i;
+                expect(regex.test("HelloWorld")).toBe(true);
+                expect(regex.test("Hello123")).toBe(false);
+              });
+
+              test("Math operations", () => {
+                const mathResult = Math.max(1, 5, 3, 2, 4);
+                expect(mathResult).toBe(5);
+              });
+            });
+
+            if (testResults.passedTests === testResults.totalTests) {
+              return { result: "JS Engine test completed successfully" };
+            } else {
+              throw new Error(
+                `JS Engine test failed: ${testResults.errors.join(", ")}`
+              );
+            }
+          } catch (error) {
+            throw new TerminateContractWithErrorException(error.message);
+          }
+
+      - type: Update Step
+        changeset:
+          - op: add
+            path: /properties/testMainCompleted
+            val: true
+
+  - name: JS Expression Test
+    trigger:
+      event:
+        type: Contract Initialization Event
+    steps:
+      - name: AccessNestedPropertyWhichDoesNotExist
+        type: JavaScript Code Step
+        code: |
+          const testValue = contract("/properties/nested/that/does/not/exist");
+          if (testValue !== null) {
+            throw new TerminateContractWithErrorException("Expected null, but got " + testValue);
+          }
+          return { result: testValue };
+
+      - name: AccessNestedProperty
+        type: JavaScript Code Step
+        code: |
+          const nestedPropValue = contract("/properties/nested/prop");
+          return { value: nestedPropValue, name: "flatProp" };
+
+      - name: Save property to variable
+        type: Update Step
+        changeset:
+          - op: add
+            # TODO: That doesn't work
+            # path: /properties/${steps.AccessNestedProperty.name}
+            # path: ${'/properties/' + steps.AccessNestedProperty.name}
+
+            path: /properties/flatProp
+
+            # TODO: This expression doesn't work
+            # val: ${steps['Access nested property'].value}
+
+            # TODO: The result is saved as a floating point number, not an integer.
+            val: ${steps.AccessNestedProperty.value}
+
+      - name: Check result of property access
+        type: JavaScript Code Step
+        code: |
+          const name = steps.AccessNestedProperty.name;
+          const testValue = contract("/properties/" + name);
+
+          // Returns = testValue 123.0 object - why is it an object?
+          // console.log("testValue", testValue, typeof testValue);
+          if (testValue != 123) {
+            throw new TerminateContractWithErrorException("Expected 123, but got " + testValue);
+          }
+          return { result: testValue };
+
+      - type: Update Step
+        # TODO: I would expect this to work, but it doesn't.
+        condition: ${contract('/properties/' + steps.AccessNestedProperty.name) == 123}
+        changeset:
+          - op: add
+            path: /properties/testExpressionsCompleted
+            val: true

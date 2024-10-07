@@ -237,6 +237,11 @@ public class JSExecutor implements AutoCloseable {
     public static class JSCriticalException extends JSException {
         private final String jsStackTrace;
 
+        public JSCriticalException(String message) {
+            super(message);
+            this.jsStackTrace = null;
+        }
+
         public JSCriticalException(String message, PolyglotException cause) {
             super(message, cause);
             this.jsStackTrace = formatPolyglotStackTrace(cause);
@@ -289,7 +294,7 @@ public class JSExecutor implements AutoCloseable {
         }
     }
 
-    public static class TerminateContractWithErrorException extends JSException {
+    public static class TerminateContractWithErrorException extends JSCriticalException {
         public TerminateContractWithErrorException(String message) {
             super(message);
         }
