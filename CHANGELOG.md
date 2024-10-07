@@ -1,3 +1,10 @@
+## v0.4.5 (2024-10-07)
+
+### Fix
+
+- Update Chess contracts
+- Remove blue-preprocessed from the repo
+
 ## v0.4.4 (2024-10-02)
 
 ### Fix
