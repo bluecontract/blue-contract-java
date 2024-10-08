@@ -28,6 +28,7 @@ public class Utils {
     public static final String TESTING_EVENTS = "Testing Events";
     public static final String TESTING_FLOWS = "Testing Flows";
     public static final String TESTING_LOCAL_SUBSCRIPTIONS = "Testing Local Subscriptions";
+    public static final String TESTING_JS = "Testing JS";
 
     public static final String SAMPLES_DIR = "src/main/resources/samples";
     public static final String REPOSITORY_DIR = "blue-repository";
