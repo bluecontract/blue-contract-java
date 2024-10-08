@@ -71,7 +71,7 @@ workflows:
       - name: ProcessMove
         type: JavaScript Code Step
         code: |
-          const chessModule = importBlueESModule('blue:FQP53g6UNu75EeEDmTX8mKHqoNSLQgYxQxpFhAzKyHhJ');
+          const chessModule = importBlueESModule('blue:9uGqgr62FtodKDH1KqGb1syeqHfSRo7ySQ5KY8bTutNu');
           const Chess = chessModule.Chess;
 
           function checkMove(from, to, position) {
