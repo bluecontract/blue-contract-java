@@ -1,3 +1,11 @@
+## v0.4.6 (2024-10-10)
+
+### Fix
+
+- correct Blue IDs to match new blueId calculation (#4)
+- JS Engine Test Contract (#3)
+- ExpressionEvaluator
+
 ## v0.4.5 (2024-10-07)
 
 ### Fix
