@@ -13,7 +13,7 @@ public class BluePackageExporter {
     public static final String ROOT_DEPENDENCY = "ROOT";
     public static final String BLUE_FILE_EXTENSION = ".blue";
     public static final String EXTENDS_FILE_NAME = "_extends.txt";
-    public static final String REPLACE_INLINE_TYPES_WITH_BLUE_ID_TRANSFORMER_BLUE_ID = "648mybP3oHoi8kx6HvYzw6Jtuz6BjUpGPk1r2DpCq7e4";
+    public static final String REPLACE_INLINE_TYPES_WITH_BLUE_ID_TRANSFORMER_BLUE_ID = "27B7fuxQCS1VAptiCPc2RMkKoutP5qxkh3uDxZ7dr6Eo";
 
     public static List<BluePackage> exportPackages(String rootDir, DependencyGraphBuilder builder) throws IOException {
         DependencyGraph graph = builder.buildDependencyGraph(rootDir);

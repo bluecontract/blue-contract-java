@@ -58,7 +58,7 @@ dependencies {
     implementation("com.github.java-json-tools:json-patch:1.13")
 
     // Blue Language
-    implementation("blue.language:blue-language-java:0.7.2")
+    implementation("blue.language:blue-language-java:0.7.3")
 
     implementation gradleApi()
     implementation localGroovy()
