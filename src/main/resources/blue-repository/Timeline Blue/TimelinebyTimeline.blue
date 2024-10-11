@@ -1,0 +1,25 @@
+name: Timeline by Timeline.blue
+type: Initial Timeline Message
+timelineAlias:
+  description: A unique identifier or nickname for your timeline
+  type: Text
+avatar:
+  description: URL or path to an image that represents you or your timeline
+  type: Text
+about:
+  description: Can be used to write more about yourself or describe the purpose of this timeline
+  type: Text
+email:
+  description: Your contact email address
+  type: Text
+website:
+  description: URL to your website
+  type: Text
+phone:
+  description: Your phone number
+  type: Text
+instagram:
+  description: Your Instagram username
+  type: Text
+signingMethod:
+  type: Schnorr Signature Algorithm Over the Elliptic Curve Secp256k1

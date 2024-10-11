@@ -1,0 +1,4 @@
+name: Schnorr Signature Algorithm Over the Elliptic Curve Secp256k1
+publicKey:
+  description: The public key of the signer
+  type: Text
