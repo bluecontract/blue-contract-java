@@ -7,6 +7,8 @@ public class ChessMove {
     private String from;
     private String to;
 
+    public ChessMove() {}
+
     public ChessMove(String from, String to) {
         this.from = from;
         this.to = to;
