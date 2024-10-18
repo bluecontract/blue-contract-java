@@ -1,3 +1,13 @@
+## v0.5.0 (2024-10-18)
+
+### Feat
+
+- add Initial Timeline Message
+
+### Fix
+
+- ChessMove constructor
+
 ## v0.4.6 (2024-10-10)
 
 ### Fix
