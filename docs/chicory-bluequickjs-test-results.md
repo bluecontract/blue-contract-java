@@ -215,6 +215,38 @@ Outcome:
   host gas drift.
 - Covered arithmetic, string concatenation, object/array return, and array map.
 
+## Forbidden surface and OOG boundaries
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryForbiddenSurfaceTest' \
+  --tests '*ChicoryOutOfGasTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Forbidden surface parity covered:
+  - `typeof Date`
+  - `typeof process`
+  - `typeof require`
+  - `Math.random()`
+  - `eval("1")`
+  - `Function("return 1")()`
+  - `new Proxy({}, {})`
+  - `typeof WeakRef`
+- OOG parity/repetition covered:
+  - host gas limit `0`
+  - host gas limit `1`
+  - `while (true) {}`
+  - large loop
+  - recursive function
+  - `document.get` loop
+- Each OOG case was repeated 5 times and checked for no Chicory result drift.
+
 ## Chicory vs Node parity
 
 Command:

@@ -76,6 +76,11 @@ public final class ChicoryBlueQuickJsRuntime implements JavaScriptRuntime, AutoC
         if ("OutOfGas: out of gas".equals(message)) {
             return "vm-error: out of gas";
         }
+        if (message != null
+                && message.startsWith("TypeError: ")
+                && message.contains("disabled in deterministic mode")) {
+            return "vm-error: " + message.substring("TypeError: ".length());
+        }
         if (message != null && message.startsWith("vm-error: ")) {
             return message;
         }
