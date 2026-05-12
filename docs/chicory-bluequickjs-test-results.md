@@ -167,6 +167,36 @@ Outcome:
 - Passed.
 - Full current `quickjs-chicory` test set remains green.
 
+## Host.v1 dispatcher
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryDocumentHostTest' \
+  --tests '*ChicoryHostCallAbiTest'
+```
+
+Outcome:
+
+- Passed.
+- Covered `document.get`, `document.getCanonical`, metadata override behavior,
+  JSON Pointer escaping, missing values, emit limit envelope behavior, malformed
+  requests, oversized request/response limits, unknown function IDs, reentrant
+  calls, and internal failure containment.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Full current `quickjs-chicory` test set remains green after Host.v1
+  dispatcher additions.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
