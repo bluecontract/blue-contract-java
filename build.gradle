@@ -58,6 +58,9 @@ compileTestJava {
 
 test {
     useJUnitPlatform()
+    if (System.getProperty('blue.quickjs.root')) {
+        systemProperty 'blue.quickjs.root', System.getProperty('blue.quickjs.root')
+    }
     reports {
         junitXml.required = false
         html.required = true
