@@ -65,6 +65,33 @@ Outcome:
 - Passed after adding the empty optional `quickjs-chicory` module.
 - Existing root tests still pass with the Node bridge baseline.
 
+## Core runtime injection layer
+
+Command:
+
+```bash
+./gradlew test --tests 'blue.contract.processor.conversation.SequentialWorkflowExecutionTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Added coverage proved that `BlueDocumentProcessorOptions` can inject a
+  `JavaScriptRuntime`, and that `ConversationProcessors.registerWith` can inject
+  a custom `SequentialWorkflowRunner`.
+
+Command:
+
+```bash
+./gradlew clean test -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed after the core injection API was added.
+- Existing default processor registration behavior remains covered and green.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
