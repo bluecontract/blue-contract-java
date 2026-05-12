@@ -42,6 +42,29 @@ finalBlueId=9kr8UvMAUAZ2wdk3EreY2ShtC5Q8927uaBdn9QTxqxyj
 
 ## Pending proof commands
 
+These commands have now been run for the initial optional module skeleton:
+
+```bash
+./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
+```
+
+Outcome:
+
+- Passed.
+- Runtime classpath contains `com.dylibso.chicory:runtime:1.7.5` and
+  `com.dylibso.chicory:wasm:1.7.5`.
+- No Node, V8, Javet, QuickJs4J, Wasmtime, or JNI dependency appeared in the
+  Chicory module runtime classpath.
+
+```bash
+./gradlew clean test -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed after adding the empty optional `quickjs-chicory` module.
+- Existing root tests still pass with the Node bridge baseline.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
@@ -62,10 +85,6 @@ phases exist:
 ./gradlew :quickjs-chicory:test \
   --tests '*BlueQuickJsResourceIntegrityTest' \
   -PblueQuickJsRoot=/tmp/blue-quickjs
-```
-
-```bash
-./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
 ```
 
 ```bash

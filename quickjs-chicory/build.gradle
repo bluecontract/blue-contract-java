@@ -1,0 +1,46 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    if (!System.getenv('CI')) {
+        mavenLocal()
+    }
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    if (JavaVersion.current().isJava11Compatible()) {
+        options.release = 11
+    }
+}
+
+dependencies {
+    api project(':')
+
+    implementation 'com.dylibso.chicory:runtime:1.7.5'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    if (System.getProperty('blue.quickjs.root')) {
+        systemProperty 'blue.quickjs.root', System.getProperty('blue.quickjs.root')
+    }
+    if (project.hasProperty('blueQuickJsRoot')) {
+        systemProperty 'blue.quickjs.root', project.property('blueQuickJsRoot')
+    }
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+        showStandardStreams = true
+    }
+}
