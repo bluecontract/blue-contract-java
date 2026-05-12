@@ -396,7 +396,8 @@ Command:
 Outcome:
 
 - Passed.
-- `BUILD SUCCESSFUL in 1m 16s`
+- Latest full clean run after adding forbidden-surface, OOG, counter-stress, and
+  Lambda classpath smoke coverage: `BUILD SUCCESSFUL in 1m 40s`
 - 13 actionable tasks executed.
 - Covered the existing root test suite plus all current `quickjs-chicory` tests.
 
