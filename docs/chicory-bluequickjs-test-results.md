@@ -301,6 +301,22 @@ Command:
 
 ```bash
 ./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryCounterSnapshotRoundTripStressTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Ran 100 Chicory-backed counter workflow iterations through canonical snapshot
+  round trips.
+- Verified counter progression, snapshot/BlueId preservation, positive gas, and
+  stable gas for equivalent operations.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
   -PblueQuickJsRoot=/tmp/blue-quickjs \
   -Dblue.quickjs.root=/tmp/blue-quickjs
 ```
