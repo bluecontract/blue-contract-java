@@ -345,6 +345,20 @@ Outcome:
 Command:
 
 ```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*LambdaPackagingSmokeTest' \
+  -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Evaluated a deterministic fixture using classpath-pinned resources without
+  configuring a filesystem blue-quickjs root in the runtime config.
+
+Command:
+
+```bash
 PATH=/usr/bin:/bin ./gradlew :quickjs-chicory:test \
   --tests '*ChicoryBlueQuickJsRuntimeSmokeTest' \
   -PblueQuickJsRoot=/tmp/blue-quickjs
