@@ -352,6 +352,28 @@ Outcome:
   `com.dylibso.chicory:wasm:1.7.5`.
 - No Node, V8, Javet, QuickJs4J, Wasmtime, or JNI runtime dependency appears.
 
+Command:
+
+```bash
+python3 - <<'PY'
+import yaml
+for path in ['.github/workflows/build.yml', '.github/workflows/release.yml']:
+    with open(path, 'r', encoding='utf-8') as fh:
+        yaml.safe_load(fh)
+    print(path, 'ok')
+PY
+./gradlew :clean :test -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Workflow YAML parsed successfully.
+- Root/core-only test path passed:
+  `BUILD SUCCESSFUL in 14s`, 6 actionable tasks executed.
+- This validates the Java 8-compatible core task path used by the split CI job
+  without invoking the Java 11+ optional module.
+
 Lambda-like Docker smoke note:
 
 - `docker` is not installed in this VM, so the Java 17/21 Lambda container smoke

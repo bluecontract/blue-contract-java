@@ -412,6 +412,55 @@ cd ../blue-quickjs
 pnpm nx build quickjs-runtime
 ```
 
+### Experimental Chicory blue-quickjs runtime
+
+The root `blue-contract-java` artifact remains Java 8 compatible and continues
+to use `NodeQuickJsRuntime` by default. An optional Java 11+ submodule,
+`quickjs-chicory`, provides an experimental JVM-native runtime that executes the
+canonical blue-quickjs wasm32 release artifact through Chicory, without Node,
+V8, Javet, native Wasmtime bindings, or JNI in the Chicory evaluation path.
+
+Build and test the optional module with a built `blue-quickjs` checkout:
+
+```bash
+cd ../blue-quickjs
+pnpm install --frozen-lockfile
+bash tools/scripts/setup-emsdk.sh
+WASM_VARIANTS=wasm32 WASM_BUILD_TYPES=release pnpm exec nx build quickjs-wasm-build
+pnpm exec nx build quickjs-wasm
+pnpm exec nx build abi-manifest
+pnpm exec nx build quickjs-runtime
+
+cd ../blue-contract-java
+./gradlew :quickjs-chicory:test \
+  -PblueQuickJsRoot=../blue-quickjs \
+  -Dblue.quickjs.root=../blue-quickjs
+```
+
+The module verifies the pinned wasm artifact, `engineBuildHash`, Host.v1
+manifest hash, gas version, and deterministic execution profile before
+evaluation. For packaging, generate classpath resources with:
+
+```bash
+./gradlew :quickjs-chicory:jar -PblueQuickJsRoot=../blue-quickjs
+```
+
+Applications can inject the runtime without adding Chicory to the Java 8 core:
+
+```java
+import blue.contract.processor.BlueDocumentProcessorOptions;
+import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.conversation.javascript.chicory.ChicoryBlueQuickJsRuntime;
+
+BlueDocumentProcessors.registerWith(
+        blue,
+        BlueDocumentProcessorOptions.builder()
+                .javaScriptRuntime(new ChicoryBlueQuickJsRuntime())
+                .build());
+```
+
+`NodeQuickJsRuntime` remains the compatibility fallback and parity oracle.
+
 ## Registration
 
 Most applications should use the one-call facade:
