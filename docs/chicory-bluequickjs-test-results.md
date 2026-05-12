@@ -139,6 +139,34 @@ Outcome:
 - Passed.
 - Full current `quickjs-chicory` test set is green.
 
+## Source wrapper and result parser
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*BlueQuickJsSourceWrapperTest' \
+  --tests '*BlueQuickJsResultParserTest'
+```
+
+Outcome:
+
+- Passed.
+- Verified expression, block, and raw source wrapping matches `evaluate.mjs`.
+- Verified VM `RESULT` / `ERROR` output parsing with gas trailers and malformed
+  output rejection.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Full current `quickjs-chicory` test set remains green.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
