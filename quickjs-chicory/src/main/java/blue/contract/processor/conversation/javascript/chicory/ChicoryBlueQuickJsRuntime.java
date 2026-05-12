@@ -39,7 +39,7 @@ public final class ChicoryBlueQuickJsRuntime implements JavaScriptRuntime, AutoC
             instance.initialize(HostV1Manifest.bytes(), HostV1Manifest.HOST_V1_HASH, contextBlob, wasmGasLimit);
             BlueQuickJsResultParser.ParsedResult parsed = BlueQuickJsResultParser.parse(instance.eval(source));
             if (!parsed.ok()) {
-                throw new JavaScriptExecutionException(parsed.errorMessage());
+                throw new JavaScriptExecutionException(normalizeVmError(parsed.errorMessage()));
             }
             return new JavaScriptEvaluationResult(parsed.value(),
                     parsed.wasmGasUsed(),
@@ -70,5 +70,15 @@ public final class ChicoryBlueQuickJsRuntime implements JavaScriptRuntime, AutoC
 
     private static Object valueOrNull(Object value) {
         return value == null ? null : value;
+    }
+
+    private static String normalizeVmError(String message) {
+        if ("OutOfGas: out of gas".equals(message)) {
+            return "vm-error: out of gas";
+        }
+        if (message != null && message.startsWith("vm-error: ")) {
+            return message;
+        }
+        return "vm-error: " + (message == null ? "unknown error" : message);
     }
 }

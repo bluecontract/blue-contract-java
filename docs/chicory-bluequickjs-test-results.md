@@ -215,6 +215,70 @@ Outcome:
   host gas drift.
 - Covered arithmetic, string concatenation, object/array return, and array map.
 
+## Chicory vs Node parity
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryVsNodeParityTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed after normalizing the raw Chicory OOG error to the same deterministic
+  category/message exposed by the Node bridge.
+- Generated parity report:
+  `quickjs-chicory/build/reports/blue-quickjs-chicory-parity.json`
+- Covered:
+  - simple arithmetic expression
+  - event binding expression
+  - currentContract expression
+  - steps binding expression
+  - document simple value
+  - document canonical value
+  - document metadata lookup
+  - array map/reduce
+  - JSON.stringify deterministic key ordering
+  - block mode object result
+  - block mode array result
+  - forbidden global
+  - out-of-gas loop
+
+Report status: `passed`; mismatches: `[]`.
+
+## Chicory workflow injection
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicorySequentialWorkflowExecutionTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Verified `SequentialWorkflowRunner.withJavaScriptRuntime(new
+  ChicoryBlueQuickJsRuntime(...))` can be injected through
+  `BlueDocumentProcessorOptions` and used by real workflow execution.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  -PblueQuickJsRoot=/tmp/blue-quickjs \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Full current `quickjs-chicory` test set is green including smoke, resource,
+  DV, Host.v1, workflow, and Node parity tests.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
