@@ -92,6 +92,25 @@ Outcome:
 - Passed after the core injection API was added.
 - Existing default processor registration behavior remains covered and green.
 
+## Resource and Host.v1 integrity
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*BlueQuickJsResourceIntegrityTest' \
+  --tests '*HostV1ManifestTest' \
+  -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Verified canonical wasm resource presence, magic bytes, metadata hash, pinned
+  engine hash, Host.v1 hash, gas/profile pins, approved import set, and required
+  exports.
+- Verified an incorrect expected engine hash fails closed before evaluation.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
@@ -106,12 +125,6 @@ phases exist:
   --tests '*ChicoryVsNodeParityTest' \
   -PblueQuickJsRoot=/tmp/blue-quickjs \
   -Dblue.quickjs.root=/tmp/blue-quickjs
-```
-
-```bash
-./gradlew :quickjs-chicory:test \
-  --tests '*BlueQuickJsResourceIntegrityTest' \
-  -PblueQuickJsRoot=/tmp/blue-quickjs
 ```
 
 ```bash

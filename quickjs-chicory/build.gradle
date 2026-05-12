@@ -25,6 +25,7 @@ dependencies {
     api project(':')
 
     implementation 'com.dylibso.chicory:runtime:1.7.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
