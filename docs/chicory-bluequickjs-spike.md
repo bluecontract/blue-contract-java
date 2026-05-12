@@ -155,8 +155,13 @@ Representative deterministic stress output:
    created in this container. All local validation commands should pass
    `-Dblue.quickjs.root=/tmp/blue-quickjs` or `-PblueQuickJsRoot=/tmp/blue-quickjs`.
 2. The raw wasm has deterministic Emscripten support imports in `env` in addition
-   to `host.host_call`. The Chicory adapter must explicitly implement or reject
-   these imports; it must not run the Emscripten JS loader under Node.
+   to `host.host_call`. The Chicory adapter explicitly provides deterministic
+   JVM-side stubs for these imports and does not run the Emscripten JS loader
+   under Node.
 3. Explicit `gasVersion` and `executionProfile` metadata fields are absent from
    the generated blue-quickjs metadata observed during preflight. Runtime pinning
-   must address this fail-closed requirement before evaluation.
+   is addressed by the Java module's generated `engine-metadata.json`, which
+   enriches the upstream artifact metadata with:
+   - `gasVersion: 2`
+   - `executionProfile: blue-quickjs-deterministic-baseline-1`
+   - `abiManifestHash: e23b0b2ee169900bbde7aff78e6ce20fead1715c60f8a8e3106d9959450a3d34`

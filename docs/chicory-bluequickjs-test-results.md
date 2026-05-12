@@ -321,39 +321,50 @@ Outcome:
 - Passed after adding resource-copy/classpath resource support.
 - Full current `quickjs-chicory` test set remains green.
 
-These are intentionally left pending until the corresponding implementation
-phases exist:
+## Final validation sweep
+
+Command:
 
 ```bash
-./gradlew :quickjs-chicory:clean :quickjs-chicory:test \
-  -PblueQuickJsRoot=/tmp/blue-quickjs \
-  -Dblue.quickjs.root=/tmp/blue-quickjs
-```
-
-```bash
-./gradlew :quickjs-chicory:test \
-  --tests '*ChicoryVsNodeParityTest' \
-  -PblueQuickJsRoot=/tmp/blue-quickjs \
-  -Dblue.quickjs.root=/tmp/blue-quickjs
-```
-
-```bash
-./gradlew clean test
-```
-
-```bash
-PATH=/usr/bin:/bin ./gradlew :quickjs-chicory:test \
-  --tests '*ChicoryBlueQuickJsRuntimeSmokeTest' \
+./gradlew clean test \
+  -Dblue.quickjs.root=/tmp/blue-quickjs \
   -PblueQuickJsRoot=/tmp/blue-quickjs
 ```
 
+Outcome:
+
+- Passed.
+- `BUILD SUCCESSFUL in 1m 16s`
+- 13 actionable tasks executed.
+- Covered the existing root test suite plus all current `quickjs-chicory` tests.
+
+Command:
+
 ```bash
-./gradlew :quickjs-chicory:clean :quickjs-chicory:jar \
-  -PblueQuickJsRoot=/tmp/blue-quickjs
+./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
 ```
 
-## Pending artifacts
+Outcome:
 
-- `quickjs-chicory/build/reports/blue-quickjs-chicory-parity.json`
-- Lambda-like Java 17 smoke output
-- Lambda-like Java 21 smoke output
+- Passed.
+- Runtime classpath contains Chicory JVM artifacts only:
+  `com.dylibso.chicory:runtime:1.7.5` and
+  `com.dylibso.chicory:wasm:1.7.5`.
+- No Node, V8, Javet, QuickJs4J, Wasmtime, or JNI runtime dependency appears.
+
+Lambda-like Docker smoke note:
+
+- `docker` is not installed in this VM, so the Java 17/21 Lambda container smoke
+  could not be executed here.
+- The no-Node PATH smoke above is the strongest local substitute performed in
+  this environment.
+
+## Remaining environment-limited checks
+
+- `./gradlew clean test` without a `blue.quickjs.root` override still depends on
+  the repository default sibling checkout. In this container that path resolves
+  to `/blue-quickjs`, but `/` is not writable, so the available checkout is
+  `/tmp/blue-quickjs`. The equivalent full clean validation with explicit
+  `-Dblue.quickjs.root=/tmp/blue-quickjs` passed.
+- Lambda-like Java 17 and Java 21 container smoke tests remain unexecuted because
+  Docker is not installed in this VM.
