@@ -197,6 +197,24 @@ Outcome:
 - Full current `quickjs-chicory` test set remains green after Host.v1
   dispatcher additions.
 
+## Chicory runtime smoke
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryBlueQuickJsRuntimeSmokeTest' \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Executed the canonical blue-quickjs wasm32 release artifact through Chicory.
+- Repeated each smoke expression 100 times and verified no value, wasm gas, or
+  host gas drift.
+- Covered arithmetic, string concatenation, object/array return, and array map.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
