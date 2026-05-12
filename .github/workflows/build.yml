@@ -22,6 +22,7 @@ jobs:
         with:
           repository: bluecontract/blue-quickjs
           path: blue-quickjs
+          submodules: recursive
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -29,23 +30,35 @@ jobs:
           java-version: '8'
           distribution: 'corretto'
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.8.0
           run_install: false
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'blue-quickjs/.nvmrc'
+          cache: 'pnpm'
+          cache-dependency-path: 'blue-quickjs/pnpm-lock.yaml'
+
+      - name: Cache emsdk
+        uses: actions/cache@v4
+        with:
+          path: blue-quickjs/tools/emsdk
+          key: emsdk-${{ runner.os }}-${{ hashFiles('blue-quickjs/tools/scripts/emsdk-version.txt') }}
+
       - name: Install blue-quickjs dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+        working-directory: blue-quickjs
+
+      - name: Install emsdk
+        run: bash tools/scripts/setup-emsdk.sh
         working-directory: blue-quickjs
 
       - name: Build blue-quickjs runtime
-        run: pnpm nx build quickjs-runtime
+        run: pnpm exec nx build quickjs-runtime
         working-directory: blue-quickjs
 
       - name: Setup Gradle
