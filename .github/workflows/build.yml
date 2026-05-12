@@ -1,0 +1,68 @@
+name: Build and validate
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/*'
+      - 'fix/*'
+      - 'hotfix/*'
+      - 'release/*'
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out blue-quickjs
+        uses: actions/checkout@v4
+        with:
+          repository: bluecontract/blue-quickjs
+          path: blue-quickjs
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'corretto'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install blue-quickjs dependencies
+        run: pnpm install
+        working-directory: blue-quickjs
+
+      - name: Build blue-quickjs runtime
+        run: pnpm nx build quickjs-runtime
+        working-directory: blue-quickjs
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Execute Gradle build
+        run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: build/reports
+
+      - name: Archive libs
+        uses: actions/upload-artifact@v4
+        with:
+          name: libs
+          path: build/libs

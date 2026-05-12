@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation "blue.contract:blue-contract-java:0.1.0-SNAPSHOT"
+    implementation "blue.contract:blue-contract-java:1.0.0"
 }
 ```
 
@@ -497,6 +497,23 @@ Build jars:
 ```bash
 ./gradlew build
 ```
+
+Publish locally:
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+Maven Central release publishing follows the same JReleaser setup used by the
+other Blue Java artifacts. The GitHub release workflow publishes
+`blue.contract:blue-contract-java:1.0.0` from `main` using:
+
+- `JRELEASER_MAVENCENTRAL_USERNAME`;
+- `JRELEASER_MAVENCENTRAL_PASSWORD`;
+- `JRELEASER_GPG_PUBLIC_KEY`;
+- `JRELEASER_GPG_SECRET_KEY`;
+- `JRELEASER_GPG_PASSPHRASE`;
+- `JRELEASER_GITHUB_TOKEN`.
 
 Current test areas:
 

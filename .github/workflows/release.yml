@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Check if branch is main
+        run: |
+          if [[ "${GITHUB_REF##*/}" != "main" ]]; then
+            echo "This workflow can only be triggered for the main branch."
+            exit 1
+          fi
+
+      - name: Check out blue-quickjs
+        uses: actions/checkout@v4
+        with:
+          repository: bluecontract/blue-quickjs
+          path: blue-quickjs
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'corretto'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install blue-quickjs dependencies
+        run: pnpm install
+        working-directory: blue-quickjs
+
+      - name: Build blue-quickjs runtime
+        run: pnpm nx build quickjs-runtime
+        working-directory: blue-quickjs
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Execute Gradle build
+        run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+
+      - name: Execute Gradle publish
+        run: ./gradlew publish -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+
+      - name: Execute Gradle release
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
+          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.MAVENCENTRAL_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
+        run: ./gradlew jreleaserFullRelease
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifacts
+          path: |
+            build/libs
+            build/publications
+            build/jreleaser
