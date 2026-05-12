@@ -111,6 +111,34 @@ Outcome:
   exports.
 - Verified an incorrect expected engine hash fails closed before evaluation.
 
+## Deterministic DV codec
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test --tests '*DeterministicValueCodecTest'
+```
+
+Outcome:
+
+- Passed.
+- Golden encodings matched the blue-quickjs DV documentation.
+- Allowed values round-tripped.
+- Rejection cases covered NaN, infinities, negative zero, duplicate/unsorted map
+  keys, indefinite lengths, tags, half/float32, overlong strings, oversized
+  encoded values, excessive depth, arrays, and maps.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Full current `quickjs-chicory` test set is green.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 
