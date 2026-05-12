@@ -3,6 +3,7 @@ package blue.contract.processor.conversation.javascript.chicory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,6 +76,12 @@ public final class BlueQuickJsWasmResources {
         if (config == null) {
             throw new IllegalArgumentException("config must not be null");
         }
+        if (config.preferClasspathResources()) {
+            BlueQuickJsWasmResources classpath = resolveClasspath(config);
+            if (classpath != null) {
+                return classpath;
+            }
+        }
         Path root = resolveRoot(config);
         Path wasmPath = locateWasm(root);
         Path metadataPath = locateMetadata(wasmPath, root);
@@ -124,6 +131,62 @@ public final class BlueQuickJsWasmResources {
                 config.expectedExecutionProfile(),
                 shape.imports,
                 shape.exports);
+    }
+
+    private static BlueQuickJsWasmResources resolveClasspath(BlueQuickJsWasmRuntimeConfig config) {
+        String base = "/blue/contract/processor/quickjs/chicory/";
+        try (InputStream wasmInput = BlueQuickJsWasmResources.class.getResourceAsStream(base + CANONICAL_WASM_FILENAME);
+             InputStream metadataInput = BlueQuickJsWasmResources.class.getResourceAsStream(base + "engine-metadata.json")) {
+            if (wasmInput == null || metadataInput == null) {
+                return null;
+            }
+            byte[] wasmBytes = readAll(wasmInput);
+            verifyMagic(wasmBytes, Paths.get("classpath:" + base + CANONICAL_WASM_FILENAME));
+            JsonNode metadata = JSON.readTree(metadataInput);
+            JsonNode selected = selectedVariant(metadata, config);
+            String wasmSha256 = sha256Hex(wasmBytes);
+            String metadataSha256 = requiredHex(selected.at("/wasm/sha256"), "metadata wasm sha256");
+            String engineBuildHash = requiredHex(selected.get("engineBuildHash"), "metadata engineBuildHash");
+            if (!wasmSha256.equals(metadataSha256) || !wasmSha256.equals(engineBuildHash)) {
+                throw new BlueQuickJsDeterminismException("classpath wasm hash mismatch");
+            }
+            if (config.expectedEngineBuildHash() != null && !engineBuildHash.equals(config.expectedEngineBuildHash())) {
+                throw new BlueQuickJsDeterminismException("engineBuildHash mismatch: expected="
+                        + config.expectedEngineBuildHash() + ", actual=" + engineBuildHash);
+            }
+            verifyMetadataShape(metadata);
+            int gasVersion = requiredInt(metadata.get("gasVersion"), "gasVersion");
+            if (gasVersion != config.expectedGasVersion()) {
+                throw new BlueQuickJsDeterminismException("gasVersion mismatch: expected="
+                        + config.expectedGasVersion() + ", actual=" + gasVersion);
+            }
+            String executionProfile = requiredText(metadata.get("executionProfile"), "executionProfile");
+            if (!config.expectedExecutionProfile().equals(executionProfile)) {
+                throw new BlueQuickJsDeterminismException("executionProfile mismatch: expected="
+                        + config.expectedExecutionProfile() + ", actual=" + executionProfile);
+            }
+            String abiManifestHash = requiredText(metadata.get("abiManifestHash"), "abiManifestHash");
+            if (!HostV1Manifest.HOST_V1_HASH.equals(abiManifestHash)) {
+                throw new BlueQuickJsDeterminismException("ABI manifest hash mismatch in classpath metadata");
+            }
+            WasmModuleShape shape = WasmModuleShape.parse(wasmBytes);
+            verifyImports(shape.imports);
+            verifyExports(shape.exports);
+            return new BlueQuickJsWasmResources(null, null, null, wasmBytes, metadata,
+                    engineBuildHash, abiManifestHash, gasVersion, executionProfile, shape.imports, shape.exports);
+        } catch (IOException ex) {
+            throw new BlueQuickJsResourceException("failed to read classpath blue-quickjs resources", ex);
+        }
+    }
+
+    private static byte[] readAll(InputStream input) throws IOException {
+        byte[] buffer = new byte[8192];
+        java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
+        int read;
+        while ((read = input.read(buffer)) >= 0) {
+            output.write(buffer, 0, read);
+        }
+        return output.toByteArray();
     }
 
     public Path blueQuickJsRoot() {

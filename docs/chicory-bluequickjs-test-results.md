@@ -279,6 +279,48 @@ Outcome:
 - Full current `quickjs-chicory` test set is green including smoke, resource,
   DV, Host.v1, workflow, and Node parity tests.
 
+## Resource pinning and no-Node smoke
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:clean :quickjs-chicory:jar \
+  -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Ran `copyBlueQuickJsWasmResources`.
+- Built a jar containing generated pinned Chicory resources.
+
+Command:
+
+```bash
+PATH=/usr/bin:/bin ./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryBlueQuickJsRuntimeSmokeTest' \
+  -PblueQuickJsRoot=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- `command -v node` produced no Node binary on that PATH before the test.
+- Chicory smoke fixtures evaluated without Node on PATH.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  -PblueQuickJsRoot=/tmp/blue-quickjs \
+  -Dblue.quickjs.root=/tmp/blue-quickjs
+```
+
+Outcome:
+
+- Passed after adding resource-copy/classpath resource support.
+- Full current `quickjs-chicory` test set remains green.
+
 These are intentionally left pending until the corresponding implementation
 phases exist:
 

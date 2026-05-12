@@ -21,6 +21,7 @@ class BlueQuickJsResourceIntegrityTest {
         BlueQuickJsWasmResources resources = BlueQuickJsWasmResources.resolve(
                 BlueQuickJsWasmRuntimeConfig.builder()
                         .blueQuickJsRoot(root)
+                        .preferClasspathResources(false)
                         .build());
 
         assertTrue(Files.isRegularFile(resources.wasmPath()));
@@ -41,6 +42,7 @@ class BlueQuickJsResourceIntegrityTest {
         BlueQuickJsWasmResources resources = BlueQuickJsWasmResources.resolve(
                 BlueQuickJsWasmRuntimeConfig.builder()
                         .blueQuickJsRoot(blueQuickJsRoot())
+                        .preferClasspathResources(false)
                         .build());
         Set<String> imports = new HashSet<String>();
         for (BlueQuickJsWasmResources.WasmImport wasmImport : resources.imports()) {
@@ -66,6 +68,7 @@ class BlueQuickJsResourceIntegrityTest {
         BlueQuickJsWasmResources resources = BlueQuickJsWasmResources.resolve(
                 BlueQuickJsWasmRuntimeConfig.builder()
                         .blueQuickJsRoot(blueQuickJsRoot())
+                        .preferClasspathResources(false)
                         .build());
         Set<String> exports = new HashSet<String>();
         for (BlueQuickJsWasmResources.WasmExport wasmExport : resources.exports()) {
@@ -87,6 +90,7 @@ class BlueQuickJsResourceIntegrityTest {
                 () -> BlueQuickJsWasmResources.resolve(
                         BlueQuickJsWasmRuntimeConfig.builder()
                                 .blueQuickJsRoot(blueQuickJsRoot())
+                                .preferClasspathResources(false)
                                 .expectedEngineBuildHash("0000000000000000000000000000000000000000000000000000000000000000")
                                 .build()));
 
