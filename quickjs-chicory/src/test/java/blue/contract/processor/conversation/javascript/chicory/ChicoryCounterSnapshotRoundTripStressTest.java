@@ -81,10 +81,7 @@ class ChicoryCounterSnapshotRoundTripStressTest {
         BlueRepository repository = BlueRepository.v1_2_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
-        ChicoryBlueQuickJsRuntime runtime = new ChicoryBlueQuickJsRuntime(BlueQuickJsWasmRuntimeConfig.builder()
-                .blueQuickJsRoot(blueQuickJsRoot())
-                .expectedEngineBuildHash("1d4584fc0552a24ee840afa2cca9f1536d47429f467585d4d5c1a5236ba96dc9")
-                .build());
+        ChicoryBlueQuickJsRuntime runtime = new ChicoryBlueQuickJsRuntime(ChicoryTestSupport.pinnedConfig(blueQuickJsRoot()));
         BlueDocumentProcessors.registerWith(blue, BlueDocumentProcessorOptions.builder()
                 .sequentialWorkflowRunner(SequentialWorkflowRunner.withJavaScriptRuntime(runtime))
                 .build());
@@ -148,12 +145,7 @@ class ChicoryCounterSnapshotRoundTripStressTest {
     }
 
     private static Path blueQuickJsRoot() {
-        String configured = System.getProperty("blue.quickjs.root");
-        Path root = configured == null || configured.trim().isEmpty()
-                ? Paths.get(System.getProperty("user.dir")).toAbsolutePath().getParent().resolve("blue-quickjs")
-                : Paths.get(configured);
-        assumeTrue(Files.isDirectory(root), "blue-quickjs checkout is required for Chicory stress tests");
-        return root;
+        return ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for Chicory stress tests");
     }
 
     @TypeBlueId(SIMPLE_TIMELINE_CHANNEL_BLUE_ID)

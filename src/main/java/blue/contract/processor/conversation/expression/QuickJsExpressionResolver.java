@@ -72,6 +72,13 @@ public final class QuickJsExpressionResolver {
             }
             return resolved;
         } catch (JavaScriptExecutionException ex) {
+            long hostGasUsed = counter.hostGasUsed;
+            if (ex.hasGasUsage()) {
+                hostGasUsed += ex.hostGasUsed();
+            }
+            if (hostGasUsed > 0L) {
+                context.processorContext().consumeGas(hostGasUsed);
+            }
             context.processorContext().throwFatal(ex.getMessage());
             return null;
         }
@@ -183,7 +190,10 @@ public final class QuickJsExpressionResolver {
                     bindings,
                     hostGasLimit));
         } catch (JavaScriptExecutionException ex) {
-            throw new JavaScriptExecutionException("QuickJS expression resolution failed: " + ex.getMessage(), ex);
+            throw new JavaScriptExecutionException("QuickJS expression resolution failed: " + ex.getMessage(),
+                    ex,
+                    ex.hasGasUsage() ? ex.wasmGasUsed() : null,
+                    ex.hasGasUsage() ? ex.hostGasUsed() : null);
         }
     }
 

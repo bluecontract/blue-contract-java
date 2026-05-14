@@ -19,12 +19,12 @@ class ChicoryDocumentHostTest {
         assertEquals(6, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "/counter"));
         assertEquals(6, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "counter"));
         assertEquals(root, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, ""));
-        assertEquals(root, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, null));
+        assertFatal(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, null);
         assertEquals(10, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "/items/0"));
         assertEquals(1, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "/a~1b"));
         assertEquals(2, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "/a~0b"));
         assertEquals(null, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, "/missing"));
-        assertEquals(null, call(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, 12));
+        assertFatal(dispatcher, HostV1Manifest.DOCUMENT_GET_FN_ID, 12);
     }
 
     @Test
@@ -62,6 +62,12 @@ class ChicoryDocumentHostTest {
         Map<?, ?> envelope = envelope(dispatcher.dispatch(fnId, DeterministicValueCodec.encode(Arrays.asList(pointer))));
         assertEquals(1, envelope.get("units"));
         return envelope.get("ok");
+    }
+
+    private static void assertFatal(BlueQuickJsHostDispatcher dispatcher, int fnId, Object pointer) {
+        BlueQuickJsHostDispatcher.DispatchResult result = dispatcher.dispatch(fnId,
+                DeterministicValueCodec.encode(Arrays.asList(pointer)));
+        org.junit.jupiter.api.Assertions.assertTrue(result.fatal(), "expected fatal transport failure");
     }
 
     private static Map<?, ?> envelope(BlueQuickJsHostDispatcher.DispatchResult result) {

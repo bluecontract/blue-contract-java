@@ -31,6 +31,7 @@ class ChicoryHostCallAbiTest {
         assertTrue(dispatcher.dispatch(999, DeterministicValueCodec.encode(Collections.emptyList())).fatal());
         assertTrue(dispatcher.dispatch(HostV1Manifest.DOCUMENT_GET_FN_ID, new byte[]{(byte) 0xff}).fatal());
         assertTrue(dispatcher.dispatch(HostV1Manifest.DOCUMENT_GET_FN_ID, DeterministicValueCodec.encode("not-array")).fatal());
+        assertTrue(dispatcher.dispatch(HostV1Manifest.DOCUMENT_GET_FN_ID, DeterministicValueCodec.encode(Arrays.asList((Object) null))).fatal());
     }
 
     @Test
@@ -77,6 +78,8 @@ class ChicoryHostCallAbiTest {
         BlueQuickJsHostDispatcher.DispatchResult result = dispatcher.dispatch(HostV1Manifest.DOCUMENT_GET_FN_ID, null);
 
         assertTrue(result.fatal());
+        assertFalse(result.error().contains("NullPointerException"));
+        assertFalse(result.error().contains("java."));
     }
 
     private static Map<?, ?> decode(BlueQuickJsHostDispatcher.DispatchResult result) {

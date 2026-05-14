@@ -134,7 +134,7 @@ public final class NodeQuickJsRuntime implements JavaScriptRuntime, AutoCloseabl
         }
     }
 
-    private JavaScriptEvaluationResult parseResult(String stdout) {
+    JavaScriptEvaluationResult parseResult(String stdout) {
         Map<String, Object> result = UncheckedObjectMapper.JSON_MAPPER.readValue(stdout,
                 new TypeReference<Map<String, Object>>() {
                 });
@@ -143,7 +143,14 @@ public final class NodeQuickJsRuntime implements JavaScriptRuntime, AutoCloseabl
             Object message = result.get("message");
             Object type = result.get("type");
             String prefix = type != null ? type + ": " : "";
-            throw new JavaScriptExecutionException(prefix + (message != null ? message : "unknown error"));
+            String errorMessage = prefix + (message != null ? message : "unknown error");
+            if (!result.containsKey("wasmGasUsed")) {
+                throw new JavaScriptExecutionException(errorMessage);
+            }
+            long errorWasmGasUsed = parseLong(result.get("wasmGasUsed"), "wasmGasUsed");
+            throw new JavaScriptExecutionException(errorMessage,
+                    errorWasmGasUsed,
+                    QuickJsGas.toHostGasUsed(errorWasmGasUsed));
         }
         long wasmGasUsed = parseLong(result.get("wasmGasUsed"), "wasmGasUsed");
         long hostGasUsed = QuickJsGas.toHostGasUsed(wasmGasUsed);
@@ -155,7 +162,11 @@ public final class NodeQuickJsRuntime implements JavaScriptRuntime, AutoCloseabl
             return ((Number) value).longValue();
         }
         if (value instanceof String) {
-            return Long.parseLong((String) value);
+            try {
+                return Long.parseLong((String) value);
+            } catch (NumberFormatException ex) {
+                throw new JavaScriptExecutionException("QuickJS bridge returned invalid " + field + ": " + value, ex);
+            }
         }
         throw new JavaScriptExecutionException("QuickJS bridge returned invalid " + field + ": " + value);
     }

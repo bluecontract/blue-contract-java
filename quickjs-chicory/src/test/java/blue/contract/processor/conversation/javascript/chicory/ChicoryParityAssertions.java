@@ -20,7 +20,7 @@ final class ChicoryParityAssertions {
             JavaScriptEvaluationResult result = runtime.evaluate(request);
             return Evaluation.ok(result.value(), result.wasmGasUsed(), result.hostGasUsed());
         } catch (JavaScriptExecutionException ex) {
-            return Evaluation.error(normalizeMessage(ex.getMessage()));
+            return Evaluation.error(normalizeMessage(ex.getMessage()), ex.wasmGasUsed(), ex.hostGasUsed());
         }
     }
 
@@ -56,8 +56,8 @@ final class ChicoryParityAssertions {
             return new Evaluation(true, normalize(value), null, wasmGasUsed, hostGasUsed);
         }
 
-        static Evaluation error(String error) {
-            return new Evaluation(false, null, error, -1L, -1L);
+        static Evaluation error(String error, long wasmGasUsed, long hostGasUsed) {
+            return new Evaluation(false, null, error, wasmGasUsed, hostGasUsed);
         }
 
         Map<String, Object> toMap() {

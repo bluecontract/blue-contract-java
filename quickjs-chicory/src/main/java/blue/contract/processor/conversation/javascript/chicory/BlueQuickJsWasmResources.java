@@ -21,6 +21,7 @@ import java.util.Set;
 public final class BlueQuickJsWasmResources {
     public static final String CANONICAL_WASM_FILENAME = "quickjs-eval.wasm";
     public static final String METADATA_FILENAME = "quickjs-wasm-build.metadata.json";
+    public static final String CLASSPATH_METADATA_FILENAME = "engine-metadata.json";
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final byte[] WASM_MAGIC = new byte[]{0x00, 0x61, 0x73, 0x6d};
@@ -111,12 +112,15 @@ public final class BlueQuickJsWasmResources {
         if (!engineBuildHash.equals(topLevelEngineBuildHash)) {
             throw new BlueQuickJsDeterminismException("top-level engineBuildHash does not match selected engineBuildHash");
         }
-        if (config.expectedEngineBuildHash() != null && !engineBuildHash.equals(config.expectedEngineBuildHash())) {
+        if (config.expectedEngineBuildHash() == null) {
+            throw new BlueQuickJsDeterminismException("expected engineBuildHash is required for filesystem wasm resources");
+        }
+        if (!engineBuildHash.equals(config.expectedEngineBuildHash())) {
             throw new BlueQuickJsDeterminismException("engineBuildHash mismatch: expected="
                     + config.expectedEngineBuildHash() + ", actual=" + engineBuildHash);
         }
         verifyMetadataShape(metadata);
-        String abiManifestHash = verifyAbiManifestHash(config);
+        PinMetadata pins = verifyPinMetadata(metadata, config, true);
         WasmModuleShape shape = WasmModuleShape.parse(wasmBytes);
         verifyImports(shape.imports);
         verifyExports(shape.exports);
@@ -126,9 +130,9 @@ public final class BlueQuickJsWasmResources {
                 wasmBytes,
                 metadata,
                 engineBuildHash,
-                abiManifestHash,
-                config.expectedGasVersion(),
-                config.expectedExecutionProfile(),
+                pins.abiManifestHash,
+                pins.gasVersion,
+                pins.executionProfile,
                 shape.imports,
                 shape.exports);
     }
@@ -136,7 +140,7 @@ public final class BlueQuickJsWasmResources {
     private static BlueQuickJsWasmResources resolveClasspath(BlueQuickJsWasmRuntimeConfig config) {
         String base = "/blue/contract/processor/quickjs/chicory/";
         try (InputStream wasmInput = BlueQuickJsWasmResources.class.getResourceAsStream(base + CANONICAL_WASM_FILENAME);
-             InputStream metadataInput = BlueQuickJsWasmResources.class.getResourceAsStream(base + "engine-metadata.json")) {
+             InputStream metadataInput = BlueQuickJsWasmResources.class.getResourceAsStream(base + CLASSPATH_METADATA_FILENAME)) {
             if (wasmInput == null || metadataInput == null) {
                 return null;
             }
@@ -144,36 +148,33 @@ public final class BlueQuickJsWasmResources {
             verifyMagic(wasmBytes, Paths.get("classpath:" + base + CANONICAL_WASM_FILENAME));
             JsonNode metadata = JSON.readTree(metadataInput);
             JsonNode selected = selectedVariant(metadata, config);
+            String metadataWasmFilename = requiredText(selected.at("/wasm/filename"),
+                    "metadata variants." + config.expectedVariant() + "." + config.expectedBuildType() + ".wasm.filename");
+            if (!CANONICAL_WASM_FILENAME.equals(metadataWasmFilename)) {
+                throw new BlueQuickJsDeterminismException("selected classpath wasm is not canonical "
+                        + CANONICAL_WASM_FILENAME + ": " + metadataWasmFilename);
+            }
             String wasmSha256 = sha256Hex(wasmBytes);
             String metadataSha256 = requiredHex(selected.at("/wasm/sha256"), "metadata wasm sha256");
             String engineBuildHash = requiredHex(selected.get("engineBuildHash"), "metadata engineBuildHash");
             if (!wasmSha256.equals(metadataSha256) || !wasmSha256.equals(engineBuildHash)) {
                 throw new BlueQuickJsDeterminismException("classpath wasm hash mismatch");
             }
+            String topLevelEngineBuildHash = requiredHex(metadata.get("engineBuildHash"), "metadata top-level engineBuildHash");
+            if (!engineBuildHash.equals(topLevelEngineBuildHash)) {
+                throw new BlueQuickJsDeterminismException("top-level engineBuildHash does not match selected engineBuildHash");
+            }
             if (config.expectedEngineBuildHash() != null && !engineBuildHash.equals(config.expectedEngineBuildHash())) {
                 throw new BlueQuickJsDeterminismException("engineBuildHash mismatch: expected="
                         + config.expectedEngineBuildHash() + ", actual=" + engineBuildHash);
             }
             verifyMetadataShape(metadata);
-            int gasVersion = requiredInt(metadata.get("gasVersion"), "gasVersion");
-            if (gasVersion != config.expectedGasVersion()) {
-                throw new BlueQuickJsDeterminismException("gasVersion mismatch: expected="
-                        + config.expectedGasVersion() + ", actual=" + gasVersion);
-            }
-            String executionProfile = requiredText(metadata.get("executionProfile"), "executionProfile");
-            if (!config.expectedExecutionProfile().equals(executionProfile)) {
-                throw new BlueQuickJsDeterminismException("executionProfile mismatch: expected="
-                        + config.expectedExecutionProfile() + ", actual=" + executionProfile);
-            }
-            String abiManifestHash = requiredText(metadata.get("abiManifestHash"), "abiManifestHash");
-            if (!HostV1Manifest.HOST_V1_HASH.equals(abiManifestHash)) {
-                throw new BlueQuickJsDeterminismException("ABI manifest hash mismatch in classpath metadata");
-            }
+            PinMetadata pins = verifyPinMetadata(metadata, config, true);
             WasmModuleShape shape = WasmModuleShape.parse(wasmBytes);
             verifyImports(shape.imports);
             verifyExports(shape.exports);
             return new BlueQuickJsWasmResources(null, null, null, wasmBytes, metadata,
-                    engineBuildHash, abiManifestHash, gasVersion, executionProfile, shape.imports, shape.exports);
+                    engineBuildHash, pins.abiManifestHash, pins.gasVersion, pins.executionProfile, shape.imports, shape.exports);
         } catch (IOException ex) {
             throw new BlueQuickJsResourceException("failed to read classpath blue-quickjs resources", ex);
         }
@@ -360,17 +361,56 @@ public final class BlueQuickJsWasmResources {
         throw new BlueQuickJsDeterminismException("metadata missing deterministic flag " + expected);
     }
 
-    private static String verifyAbiManifestHash(BlueQuickJsWasmRuntimeConfig config) {
-        String actual = HostV1Manifest.HOST_V1_HASH;
+    private static PinMetadata verifyPinMetadata(JsonNode metadata,
+                                                 BlueQuickJsWasmRuntimeConfig config,
+                                                 boolean requireMetadataFields) {
+        int gasVersion;
+        if (metadata.has("gasVersion")) {
+            gasVersion = requiredInt(metadata.get("gasVersion"), "gasVersion");
+        } else if (requireMetadataFields) {
+            throw new BlueQuickJsDeterminismException("required metadata integer missing: gasVersion");
+        } else {
+            gasVersion = config.expectedGasVersion();
+        }
+        if (gasVersion != config.expectedGasVersion()) {
+            throw new BlueQuickJsDeterminismException("gasVersion mismatch: expected="
+                    + config.expectedGasVersion() + ", actual=" + gasVersion);
+        }
+
+        String executionProfile;
+        if (metadata.has("executionProfile")) {
+            executionProfile = requiredText(metadata.get("executionProfile"), "executionProfile");
+        } else if (requireMetadataFields) {
+            throw new BlueQuickJsDeterminismException("required metadata field missing or non-text: executionProfile");
+        } else {
+            executionProfile = config.expectedExecutionProfile();
+        }
+        if (!config.expectedExecutionProfile().equals(executionProfile)) {
+            throw new BlueQuickJsDeterminismException("executionProfile mismatch: expected="
+                    + config.expectedExecutionProfile() + ", actual=" + executionProfile);
+        }
+
+        String abiManifestHash;
+        if (metadata.has("abiManifestHash")) {
+            abiManifestHash = requiredHex(metadata.get("abiManifestHash"), "abiManifestHash");
+        } else if (requireMetadataFields) {
+            throw new BlueQuickJsDeterminismException("required metadata field missing or non-text: abiManifestHash");
+        } else {
+            abiManifestHash = HostV1Manifest.HOST_V1_HASH;
+        }
         String expected = config.expectedAbiManifestHash();
         if (expected == null || expected.trim().isEmpty()) {
             throw new BlueQuickJsDeterminismException("expected ABI manifest hash is required");
         }
-        if (!actual.equals(expected)) {
-            throw new BlueQuickJsDeterminismException("ABI manifest hash mismatch: expected="
-                    + expected + ", actual=" + actual);
+        if (!HostV1Manifest.HOST_V1_HASH.equals(abiManifestHash)) {
+            throw new BlueQuickJsDeterminismException("ABI manifest hash mismatch in metadata: expected="
+                    + HostV1Manifest.HOST_V1_HASH + ", actual=" + abiManifestHash);
         }
-        return actual;
+        if (!abiManifestHash.equals(expected)) {
+            throw new BlueQuickJsDeterminismException("ABI manifest hash mismatch: expected="
+                    + expected + ", actual=" + abiManifestHash);
+        }
+        return new PinMetadata(abiManifestHash, gasVersion, executionProfile);
     }
 
     private static void verifyImports(List<WasmImport> imports) {
@@ -438,6 +478,18 @@ public final class BlueQuickJsWasmResources {
             return hex.toString();
         } catch (NoSuchAlgorithmException ex) {
             throw new BlueQuickJsResourceException("SHA-256 is unavailable", ex);
+        }
+    }
+
+    private static final class PinMetadata {
+        private final String abiManifestHash;
+        private final int gasVersion;
+        private final String executionProfile;
+
+        private PinMetadata(String abiManifestHash, int gasVersion, String executionProfile) {
+            this.abiManifestHash = abiManifestHash;
+            this.gasVersion = gasVersion;
+            this.executionProfile = executionProfile;
         }
     }
 

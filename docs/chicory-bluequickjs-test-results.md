@@ -439,8 +439,8 @@ Outcome:
 
 Lambda-like Docker smoke note:
 
-- `docker` is not installed in this VM, so the Java 17/21 Lambda container smoke
-  could not be executed here.
+- The Java 17/21 Lambda container smoke could not be executed in the original
+  validation environment.
 - The no-Node PATH smoke above is the strongest local substitute performed in
   this environment.
 
@@ -451,5 +451,194 @@ Lambda-like Docker smoke note:
   to `/blue-quickjs`, but `/` is not writable, so the available checkout is
   `/tmp/blue-quickjs`. The equivalent full clean validation with explicit
   `-Dblue.quickjs.root=/tmp/blue-quickjs` passed.
-- Lambda-like Java 17 and Java 21 container smoke tests remain unexecuted because
-  Docker is not installed in this VM.
+- Lambda-like Java 17 and Java 21 container smoke tests remain unexecuted in
+  this environment.
+
+## Hardening validation
+
+Date: 2026-05-13
+
+Environment updates:
+
+- Java repo branch: `cursor/chicory-blue-quickjs-runtime-1606`
+- blue-quickjs checkout: `/Users/piotr/data/blue-quickjs`
+- selected engineBuildHash:
+  `f91091cb7feb788df340305a877a9cadb0c6f4d13aea8a7da4040b6367d178ea`
+- gasVersion: `8`
+- executionProfile: `baseline-v1` in generated Java-side metadata
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*BlueQuickJsResourceIntegrityTest' \
+  --tests '*ChicoryDocumentHostTest' \
+  --tests '*ChicoryHostCallAbiTest' \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Covered fail-closed checks for missing filesystem engine hash, wrong engine
+  hash, wrong Host.v1 hash, wrong gas version, and wrong execution profile.
+- Covered Host.v1 document get/canonical, JSON Pointer escaping, missing/invalid
+  pointer behavior, request/response limits, reentrant rejection, and internal
+  host failure containment.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryVsNodeParityTest' \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Parity report:
+  `quickjs-chicory/build/reports/blue-quickjs-chicory-parity.json`
+- The report compares ok/error status, value, normalized VM error
+  category/message, `wasmGasUsed`, and `hostGasUsed`.
+- No gas mismatches remained in the expanded fixture set.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*BlueQuickJsSourceWrapperTest' \
+  --tests '*ChicoryForbiddenSurfaceTest' \
+  --tests '*ChicoryOutOfGasTest' \
+  --tests '*LambdaPackagingSmokeTest' \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Confirmed source wrapping matches the Node bridge wrapper.
+- Confirmed forbidden APIs and out-of-gas boundaries match the Node bridge.
+- Confirmed classpath-bundled WASM resources work in a child JVM with
+  `PATH=/bin`, where `node` is not available.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  --tests '*ChicoryBenchmarkReportTest' \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Benchmark report:
+  `quickjs-chicory/build/reports/blue-quickjs-chicory-benchmarks.json`
+- Timing is reported only. Gas equality is asserted.
+- Current local timing confirms the expected spike tradeoff: Chicory is much
+  slower with fresh WASM instances per evaluation, but gas matched exactly.
+
+Command:
+
+```bash
+docker version
+```
+
+Outcome:
+
+- Docker client is installed, but the daemon is not reachable:
+  `Cannot connect to the Docker daemon at unix:///var/run/docker.sock`.
+- Lambda-like Java 17/21 container smoke remains pending.
+
+Command:
+
+```bash
+./gradlew :quickjs-chicory:test \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+```
+
+Outcome:
+
+- Passed.
+- Full optional module test suite: `BUILD SUCCESSFUL in 4m 56s`.
+
+## Final stabilization validation
+
+Date: 2026-05-14
+
+Dependency update:
+
+- Root now resolves `blue.language:blue-language-java:2.0.0` from Maven.
+- The resolved artifact exposes `ProcessorFatalException.partialResult()` and
+  `ProcessorFatalException.totalGas()`.
+- Processor-level fatal parity tests use those public accessors directly; no
+  reflection-based fatal gas probe remains.
+
+Commands:
+
+```bash
+./gradlew test \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+
+./gradlew clean build \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+
+./gradlew publishToMavenLocal \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+
+./gradlew publish \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+
+./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
+
+./gradlew :quickjs-chicory:test \
+  --tests '*LambdaPackagingSmokeTest' \
+  -PblueQuickJsRoot=/Users/piotr/data/blue-quickjs \
+  -Dblue.quickjs.root=/Users/piotr/data/blue-quickjs
+
+docker version
+
+docker run --rm --platform linux/amd64 \
+  -v /Users/piotr/data/blue-contract-java:/workspace \
+  -v /Users/piotr/data/blue-quickjs:/blue-quickjs:ro \
+  -v /Users/piotr/.gradle:/root/.gradle \
+  -w /workspace \
+  amazon/aws-sam-cli-build-image-java11:latest \
+  /bin/bash -lc './gradlew :quickjs-chicory:test --tests "*LambdaPackagingSmokeTest" -PblueQuickJsRoot=/blue-quickjs -Dblue.quickjs.root=/blue-quickjs'
+```
+
+Outcomes:
+
+- All Gradle verification commands above passed.
+- `quickjs-chicory/build/reports/blue-quickjs-chicory-parity.json` reported
+  `status: passed`, `caseCount: 33`, and no mismatches.
+- `quickjs-chicory/build/reports/blue-quickjs-chicory-benchmarks.json` was
+  generated as a timing report only; timing is not a pass/fail signal.
+- `publishToMavenLocal` produced root and optional Chicory main, sources, and
+  javadoc jars.
+- `publish` produced staged root and optional Chicory main, sources, javadoc,
+  and POM artifacts under `build/staging-deploy`.
+- The root POM depends on `blue.language:blue-language-java:2.0.0`,
+  `blue.repo:blue-repo-java:1.2.0`, and Jackson; it does not depend on Chicory.
+- The optional POM depends on `blue.contract:blue-contract-java`,
+  `com.dylibso.chicory:runtime`, and Jackson.
+- Docker was initially blocked in the sandbox, but was reachable outside it
+  through Docker Desktop 4.73.0.
+- The Java 11 AWS SAM Lambda build image smoke passed:
+  `BUILD SUCCESSFUL in 28s`.
+- The container smoke ran `LambdaPackagingSmokeTest`, which evaluates
+  classpath-pinned Chicory without Node on `PATH` and checks for native JS
+  runtime dependency leakage.
+- A full AWS Lambda runtime/RIE handler invocation smoke is still optional
+  follow-up work if release policy requires more than a Java process inside an
+  AWS Lambda Java image.

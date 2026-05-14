@@ -61,6 +61,9 @@ public final class QuickJsExpressionEvaluator implements ExpressionEvaluator {
             context.processorContext().consumeGas(result.hostGasUsed());
             return JavaScriptValues.toNode(result.value());
         } catch (JavaScriptExecutionException ex) {
+            if (ex.hasGasUsage()) {
+                context.processorContext().consumeGas(ex.hostGasUsed());
+            }
             context.processorContext().throwFatal("QuickJS expression evaluation failed: " + ex.getMessage());
             return null;
         }

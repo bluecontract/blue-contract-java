@@ -5,8 +5,8 @@ import java.nio.file.Path;
 public final class BlueQuickJsWasmRuntimeConfig {
     public static final String BLUE_QUICKJS_ROOT_PROPERTY = "blue.quickjs.root";
     public static final String ENGINE_BUILD_HASH_PROPERTY = "blue.quickjs.engineBuildHash";
-    public static final int DEFAULT_GAS_VERSION = 2;
-    public static final String DEFAULT_EXECUTION_PROFILE = "blue-quickjs-deterministic-baseline-1";
+    public static final int DEFAULT_GAS_VERSION = 8;
+    public static final String DEFAULT_EXECUTION_PROFILE = "baseline-v1";
 
     private final Path blueQuickJsRoot;
     private final String expectedEngineBuildHash;

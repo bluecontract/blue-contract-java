@@ -17,10 +17,7 @@ class ChicoryOutOfGasTest {
     @Test
     void outOfGasBoundariesMatchNodeAndDoNotDrift() {
         Path root = blueQuickJsRoot();
-        ChicoryBlueQuickJsRuntime chicory = new ChicoryBlueQuickJsRuntime(BlueQuickJsWasmRuntimeConfig.builder()
-                .blueQuickJsRoot(root)
-                .expectedEngineBuildHash("1d4584fc0552a24ee840afa2cca9f1536d47429f467585d4d5c1a5236ba96dc9")
-                .build());
+        ChicoryBlueQuickJsRuntime chicory = new ChicoryBlueQuickJsRuntime(ChicoryTestSupport.pinnedConfig(root));
         try (NodeQuickJsRuntime node = new NodeQuickJsRuntime(root)) {
             assertRepeatedParity(node, chicory, "hostGasLimit = 0", "1 + 1", 0L, Collections.<String, Object>emptyMap());
             assertRepeatedParity(node, chicory, "hostGasLimit = 1", "1 + 1", 1L, Collections.<String, Object>emptyMap());
@@ -79,11 +76,6 @@ class ChicoryOutOfGasTest {
     }
 
     private static Path blueQuickJsRoot() {
-        String configured = System.getProperty("blue.quickjs.root");
-        Path root = configured == null || configured.trim().isEmpty()
-                ? Paths.get(System.getProperty("user.dir")).toAbsolutePath().getParent().resolve("blue-quickjs")
-                : Paths.get(configured);
-        assumeTrue(Files.isDirectory(root), "blue-quickjs checkout is required for OOG tests");
-        return root;
+        return ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for OOG tests");
     }
 }

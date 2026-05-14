@@ -77,7 +77,7 @@ jobs:
         run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
 
       - name: Execute Gradle publish
-        run: ./gradlew publish -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+        run: ./gradlew publish -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
 
       - name: Execute Gradle release
         env:
@@ -96,5 +96,7 @@ jobs:
           name: artifacts
           path: |
             build/libs
+            quickjs-chicory/build/libs
             build/publications
+            quickjs-chicory/build/publications
             build/jreleaser

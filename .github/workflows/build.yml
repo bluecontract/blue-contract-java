@@ -145,6 +145,9 @@ jobs:
       - name: Confirm no native runtime dependency creep
         run: ./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
 
+      - name: Verify Chicory no-Node smoke test
+        run: ./gradlew :quickjs-chicory:test --tests '*LambdaPackagingSmokeTest' -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
+
       - name: Archive test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -153,6 +156,13 @@ jobs:
           path: |
             build/reports
             quickjs-chicory/build/reports
+
+      - name: Archive Chicory parity and benchmark reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chicory-parity-benchmark-reports
+          path: quickjs-chicory/build/reports/*.json
 
       - name: Archive libs
         uses: actions/upload-artifact@v4

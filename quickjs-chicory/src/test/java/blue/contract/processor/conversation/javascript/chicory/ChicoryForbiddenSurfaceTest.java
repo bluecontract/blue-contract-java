@@ -16,10 +16,7 @@ class ChicoryForbiddenSurfaceTest {
     @Test
     void forbiddenSurfaceMatchesNodeOracle() {
         Path root = blueQuickJsRoot();
-        ChicoryBlueQuickJsRuntime chicory = new ChicoryBlueQuickJsRuntime(BlueQuickJsWasmRuntimeConfig.builder()
-                .blueQuickJsRoot(root)
-                .expectedEngineBuildHash("1d4584fc0552a24ee840afa2cca9f1536d47429f467585d4d5c1a5236ba96dc9")
-                .build());
+        ChicoryBlueQuickJsRuntime chicory = new ChicoryBlueQuickJsRuntime(ChicoryTestSupport.pinnedConfig(root));
         try (NodeQuickJsRuntime node = new NodeQuickJsRuntime(root)) {
             assertParity(node, chicory, "typeof Date");
             assertParity(node, chicory, "typeof process");
@@ -43,11 +40,6 @@ class ChicoryForbiddenSurfaceTest {
     }
 
     private static Path blueQuickJsRoot() {
-        String configured = System.getProperty("blue.quickjs.root");
-        Path root = configured == null || configured.trim().isEmpty()
-                ? Paths.get(System.getProperty("user.dir")).toAbsolutePath().getParent().resolve("blue-quickjs")
-                : Paths.get(configured);
-        assumeTrue(Files.isDirectory(root), "blue-quickjs checkout is required for forbidden surface tests");
-        return root;
+        return ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for forbidden surface tests");
     }
 }

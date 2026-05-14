@@ -45,8 +45,8 @@ pnpm exec nx build quickjs-runtime
 - Wasm size: `659086`
 - Variant: `wasm32`
 - Build type: `release`
-- engineBuildHash / SHA-256:
-  `1d4584fc0552a24ee840afa2cca9f1536d47429f467585d4d5c1a5236ba96dc9`
+- engineBuildHash / SHA-256 observed in the current local checkout:
+  `f91091cb7feb788df340305a877a9cadb0c6f4d13aea8a7da4040b6367d178ea`
 - Loader SHA-256:
   `11a13f0414e7387f0c9502c8c0ca9479473505d94b824356d015a8d8007637fb`
 - Emscripten version: `3.1.56`
@@ -79,13 +79,14 @@ pnpm exec nx build quickjs-runtime
 
 ## Gas/profile metadata
 
-- Gas version from blue-quickjs documentation: `JS_GAS_VERSION_LATEST = 2`
-- Execution profile from blue-quickjs documentation: deterministic Baseline #1
-- Current build metadata does not yet include explicit `gasVersion` or
-  `executionProfile` fields. The Java runtime must not silently infer them from
-  docs during normal evaluation; it must fail closed unless the generated/pinned
-  Java-side metadata includes these values or upstream metadata grows these
-  fields.
+- Gas version from the current blue-quickjs metadata: `8`
+- Execution profile pinned by the Java spike metadata bridge: `baseline-v1`
+- Current upstream build metadata includes `gasVersion`, but still does not
+  include all fields the Java runtime wants to verify for release-mode
+  embedding, especially `executionProfile` and `abiManifestHash`. The
+  `quickjs-chicory` build enriches classpath metadata with those fields as a
+  temporary bridge. Long term, upstream blue-quickjs release artifacts should
+  publish them directly.
 
 ## Wasm imports
 
@@ -162,6 +163,33 @@ Representative deterministic stress output:
    the generated blue-quickjs metadata observed during preflight. Runtime pinning
    is addressed by the Java module's generated `engine-metadata.json`, which
    enriches the upstream artifact metadata with:
-   - `gasVersion: 2`
-   - `executionProfile: blue-quickjs-deterministic-baseline-1`
+   - `gasVersion: <upstream metadata gasVersion>`
+   - `executionProfile: baseline-v1`
    - `abiManifestHash: e23b0b2ee169900bbde7aff78e6ce20fead1715c60f8a8e3106d9959450a3d34`
+
+## Hardening update
+
+Date: 2026-05-13
+
+The Java/Chicory spike now fails closed for unpinned filesystem WASM artifacts:
+
+- filesystem resolution requires an explicit expected `engineBuildHash`;
+- classpath-bundled resources must include `engineBuildHash`,
+  `abiManifestHash`, `gasVersion`, and `executionProfile`;
+- wrong engine hash, Host.v1 hash, gas version, or execution profile fails
+  before evaluation;
+- generated classpath metadata remains a temporary deterministic bridge until
+  upstream release metadata carries every required field.
+
+Node-vs-Chicory parity now treats gas equality as mandatory. For each fixture,
+the report compares:
+
+- ok/error status;
+- returned value;
+- normalized VM error category/message;
+- `wasmGasUsed`;
+- `hostGasUsed`.
+
+Performance is explicitly not a parity signal. Benchmark reports record elapsed
+time because it matters for Lambda sizing, but timing differences do not fail
+tests. Gas differences always fail.

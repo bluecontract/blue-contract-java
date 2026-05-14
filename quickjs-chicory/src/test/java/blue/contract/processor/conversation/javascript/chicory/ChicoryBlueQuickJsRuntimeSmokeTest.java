@@ -19,10 +19,7 @@ class ChicoryBlueQuickJsRuntimeSmokeTest {
 
     @Test
     void deterministicExpressionsEvaluateWithoutNode() {
-        BlueQuickJsWasmRuntimeConfig config = BlueQuickJsWasmRuntimeConfig.builder()
-                .blueQuickJsRoot(blueQuickJsRoot())
-                .expectedEngineBuildHash("1d4584fc0552a24ee840afa2cca9f1536d47429f467585d4d5c1a5236ba96dc9")
-                .build();
+        BlueQuickJsWasmRuntimeConfig config = ChicoryTestSupport.pinnedConfig(blueQuickJsRoot());
         ChicoryBlueQuickJsRuntime runtime = new ChicoryBlueQuickJsRuntime(config);
 
         assertStable(runtime, "1 + 2", 3);
@@ -56,11 +53,6 @@ class ChicoryBlueQuickJsRuntimeSmokeTest {
     }
 
     private static Path blueQuickJsRoot() {
-        String configured = System.getProperty("blue.quickjs.root");
-        Path root = configured == null || configured.trim().isEmpty()
-                ? Paths.get(System.getProperty("user.dir")).toAbsolutePath().getParent().resolve("blue-quickjs")
-                : Paths.get(configured);
-        assumeTrue(Files.isDirectory(root), "blue-quickjs checkout is required for Chicory smoke tests");
-        return root;
+        return ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for Chicory smoke tests");
     }
 }

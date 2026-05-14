@@ -46,7 +46,7 @@ public final class BlueQuickJsHostDispatcher {
         try {
             return dispatchInternal(fnId, requestBytes);
         } catch (RuntimeException ex) {
-            return DispatchResult.fatal("host dispatcher threw: " + ex.getMessage());
+            return DispatchResult.fatal("host dispatcher failed");
         } finally {
             inProgress = false;
         }
@@ -93,6 +93,9 @@ public final class BlueQuickJsHostDispatcher {
     }
 
     private DispatchResult handleDocument(FunctionSpec spec, Object pointer, boolean canonical) {
+        if (!(pointer instanceof String)) {
+            return DispatchResult.fatal("fn_id=" + spec.fnId + " expected string path argument");
+        }
         if (pointer instanceof String
                 && ((String) pointer).getBytes(StandardCharsets.UTF_8).length > spec.argUtf8Max) {
             return encodeLimit(spec);
