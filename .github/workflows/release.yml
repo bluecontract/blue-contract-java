@@ -32,7 +32,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'corretto'
 
       - name: Set up pnpm
@@ -63,17 +63,21 @@ jobs:
         working-directory: blue-quickjs
 
       - name: Build blue-quickjs runtime
-        run: pnpm exec nx build quickjs-runtime
+        run: |
+          WASM_VARIANTS=wasm32 WASM_BUILD_TYPES=release pnpm exec nx build quickjs-wasm-build
+          pnpm exec nx build quickjs-wasm
+          pnpm exec nx build abi-manifest
+          pnpm exec nx build quickjs-runtime
         working-directory: blue-quickjs
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
       - name: Execute Gradle build
-        run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+        run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
 
       - name: Execute Gradle publish
-        run: ./gradlew publish -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs"
+        run: ./gradlew publish -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
 
       - name: Execute Gradle release
         env:
@@ -92,5 +96,7 @@ jobs:
           name: artifacts
           path: |
             build/libs
+            quickjs-chicory/build/libs
             build/publications
+            quickjs-chicory/build/publications
             build/jreleaser

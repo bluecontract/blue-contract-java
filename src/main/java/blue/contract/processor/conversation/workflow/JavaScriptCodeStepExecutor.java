@@ -63,6 +63,9 @@ public final class JavaScriptCodeStepExecutor implements WorkflowStepExecutor<Ja
             emitReturnedEvents(result.value(), context);
             return WorkflowStepResult.value(result.value());
         } catch (JavaScriptExecutionException ex) {
+            if (ex.hasGasUsage()) {
+                context.processorContext().consumeGas(ex.hostGasUsed());
+            }
             context.processorContext().throwFatal("JavaScript Code execution failed: " + ex.getMessage());
             return WorkflowStepResult.none();
         }

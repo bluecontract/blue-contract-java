@@ -41,7 +41,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    api 'blue.language:blue-language-java:1.0.0'
+    api 'blue.language:blue-language-java:2.0.0'
     api 'blue.repo:blue-repo-java:1.2.0'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'

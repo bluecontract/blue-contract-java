@@ -95,6 +95,17 @@ public final class SequentialWorkflowRunner {
 
     private static List<WorkflowStepExecutor<? extends SequentialWorkflowStep>> defaultExecutors() {
         JavaScriptRuntime runtime = new NodeQuickJsRuntime();
+        return executorsFor(runtime);
+    }
+
+    public static SequentialWorkflowRunner withJavaScriptRuntime(JavaScriptRuntime runtime) {
+        if (runtime == null) {
+            throw new IllegalArgumentException("runtime must not be null");
+        }
+        return new SequentialWorkflowRunner(executorsFor(runtime));
+    }
+
+    private static List<WorkflowStepExecutor<? extends SequentialWorkflowStep>> executorsFor(JavaScriptRuntime runtime) {
         QuickJsExpressionResolver resolver = new QuickJsExpressionResolver(runtime);
         return Arrays.<WorkflowStepExecutor<? extends SequentialWorkflowStep>>asList(
                 new TriggerEventStepExecutor(resolver),

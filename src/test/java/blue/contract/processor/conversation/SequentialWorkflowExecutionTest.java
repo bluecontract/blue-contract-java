@@ -1,12 +1,17 @@
 package blue.contract.processor.conversation;
 
+import blue.contract.processor.BlueDocumentProcessorOptions;
 import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.ConversationProcessors;
 import blue.contract.processor.conversation.expression.ExpressionEvaluator;
 import blue.contract.processor.conversation.expression.QuickJsExpressionEvaluator;
 import blue.contract.processor.conversation.expression.QuickJsExpressionResolver;
 import blue.contract.processor.conversation.expression.SimpleExpressionEvaluator;
+import blue.contract.processor.conversation.javascript.JavaScriptEvaluationRequest;
+import blue.contract.processor.conversation.javascript.JavaScriptEvaluationResult;
 import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.contract.processor.conversation.javascript.QuickJsGas;
+import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
 import blue.contract.processor.conversation.workflow.JavaScriptCodeStepExecutor;
 import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.contract.processor.conversation.workflow.StepExecutionContext;
@@ -147,6 +152,45 @@ class SequentialWorkflowExecutionTest {
                 Arrays.<WorkflowStepExecutor<? extends SequentialWorkflowStep>>asList(
                         new UpdateDocumentStepExecutor(fixedEvaluator)));
         Fixture fixture = configuredFixture(runner, null);
+        Node document = initializedDocument(fixture, expressionDocument(fixture.repository,
+                0,
+                new Node().value("${event.message.request + document('/counter')}")));
+
+        Node processed = processOperationRequest(fixture, document, "owner", 1, "increment", 7);
+
+        assertCounter(processed, 42);
+    }
+
+    @Test
+    void blueDocumentProcessorOptionsInjectsJavaScriptRuntime() {
+        BlueDocumentProcessorOptions options = BlueDocumentProcessorOptions.builder()
+                .javaScriptRuntime(fixedRuntime(42))
+                .build();
+        Fixture fixture = configuredFixture(options);
+        Node document = initializedDocument(fixture, expressionDocument(fixture.repository,
+                0,
+                new Node().value("${1 + 1}")));
+
+        Node processed = processOperationRequest(fixture, document, "owner", 1, "increment", 7);
+
+        assertCounter(processed, 42);
+    }
+
+    @Test
+    void conversationProcessorOptionsInjectsSequentialWorkflowRunner() {
+        ExpressionEvaluator fixedEvaluator = new ExpressionEvaluator() {
+            @Override
+            public Node evaluate(Node value, StepExecutionContext context) {
+                return new Node().value(42);
+            }
+        };
+        SequentialWorkflowRunner runner = new SequentialWorkflowRunner(
+                Arrays.<WorkflowStepExecutor<? extends SequentialWorkflowStep>>asList(
+                        new UpdateDocumentStepExecutor(fixedEvaluator)));
+        BlueDocumentProcessorOptions options = BlueDocumentProcessorOptions.builder()
+                .sequentialWorkflowRunner(runner)
+                .build();
+        Fixture fixture = configuredConversationFixture(options);
         Node document = initializedDocument(fixture, expressionDocument(fixture.repository,
                 0,
                 new Node().value("${event.message.request + document('/counter')}")));
@@ -1039,6 +1083,24 @@ class SequentialWorkflowExecutionTest {
         return new Fixture(repository, blue);
     }
 
+    private static Fixture configuredFixture(BlueDocumentProcessorOptions options) {
+        BlueRepository repository = BlueRepository.v1_2_0();
+        Blue blue = repository.configure(new Blue());
+        blue.nodeProvider(repository.nodeProvider());
+        BlueDocumentProcessors.registerWith(blue, options);
+        TestTimelineProvider.registerWith(blue);
+        return new Fixture(repository, blue);
+    }
+
+    private static Fixture configuredConversationFixture(BlueDocumentProcessorOptions options) {
+        BlueRepository repository = BlueRepository.v1_2_0();
+        Blue blue = repository.configure(new Blue());
+        blue.nodeProvider(repository.nodeProvider());
+        ConversationProcessors.registerWith(blue, options);
+        TestTimelineProvider.registerWith(blue);
+        return new Fixture(repository, blue);
+    }
+
     private static Fixture configuredFixture(SequentialWorkflowRunner operationRunner,
                                              SequentialWorkflowRunner directRunner) {
         Fixture fixture = configuredFixture();
@@ -1071,6 +1133,15 @@ class SequentialWorkflowExecutionTest {
         bindings.put("document", null);
         bindings.put("documentCanonical", null);
         return bindings;
+    }
+
+    private static JavaScriptRuntime fixedRuntime(final Object value) {
+        return new JavaScriptRuntime() {
+            @Override
+            public JavaScriptEvaluationResult evaluate(JavaScriptEvaluationRequest request) {
+                return new JavaScriptEvaluationResult(value, QuickJsGas.WASM_FUEL_PER_HOST_GAS_UNIT, 1L);
+            }
+        };
     }
 
     private static void assertCounter(Node document, int expected) {
