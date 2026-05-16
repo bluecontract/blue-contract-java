@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,6 +38,7 @@ class ChicoryCounterSnapshotRoundTripStressTest {
     private static final String SIMPLE_TIMELINE_CHANNEL_BLUE_ID = "chicory-stress-simple-timeline-channel";
 
     @Test
+    @Tag("stress")
     void chicoryCounterWorkflowSurvivesCanonicalSnapshotRoundTrips() {
         Fixture fixture = configuredFixture();
         DocumentProcessingResult initialized = fixture.blue.initializeDocument(

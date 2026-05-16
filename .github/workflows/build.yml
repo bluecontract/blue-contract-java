@@ -142,6 +142,9 @@ jobs:
       - name: Execute full Gradle build
         run: ./gradlew clean build -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
 
+      - name: Generate Chicory benchmark report
+        run: ./gradlew :quickjs-chicory:benchmarkTest -Dblue.quickjs.root="$GITHUB_WORKSPACE/blue-quickjs" -PblueQuickJsRoot="$GITHUB_WORKSPACE/blue-quickjs"
+
       - name: Confirm no native runtime dependency creep
         run: ./gradlew :quickjs-chicory:dependencies --configuration runtimeClasspath
 

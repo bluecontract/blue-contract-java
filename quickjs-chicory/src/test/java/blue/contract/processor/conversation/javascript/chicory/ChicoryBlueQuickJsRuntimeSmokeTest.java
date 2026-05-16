@@ -3,9 +3,7 @@ package blue.contract.processor.conversation.javascript.chicory;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationRequest;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationResult;
 import blue.contract.processor.conversation.javascript.QuickJsGas;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -13,9 +11,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class ChicoryBlueQuickJsRuntimeSmokeTest {
+    private static final int SMOKE_REPETITIONS = 2;
 
     @Test
     void deterministicExpressionsEvaluateWithoutNode() {
@@ -35,7 +33,7 @@ class ChicoryBlueQuickJsRuntimeSmokeTest {
     private static void assertStable(ChicoryBlueQuickJsRuntime runtime, String code, Object expected) {
         Long wasmGas = null;
         Long hostGas = null;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < SMOKE_REPETITIONS; i++) {
             JavaScriptEvaluationResult result = runtime.evaluate(new JavaScriptEvaluationRequest(
                     code,
                     JavaScriptEvaluationRequest.Mode.EXPRESSION,

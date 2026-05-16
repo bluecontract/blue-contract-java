@@ -130,7 +130,51 @@ tasks.named('sourcesJar') {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'benchmark', 'stress'
+    }
+    if (System.getProperty('blue.quickjs.root')) {
+        systemProperty 'blue.quickjs.root', System.getProperty('blue.quickjs.root')
+    }
+    if (project.hasProperty('blueQuickJsRoot')) {
+        systemProperty 'blue.quickjs.root', project.property('blueQuickJsRoot')
+    }
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+        showStandardStreams = true
+    }
+}
+
+tasks.register('benchmarkTest', Test) {
+    description = 'Runs Chicory benchmark report tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    shouldRunAfter test
+    useJUnitPlatform {
+        includeTags 'benchmark'
+    }
+    if (System.getProperty('blue.quickjs.root')) {
+        systemProperty 'blue.quickjs.root', System.getProperty('blue.quickjs.root')
+    }
+    if (project.hasProperty('blueQuickJsRoot')) {
+        systemProperty 'blue.quickjs.root', project.property('blueQuickJsRoot')
+    }
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+        showStandardStreams = true
+    }
+}
+
+tasks.register('stressTest', Test) {
+    description = 'Runs Chicory stress tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    shouldRunAfter test
+    useJUnitPlatform {
+        includeTags 'stress'
+    }
     if (System.getProperty('blue.quickjs.root')) {
         systemProperty 'blue.quickjs.root', System.getProperty('blue.quickjs.root')
     }

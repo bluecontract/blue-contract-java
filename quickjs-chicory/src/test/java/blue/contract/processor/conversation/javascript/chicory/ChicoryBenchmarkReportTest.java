@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +23,7 @@ class ChicoryBenchmarkReportTest {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     @Test
+    @Tag("benchmark")
     void writesNodeAndChicoryBenchmarkReportWithoutTimingAssertions() throws IOException {
         Path root = ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for benchmark report tests");
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
