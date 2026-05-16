@@ -3,9 +3,9 @@ package blue.contract.processor.conversation.workflow;
 import blue.contract.processor.conversation.expression.ExpressionEvaluator;
 import blue.language.model.Node;
 import blue.language.processor.model.JsonPatch;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
-import blue.repo.v1_2_0.conversation.UpdateDocument;
-import blue.repo.v1_2_0.core.JsonPatchEntry;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.UpdateDocument;
+import blue.repo.v1_3_0.core.JsonPatchEntry;
 
 public final class UpdateDocumentStepExecutor implements WorkflowStepExecutor<UpdateDocument> {
     private final ExpressionEvaluator expressionEvaluator;

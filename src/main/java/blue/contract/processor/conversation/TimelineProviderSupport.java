@@ -5,7 +5,7 @@ import blue.language.processor.ChannelCheckpointContext;
 import blue.language.processor.ChannelEvaluation;
 import blue.language.processor.ChannelEvaluationContext;
 import blue.language.utils.BlueIdCalculator;
-import blue.repo.v1_2_0.conversation.TimelineChannel;
+import blue.repo.v1_3_0.conversation.TimelineChannel;
 import java.math.BigInteger;
 
 public final class TimelineProviderSupport {

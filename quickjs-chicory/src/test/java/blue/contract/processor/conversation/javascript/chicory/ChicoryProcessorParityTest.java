@@ -24,12 +24,12 @@ import blue.language.processor.ChannelProcessor;
 import blue.language.processor.DocumentProcessingResult;
 import blue.language.processor.ProcessorFatalException;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.JavaScriptCode;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
-import blue.repo.v1_2_0.conversation.Timeline;
-import blue.repo.v1_2_0.conversation.TimelineChannel;
-import blue.repo.v1_2_0.conversation.TimelineEntry;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.JavaScriptCode;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.Timeline;
+import blue.repo.v1_3_0.conversation.TimelineChannel;
+import blue.repo.v1_3_0.conversation.TimelineEntry;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -211,7 +211,7 @@ class ChicoryProcessorParityTest {
     }
 
     private static Fixture configuredFixture(JavaScriptRuntime runtime, ProcessorFixture fixture) {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessorOptions.Builder options = BlueDocumentProcessorOptions.builder()
@@ -244,7 +244,7 @@ class ChicoryProcessorParityTest {
                 .properties("steps", new Node().items(Arrays.asList(steps))));
 
         return new Node()
-                .blue(BlueRepository.v1_2_0().typeAliasBlue())
+                .blue(BlueRepository.v1_3_0().typeAliasBlue())
                 .name("Processor Parity Document")
                 .properties("counter", new Node().value(counter))
                 .properties("contracts", new Node().properties(contracts));

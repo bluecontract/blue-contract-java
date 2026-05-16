@@ -280,7 +280,7 @@ class CompositeTimelineChannelProcessorTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);

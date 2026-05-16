@@ -629,7 +629,7 @@ Outcomes:
 - `publish` produced staged root and optional Chicory main, sources, javadoc,
   and POM artifacts under `build/staging-deploy`.
 - The root POM depends on `blue.language:blue-language-java:2.0.0`,
-  `blue.repo:blue-repo-java:1.2.0`, and Jackson; it does not depend on Chicory.
+  `blue.repo:blue-repo-java:1.3.0`, and Jackson; it does not depend on Chicory.
 - The optional POM depends on `blue.contract:blue-contract-java`,
   `com.dylibso.chicory:runtime`, and Jackson.
 - Docker was initially blocked in the sandbox, but was reachable outside it

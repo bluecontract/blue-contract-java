@@ -6,8 +6,8 @@ import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.language.processor.ProcessorFatalException;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.StatusCompleted;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.StatusCompleted;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -318,7 +318,7 @@ class TriggerEventStepExecutorTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);

@@ -37,7 +37,7 @@ This project targets Java 8 bytecode and depends on published artifacts:
 
 ```groovy
 api "blue.language:blue-language-java:2.0.0"
-api "blue.repo:blue-repo-java:1.2.0"
+api "blue.repo:blue-repo-java:1.3.0"
 ```
 
 ## Counter In One Document
@@ -167,7 +167,7 @@ public final class CounterExample {
             "          message: Counter is now ${document('/counter')}\n";
 
     public static void main(String[] args) {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
 
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
@@ -526,7 +526,7 @@ generated fields; it must not infer gas version from documentation.
 Most applications should use the one-call facade:
 
 ```java
-BlueRepository repository = BlueRepository.v1_2_0();
+BlueRepository repository = BlueRepository.v1_3_0();
 
 Blue blue = repository.configure(new Blue());
 blue.nodeProvider(repository.nodeProvider());

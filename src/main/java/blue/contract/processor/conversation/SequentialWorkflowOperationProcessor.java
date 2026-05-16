@@ -5,8 +5,8 @@ import blue.language.processor.HandlerMatchContext;
 import blue.language.processor.HandlerProcessor;
 import blue.language.processor.HandlerRegistrationContext;
 import blue.language.processor.ProcessorExecutionContext;
-import blue.repo.v1_2_0.conversation.Operation;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowOperation;
+import blue.repo.v1_3_0.conversation.Operation;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowOperation;
 
 public final class SequentialWorkflowOperationProcessor implements HandlerProcessor<SequentialWorkflowOperation> {
     private final SequentialWorkflowRunner runner;

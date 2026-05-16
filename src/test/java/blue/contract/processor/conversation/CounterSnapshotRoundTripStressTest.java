@@ -11,14 +11,14 @@ import blue.language.processor.model.HandlerContract;
 import blue.language.processor.model.JsonPatch;
 import blue.language.snapshot.ResolvedSnapshot;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.Operation;
-import blue.repo.v1_2_0.conversation.OperationRequest;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowOperation;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
-import blue.repo.v1_2_0.conversation.TriggerEvent;
-import blue.repo.v1_2_0.conversation.UpdateDocument;
-import blue.repo.v1_2_0.core.JsonPatchEntry;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.Operation;
+import blue.repo.v1_3_0.conversation.OperationRequest;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowOperation;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.TriggerEvent;
+import blue.repo.v1_3_0.conversation.UpdateDocument;
+import blue.repo.v1_3_0.core.JsonPatchEntry;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -269,7 +269,7 @@ class CounterSnapshotRoundTripStressTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);

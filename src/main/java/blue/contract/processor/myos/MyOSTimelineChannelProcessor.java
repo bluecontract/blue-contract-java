@@ -6,8 +6,8 @@ import blue.language.processor.ChannelCheckpointContext;
 import blue.language.processor.ChannelEvaluation;
 import blue.language.processor.ChannelEvaluationContext;
 import blue.language.processor.ChannelProcessor;
-import blue.repo.v1_2_0.myos.MyOSTimelineChannel;
-import blue.repo.v1_2_0.myos.MyOSTimelineEntry;
+import blue.repo.v1_3_0.myos.MyOSTimelineChannel;
+import blue.repo.v1_3_0.myos.MyOSTimelineEntry;
 
 public final class MyOSTimelineChannelProcessor implements ChannelProcessor<MyOSTimelineChannel> {
     @Override

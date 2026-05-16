@@ -2,8 +2,8 @@ package blue.contract.processor.conversation.workflow;
 
 import blue.language.model.Node;
 import blue.language.processor.ProcessorExecutionContext;
-import blue.repo.v1_2_0.conversation.SequentialWorkflow;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.SequentialWorkflow;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package blue.contract.processor.conversation.workflow;
 
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
 
 public interface WorkflowStepExecutor<T extends SequentialWorkflowStep> {
     boolean supports(SequentialWorkflowStep step);

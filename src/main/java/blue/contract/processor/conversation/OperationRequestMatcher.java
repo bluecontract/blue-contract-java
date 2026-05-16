@@ -5,9 +5,9 @@ import blue.language.processor.HandlerMatchContext;
 import blue.language.processor.model.InitializationMarker;
 import blue.language.processor.model.MarkerContract;
 import blue.language.utils.BlueIdCalculator;
-import blue.repo.v1_2_0.conversation.Operation;
-import blue.repo.v1_2_0.conversation.OperationRequest;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowOperation;
+import blue.repo.v1_3_0.conversation.Operation;
+import blue.repo.v1_3_0.conversation.OperationRequest;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowOperation;
 import java.util.Map;
 
 final class OperationRequestMatcher {

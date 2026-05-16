@@ -5,7 +5,7 @@ import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.OperationRequest;
+import blue.repo.v1_3_0.conversation.OperationRequest;
 import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
@@ -215,7 +215,7 @@ class RepositoryStyleCounterDocumentTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);

@@ -23,9 +23,9 @@ import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.language.processor.ProcessorFatalException;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.JavaScriptCode;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
-import blue.repo.v1_2_0.conversation.UpdateDocument;
+import blue.repo.v1_3_0.conversation.JavaScriptCode;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.UpdateDocument;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -1075,7 +1075,7 @@ class SequentialWorkflowExecutionTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);
@@ -1084,7 +1084,7 @@ class SequentialWorkflowExecutionTest {
     }
 
     private static Fixture configuredFixture(BlueDocumentProcessorOptions options) {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue, options);
@@ -1093,7 +1093,7 @@ class SequentialWorkflowExecutionTest {
     }
 
     private static Fixture configuredConversationFixture(BlueDocumentProcessorOptions options) {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         ConversationProcessors.registerWith(blue, options);

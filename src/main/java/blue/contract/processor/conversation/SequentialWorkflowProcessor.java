@@ -4,7 +4,7 @@ import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.language.processor.HandlerMatchContext;
 import blue.language.processor.HandlerProcessor;
 import blue.language.processor.ProcessorExecutionContext;
-import blue.repo.v1_2_0.conversation.SequentialWorkflow;
+import blue.repo.v1_3_0.conversation.SequentialWorkflow;
 
 public final class SequentialWorkflowProcessor implements HandlerProcessor<SequentialWorkflow> {
     private final SequentialWorkflowRunner runner;

@@ -10,16 +10,16 @@ import blue.language.processor.model.HandlerContract;
 import blue.language.processor.model.MarkerContract;
 import blue.language.utils.TypeClassResolver;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.CompositeTimelineChannel;
-import blue.repo.v1_2_0.conversation.JavaScriptCode;
-import blue.repo.v1_2_0.conversation.Operation;
-import blue.repo.v1_2_0.conversation.OperationRequest;
-import blue.repo.v1_2_0.conversation.SequentialWorkflow;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowOperation;
-import blue.repo.v1_2_0.conversation.TimelineChannel;
-import blue.repo.v1_2_0.conversation.UpdateDocument;
-import blue.repo.v1_2_0.myos.MyOSTimelineChannel;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.CompositeTimelineChannel;
+import blue.repo.v1_3_0.conversation.JavaScriptCode;
+import blue.repo.v1_3_0.conversation.Operation;
+import blue.repo.v1_3_0.conversation.OperationRequest;
+import blue.repo.v1_3_0.conversation.SequentialWorkflow;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowOperation;
+import blue.repo.v1_3_0.conversation.TimelineChannel;
+import blue.repo.v1_3_0.conversation.UpdateDocument;
+import blue.repo.v1_3_0.myos.MyOSTimelineChannel;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -104,7 +104,7 @@ class BlueDocumentProcessorsTest {
 
     @Test
     void generatedConversationTypesResolveToRepositoryClasses() {
-        TypeClassResolver resolver = BlueRepository.v1_2_0().typeClassResolver();
+        TypeClassResolver resolver = BlueRepository.v1_3_0().typeClassResolver();
 
         assertEquals(TimelineChannel.class, resolver.resolveClass(TimelineChannel.blueId()));
         assertEquals(CompositeTimelineChannel.class,
@@ -132,7 +132,7 @@ class BlueDocumentProcessorsTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         BlueDocumentProcessors.registerWith(blue);

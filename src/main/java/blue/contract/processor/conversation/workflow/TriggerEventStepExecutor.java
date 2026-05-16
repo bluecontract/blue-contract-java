@@ -2,8 +2,8 @@ package blue.contract.processor.conversation.workflow;
 
 import blue.contract.processor.conversation.expression.QuickJsExpressionResolver;
 import blue.language.model.Node;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
-import blue.repo.v1_2_0.conversation.TriggerEvent;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.TriggerEvent;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;

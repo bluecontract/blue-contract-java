@@ -8,8 +8,8 @@ import blue.contract.processor.conversation.javascript.JavaScriptValues;
 import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.contract.processor.conversation.javascript.QuickJsGas;
 import blue.contract.processor.conversation.javascript.QuickJsStepBindings;
-import blue.repo.v1_2_0.conversation.JavaScriptCode;
-import blue.repo.v1_2_0.conversation.SequentialWorkflowStep;
+import blue.repo.v1_3_0.conversation.JavaScriptCode;
+import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
 import java.util.List;
 import java.util.Map;
 

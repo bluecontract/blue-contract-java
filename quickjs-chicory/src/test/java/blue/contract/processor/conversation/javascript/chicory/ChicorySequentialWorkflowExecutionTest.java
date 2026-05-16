@@ -13,10 +13,10 @@ import blue.language.processor.ChannelEvaluationContext;
 import blue.language.processor.ChannelProcessor;
 import blue.language.processor.DocumentProcessingResult;
 import blue.repo.BlueRepository;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.Timeline;
-import blue.repo.v1_2_0.conversation.TimelineChannel;
-import blue.repo.v1_2_0.conversation.TimelineEntry;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.Timeline;
+import blue.repo.v1_3_0.conversation.TimelineChannel;
+import blue.repo.v1_3_0.conversation.TimelineEntry;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,7 +44,7 @@ class ChicorySequentialWorkflowExecutionTest {
     }
 
     private static Fixture configuredFixture() {
-        BlueRepository repository = BlueRepository.v1_2_0();
+        BlueRepository repository = BlueRepository.v1_3_0();
         Blue blue = repository.configure(new Blue());
         blue.nodeProvider(repository.nodeProvider());
         ChicoryBlueQuickJsRuntime runtime = new ChicoryBlueQuickJsRuntime(ChicoryTestSupport.pinnedConfig(blueQuickJsRoot()));

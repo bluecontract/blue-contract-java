@@ -1,11 +1,11 @@
 package blue.contract.processor.conversation;
 
 import blue.language.model.Node;
-import blue.repo.v1_2_0.conversation.ChatMessage;
-import blue.repo.v1_2_0.conversation.OperationRequest;
-import blue.repo.v1_2_0.conversation.StatusCompleted;
-import blue.repo.v1_2_0.conversation.Timeline;
-import blue.repo.v1_2_0.conversation.TimelineEntry;
+import blue.repo.v1_3_0.conversation.ChatMessage;
+import blue.repo.v1_3_0.conversation.OperationRequest;
+import blue.repo.v1_3_0.conversation.StatusCompleted;
+import blue.repo.v1_3_0.conversation.Timeline;
+import blue.repo.v1_3_0.conversation.TimelineEntry;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;

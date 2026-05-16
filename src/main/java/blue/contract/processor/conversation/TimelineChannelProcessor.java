@@ -4,7 +4,7 @@ import blue.language.processor.ChannelCheckpointContext;
 import blue.language.processor.ChannelEvaluation;
 import blue.language.processor.ChannelEvaluationContext;
 import blue.language.processor.ChannelProcessor;
-import blue.repo.v1_2_0.conversation.TimelineChannel;
+import blue.repo.v1_3_0.conversation.TimelineChannel;
 
 public final class TimelineChannelProcessor implements ChannelProcessor<TimelineChannel> {
     @Override

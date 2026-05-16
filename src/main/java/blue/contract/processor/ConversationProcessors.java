@@ -8,7 +8,7 @@ import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.language.Blue;
 import blue.language.processor.DocumentProcessor;
 import blue.language.utils.TypeClassResolver;
-import blue.repo.v1_2_0.BlueRepositoryV1_2_0;
+import blue.repo.v1_3_0.BlueRepositoryV1_3_0;
 
 public final class ConversationProcessors {
     private ConversationProcessors() {
@@ -23,7 +23,7 @@ public final class ConversationProcessors {
             throw new IllegalArgumentException("blue must not be null");
         }
         SequentialWorkflowRunner runner = workflowRunner(options);
-        BlueRepositoryV1_2_0.registerAll(blue.getDocumentProcessor().getContractTypeResolver());
+        BlueRepositoryV1_3_0.registerAll(blue.getDocumentProcessor().getContractTypeResolver());
         blue.registerContractProcessor(new CompositeTimelineChannelProcessor());
         blue.registerContractProcessor(new OperationProcessor());
         blue.registerContractProcessor(runner != null
@@ -45,7 +45,7 @@ public final class ConversationProcessors {
             throw new IllegalArgumentException("builder must not be null");
         }
         SequentialWorkflowRunner runner = workflowRunner(options);
-        TypeClassResolver resolver = BlueRepositoryV1_2_0.registerAll(
+        TypeClassResolver resolver = BlueRepositoryV1_3_0.registerAll(
                 new TypeClassResolver("blue.language.processor.model"));
         return builder
                 .withContractTypeResolver(resolver)
