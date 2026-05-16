@@ -270,6 +270,39 @@ class BlueQuickJsResourceIntegrityTest {
         assertTrue(ex.getMessage().contains("executionProfile mismatch"));
     }
 
+    @Test
+    void growingFilesystemMemoryFailsClosed(@TempDir Path tempDir) throws IOException {
+        Path root = filesystemFixture(blueQuickJsRoot(), tempDir,
+                metadata -> ((ObjectNode) metadata.path("build").path("memory")).put("allowGrowth", true));
+
+        BlueQuickJsDeterminismException ex = assertThrows(BlueQuickJsDeterminismException.class,
+                () -> BlueQuickJsWasmResources.resolve(
+                        BlueQuickJsWasmRuntimeConfig.builder()
+                                .blueQuickJsRoot(root)
+                                .preferClasspathResources(false)
+                                .expectedEngineBuildHash(ChicoryTestSupport.engineBuildHash(root))
+                                .build()));
+
+        assertTrue(ex.getMessage().contains("memory growth must be disabled"));
+    }
+
+    @Test
+    void filesystemMemoryFlagsMustMatchMetadata(@TempDir Path tempDir) throws IOException {
+        Path root = filesystemFixture(blueQuickJsRoot(), tempDir,
+                metadata -> ((ObjectNode) metadata.path("build").path("memory")).put("initial", 67108864));
+
+        BlueQuickJsDeterminismException ex = assertThrows(BlueQuickJsDeterminismException.class,
+                () -> BlueQuickJsWasmResources.resolve(
+                        BlueQuickJsWasmRuntimeConfig.builder()
+                                .blueQuickJsRoot(root)
+                                .preferClasspathResources(false)
+                                .expectedEngineBuildHash(ChicoryTestSupport.engineBuildHash(root))
+                                .build()));
+
+        assertTrue(ex.getMessage().contains("wasm memory must be fixed")
+                || ex.getMessage().contains("metadata missing deterministic flag"));
+    }
+
     private static Path blueQuickJsRoot() {
         return ChicoryTestSupport.blueQuickJsRoot("blue-quickjs checkout is required for resource integrity tests");
     }

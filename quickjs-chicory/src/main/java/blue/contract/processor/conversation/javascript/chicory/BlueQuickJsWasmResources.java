@@ -331,13 +331,16 @@ public final class BlueQuickJsWasmResources {
 
     private static void verifyMetadataShape(JsonNode metadata) {
         JsonNode memory = metadata.path("build").path("memory");
-        if (requiredInt(memory.get("initial"), "memory.initial") != 33554432) {
-            throw new BlueQuickJsDeterminismException("unexpected initial wasm memory");
+        int initialMemory = requiredInt(memory.get("initial"), "memory.initial");
+        int maximumMemory = requiredInt(memory.get("maximum"), "memory.maximum");
+        int stackSize = requiredInt(memory.get("stackSize"), "memory.stackSize");
+        if (initialMemory <= 0) {
+            throw new BlueQuickJsDeterminismException("wasm initial memory must be positive");
         }
-        if (requiredInt(memory.get("maximum"), "memory.maximum") != 33554432) {
-            throw new BlueQuickJsDeterminismException("unexpected maximum wasm memory");
+        if (maximumMemory != initialMemory) {
+            throw new BlueQuickJsDeterminismException("wasm memory must be fixed");
         }
-        if (requiredInt(memory.get("stackSize"), "memory.stackSize") != 1048576) {
+        if (stackSize != 1048576) {
             throw new BlueQuickJsDeterminismException("unexpected wasm stack size");
         }
         if (memory.path("allowGrowth").asBoolean(true)) {
@@ -349,6 +352,9 @@ public final class BlueQuickJsWasmResources {
         }
         requireFlag(flags, "-sFILESYSTEM=0");
         requireFlag(flags, "-sALLOW_MEMORY_GROWTH=0");
+        requireFlag(flags, "-sINITIAL_MEMORY=" + initialMemory);
+        requireFlag(flags, "-sMAXIMUM_MEMORY=" + maximumMemory);
+        requireFlag(flags, "-sSTACK_SIZE=" + stackSize);
         requireFlag(flags, "-sALLOW_TABLE_GROWTH=0");
     }
 

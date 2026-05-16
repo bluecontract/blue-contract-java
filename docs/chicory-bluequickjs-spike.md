@@ -52,15 +52,15 @@ pnpm exec nx build quickjs-runtime
 - Emscripten version: `3.1.56`
 - QuickJS version: `2025-09-13`
 - Fixed memory:
-  - initial: `33554432`
-  - maximum: `33554432`
+  - initial: observed release artifacts currently use `33554432` or `134217728`
+  - maximum: must equal initial
   - stack: `1048576`
   - allowGrowth: `false`
 - Determinism flags:
   - `-sFILESYSTEM=0`
   - `-sALLOW_MEMORY_GROWTH=0`
-  - `-sINITIAL_MEMORY=33554432`
-  - `-sMAXIMUM_MEMORY=33554432`
+  - `-sINITIAL_MEMORY=<metadata build.memory.initial>`
+  - `-sMAXIMUM_MEMORY=<metadata build.memory.maximum>`
   - `-sSTACK_SIZE=1048576`
   - `-sALLOW_TABLE_GROWTH=0`
   - `-sENVIRONMENT=node,web`
