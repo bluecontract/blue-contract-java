@@ -79,14 +79,14 @@ pnpm exec nx build quickjs-runtime
 
 ## Gas/profile metadata
 
-- Gas version from the current blue-quickjs metadata: `8`
+- Gas version pinned by the Java spike metadata bridge: `8`
 - Execution profile pinned by the Java spike metadata bridge: `baseline-v1`
-- Current upstream build metadata includes `gasVersion`, but still does not
-  include all fields the Java runtime wants to verify for release-mode
-  embedding, especially `executionProfile` and `abiManifestHash`. The
-  `quickjs-chicory` build enriches classpath metadata with those fields as a
-  temporary bridge. Long term, upstream blue-quickjs release artifacts should
-  publish them directly.
+- Current upstream build metadata may include `gasVersion`, but still does not
+  consistently include all fields the Java runtime wants to verify for
+  release-mode embedding: `gasVersion`, `executionProfile`, and
+  `abiManifestHash`. The `quickjs-chicory` build enriches classpath metadata
+  with those fields as a temporary bridge. Long term, upstream blue-quickjs
+  release artifacts should publish them directly.
 
 ## Wasm imports
 
@@ -159,11 +159,11 @@ Representative deterministic stress output:
    to `host.host_call`. The Chicory adapter explicitly provides deterministic
    JVM-side stubs for these imports and does not run the Emscripten JS loader
    under Node.
-3. Explicit `gasVersion` and `executionProfile` metadata fields are absent from
+3. Explicit `gasVersion` and `executionProfile` metadata fields can be absent from
    the generated blue-quickjs metadata observed during preflight. Runtime pinning
    is addressed by the Java module's generated `engine-metadata.json`, which
    enriches the upstream artifact metadata with:
-   - `gasVersion: <upstream metadata gasVersion>`
+   - `gasVersion: 8`
    - `executionProfile: baseline-v1`
    - `abiManifestHash: e23b0b2ee169900bbde7aff78e6ce20fead1715c60f8a8e3106d9959450a3d34`
 

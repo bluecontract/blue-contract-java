@@ -48,7 +48,10 @@ final class ChicoryTestSupport {
     }
 
     static int gasVersion(Path root) {
-        return metadata(root).path("gasVersion").asInt();
+        JsonNode gasVersion = metadata(root).get("gasVersion");
+        return gasVersion != null && gasVersion.isNumber()
+                ? gasVersion.asInt()
+                : BlueQuickJsWasmRuntimeConfig.DEFAULT_GAS_VERSION;
     }
 
     static JsonNode metadata(Path root) {

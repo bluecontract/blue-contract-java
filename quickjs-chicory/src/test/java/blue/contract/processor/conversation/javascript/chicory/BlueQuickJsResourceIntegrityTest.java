@@ -290,6 +290,9 @@ class BlueQuickJsResourceIntegrityTest {
                 StandardCopyOption.REPLACE_EXISTING);
 
         ObjectNode metadata = (ObjectNode) JSON.readTree(sourceMetadata(sourceRoot).toFile());
+        if (!metadata.has("gasVersion")) {
+            metadata.put("gasVersion", BlueQuickJsWasmRuntimeConfig.DEFAULT_GAS_VERSION);
+        }
         metadata.put("executionProfile", BlueQuickJsWasmRuntimeConfig.DEFAULT_EXECUTION_PROFILE);
         metadata.put("abiManifestHash", HostV1Manifest.HOST_V1_HASH);
         mutation.mutate(metadata);

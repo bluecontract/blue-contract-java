@@ -517,9 +517,12 @@ Lambda build image. A full AWS Lambda runtime/RIE invocation smoke can still be
 added later if release policy requires it.
 
 The generated `quickjs-chicory` metadata currently bridges fields that should
-come from upstream blue-quickjs release metadata long term, especially
-`executionProfile` and `abiManifestHash`. Java consumes and verifies those
-generated fields; it must not infer gas version from documentation.
+come from upstream blue-quickjs release metadata long term: `gasVersion`,
+`executionProfile`, and `abiManifestHash`. If upstream metadata omits
+`gasVersion`, the Gradle packaging task writes the Java runtime's pinned
+`DEFAULT_GAS_VERSION` into generated classpath metadata. Java consumes and
+verifies those generated fields; filesystem WASM metadata still fails closed
+when required pinning fields are missing.
 
 ## Registration
 
