@@ -5,6 +5,7 @@ import blue.contract.processor.conversation.OperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowOperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowProcessor;
 import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
+import blue.contract.processor.expression.ExpressionAwareMerging;
 import blue.language.Blue;
 import blue.language.processor.DocumentProcessor;
 import blue.language.utils.TypeClassResolver;
@@ -32,6 +33,7 @@ public final class ConversationProcessors {
         blue.registerContractProcessor(runner != null
                 ? new SequentialWorkflowOperationProcessor(runner)
                 : new SequentialWorkflowOperationProcessor());
+        ExpressionAwareMerging.install(blue);
         return blue;
     }
 

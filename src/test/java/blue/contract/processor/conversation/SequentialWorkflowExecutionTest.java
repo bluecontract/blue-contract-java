@@ -431,7 +431,7 @@ class SequentialWorkflowExecutionTest {
         ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
                 () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
 
-        assertTrue(ex.getMessage().contains("QuickJS expression evaluation failed"));
+        assertTrue(ex.getMessage().contains("QuickJS expression"));
         assertTrue(ex.getMessage().contains("missing"));
     }
 
@@ -463,6 +463,25 @@ class SequentialWorkflowExecutionTest {
         Node processed = processChat(fixture, document, "owner", 1, "run").document();
 
         assertCounter(processed, 42);
+    }
+
+    @Test
+    void updateDocumentSupportsChangesetExpressionFromPreviousStep() {
+        Fixture fixture = configuredFixture();
+        Node authored = directWorkflowStepsDocument(fixture.repository,
+                0,
+                javaScriptStep("Prepare", "return { changeset: [\n"
+                        + "  { op: 'replace', path: '/counter', val: 11 },\n"
+                        + "  { op: 'add', path: '/history/-', val: 'prepared' }\n"
+                        + "] };"),
+                updateDocumentStep(new Node().value("${steps.Prepare.changeset}")));
+        authored.properties("history", new Node().items(new Node().value("created")));
+        Node document = initializedDocument(fixture, authored);
+
+        Node processed = processChat(fixture, document, "owner", 1, "run").document();
+
+        assertCounter(processed, 11);
+        assertEquals("prepared", processed.get("/history/1"));
     }
 
     @Test
@@ -1014,6 +1033,12 @@ class SequentialWorkflowExecutionTest {
                         .properties("op", new Node().value(op))
                         .properties("path", new Node().value(path))
                         .properties("val", value)));
+    }
+
+    private static Node updateDocumentStep(Node changeset) {
+        return new Node()
+                .type("Conversation/Update Document")
+                .properties("changeset", changeset);
     }
 
     private static Node javaScriptStep(String code) {

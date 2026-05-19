@@ -151,8 +151,9 @@ public final class QuickJsExpressionResolver {
     }
 
     private Node resolveString(String value, Map<String, Object> bindings, EvaluationCounter counter) {
-        Matcher full = FULL_EXPRESSION.matcher(value);
-        if (full.matches()) {
+        if (isExpression(value)) {
+            Matcher full = FULL_EXPRESSION.matcher(value);
+            full.matches();
             JavaScriptEvaluationResult result = evaluate(full.group(1).trim(), bindings);
             counter.hostGasUsed += result.hostGasUsed();
             return JavaScriptValues.toNode(result.value());
@@ -246,6 +247,14 @@ public final class QuickJsExpressionResolver {
             return "/" + escaped;
         }
         return parent + "/" + escaped;
+    }
+
+    private boolean isExpression(String value) {
+        Matcher full = FULL_EXPRESSION.matcher(value);
+        if (!full.matches()) {
+            return false;
+        }
+        return value.indexOf("${") == value.lastIndexOf("${");
     }
 
     private static final class EvaluationCounter {

@@ -1,6 +1,5 @@
 package blue.contract.processor.conversation.workflow;
 
-import blue.contract.processor.conversation.expression.QuickJsExpressionEvaluator;
 import blue.contract.processor.conversation.expression.QuickJsExpressionResolver;
 import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
 import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
@@ -110,7 +109,7 @@ public final class SequentialWorkflowRunner {
         return Arrays.<WorkflowStepExecutor<? extends SequentialWorkflowStep>>asList(
                 new TriggerEventStepExecutor(resolver),
                 new JavaScriptCodeStepExecutor(runtime),
-                new UpdateDocumentStepExecutor(new QuickJsExpressionEvaluator(runtime)));
+                new UpdateDocumentStepExecutor(resolver));
     }
 
     private List<Node> stepNodes(Node contractNode) {
