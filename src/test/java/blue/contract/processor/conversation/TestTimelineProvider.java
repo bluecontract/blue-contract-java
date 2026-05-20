@@ -8,10 +8,10 @@ import blue.language.processor.ChannelEvaluation;
 import blue.language.processor.ChannelEvaluationContext;
 import blue.language.processor.ChannelProcessor;
 import blue.repo.BlueRepository;
-import blue.repo.v1_3_0.conversation.ChatMessage;
-import blue.repo.v1_3_0.conversation.Timeline;
-import blue.repo.v1_3_0.conversation.TimelineChannel;
-import blue.repo.v1_3_0.conversation.TimelineEntry;
+import blue.repo.conversation.ChatMessage;
+import blue.repo.conversation.Timeline;
+import blue.repo.conversation.TimelineChannel;
+import blue.repo.conversation.TimelineEntry;
 
 import java.math.BigInteger;
 

@@ -1,0 +1,264 @@
+# Generated from src/test/resources/processor-delay/customer-paynote-snapshot.event.json
+type: "MyOS/MyOS Timeline Entry"
+timeline:
+  timelineId: "admin-timeline"
+timestamp: 1700000000000
+actor:
+  type: "MyOS/Principal Actor"
+  accountId: "0"
+message:
+  type: "Conversation/Operation Request"
+  operation: "myOsAdminUpdate"
+  request:
+    - type: "MyOS/Document Initial Snapshot Resolved"
+      inResponseTo:
+        requestId:
+          type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+          value: "snapshot:customer-paynote:customer-paynote-a"
+      document:
+        name: "Customer to Boutique Travel Agency Package PayNote"
+        description: "Customer package payment secured before provider orders."
+        type: { blueId: "emSg8pWstEHBtnbUPNu7rmqMzWskDCUbyggteUdk32w" }
+        amount:
+          expectedTotal:
+            type: { blueId: "5WNMiV9Knz63B4dVY5JtMyh3FB4FSGqv7ceScvuapdE1" }
+            value: 100000
+          secured:
+            type: { blueId: "5WNMiV9Knz63B4dVY5JtMyh3FB4FSGqv7ceScvuapdE1" }
+            value: 100000
+        contracts:
+          guarantorChannel:
+            type: { blueId: "HCF8mXnX3dFjQ8osjxb4Wzm2Nm1DoXnTYuA5sPnV7NTs" }
+            timelineId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "admin-timeline"
+            accountId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "0"
+          payeeChannel:
+            type: { blueId: "HCF8mXnX3dFjQ8osjxb4Wzm2Nm1DoXnTYuA5sPnV7NTs" }
+            timelineId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "investor-timeline"
+            accountId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "investor-uid"
+          payerChannel:
+            type: { blueId: "HCF8mXnX3dFjQ8osjxb4Wzm2Nm1DoXnTYuA5sPnV7NTs" }
+            timelineId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "a-customer-timeline"
+            accountId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "customer-a-uid"
+          links:
+            type: { blueId: "4cmrbevB6K23ZenjqwmNxpnaw6RF4VB3wkP7XB59V7W5" }
+            packageOffer:
+              type: { blueId: "BFxgEnovNHQ693YR2YvALi4FP8vjcwSQiX63LiLwjUhk" }
+              anchor:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "customerPayNotes"
+              documentId:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "783DnFBHNTYAntUMGupaoArsByZ4f2Aet55aJ6UR6bHg"
+            packageOrder:
+              type: { blueId: "BFxgEnovNHQ693YR2YvALi4FP8vjcwSQiX63LiLwjUhk" }
+              anchor:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "payments"
+              documentId:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "zzimVxhnKLL5SwMkS9kmF8p5g7pyxPWBu664HxGbszB"
+          attachComponentOrder:
+            description: "Attaches an included merchant order snapshot so package payment can complete after both confirmations."
+            type: { blueId: "BoAiqVUZv9Fum3wFqaX2JnQMBHJLxJSo2V9U2UBmCfsC" }
+            channel:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "payeeChannel"
+            request:
+              kind:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              initialSnapshot:
+                type: { blueId: "J18rFf6VX3ADe5gTnqmL4wXtivLkzrRXLPPhnoghnjzB" }
+          attachComponentOrderImpl:
+            type: { blueId: "CGdxkNjPcsdescqLPz6SNLsMyak6demQQr7RoKNHbCyv" }
+            steps:
+              items:
+                - name: "BuildComponentAttachment"
+                  type: { blueId: "ExZxT61PSpWHpEAtP2WKMXXqxEYN7Z13j7Zv36Dp99kS" }
+                  code:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "const unwrap = value => value && typeof value === 'object' && value.value !== undefined ? value.value : value; const readField = (object, key) => unwrap((object || {})[key]); const req = event.message.request || {}; const kind = unwrap(req.kind) || ''; const snapshot = req.initialSnapshot || {}; const expectedKind = kind === 'hotel' || kind === 'restaurant' ? 'Order' : ''; const targetPath = kind === 'hotel' ? '/embeddedDocs/hotelOrder' : kind === 'restaurant' ? '/embeddedDocs/restaurantOrder' : ''; const context = snapshot.context || {}; const existing = targetPath ? document(targetPath) || {} : {}; const snapshotOrderKind = readField(snapshot, 'orderKind') || readField(context, 'orderKind'); if (!targetPath || readField(snapshot, 'kind') !== expectedKind || snapshotOrderKind !== kind || readField(context, 'packageOrderDocumentId') !== document('/context/packageOrderDocumentId')) return { changeset: [], events: [{ type: 'Conversation/Event', kind: 'Component Order Attachment Rejected', orderKind: kind }] }; if (existing && Object.keys(existing).length > 0) return { changeset: [], events: [{ type: 'Conversation/Event', kind: 'Component Order Attachment Rejected', orderKind: kind, reason: 'component_order_already_attached' }] }; return { changeset: [{ op: 'add', path: targetPath, val: snapshot }], events: [{ type: 'Conversation/Event', kind: 'Component Order Attached', orderKind: kind }] };"
+                - name: "ApplyComponentAttachment"
+                  type: { blueId: "FtHZJzH4hqAoGxFBjsmy1svfT4BwEBB4aHpFSZycZLLa" }
+                  changeset:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "${steps.BuildComponentAttachment.changeset}"
+            operation:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "attachComponentOrder"
+          embeddedHotelOrderEvents:
+            type: { blueId: "Fjbu3QpnUaTruDTcTidETCX2N5STyv7KYxT42PCzGHxm" }
+            childPath:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "/embeddedDocs/hotelOrder"
+          embeddedRestaurantOrderEvents:
+            type: { blueId: "Fjbu3QpnUaTruDTcTidETCX2N5STyv7KYxT42PCzGHxm" }
+            childPath:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "/embeddedDocs/restaurantOrder"
+          processEmbeddedComponentOrders:
+            type: { blueId: "Hu4XkfvyXLSdfFNUwuXebEu3oJeWcMyhBTcRV9AQyKPC" }
+            paths:
+              items:
+                - type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                  value: "/embeddedDocs/hotelOrder"
+                - type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                  value: "/embeddedDocs/restaurantOrder"
+          completeWhenOrdersConfirmedFromHotelEvent:
+            type: { blueId: "7X3LkN54Yp88JgZbppPhP6hM3Jqiqv8Z2i4kS7phXtQe" }
+            channel:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "embeddedHotelOrderEvents"
+            event:
+              type: { blueId: "5Wz4G9qcnBJnntYRkz4dgLK5bSuoMpYJZj4j5M59z4we" }
+              kind:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "Order Confirmed"
+            steps:
+              items:
+                - name: "BuildCompletion"
+                  type: { blueId: "ExZxT61PSpWHpEAtP2WKMXXqxEYN7Z13j7Zv36Dp99kS" }
+                  code:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "const hotel = document('/embeddedDocs/hotelOrder/confirmation/status'); const restaurant = document('/embeddedDocs/restaurantOrder/confirmation/status'); if (hotel !== 'confirmed' || restaurant !== 'confirmed' || document('/completionRequested')) return { changeset: [], events: [] }; return { changeset: [{ op: 'replace', path: '/completionRequested', val: true }], events: [{ type: 'PayNote/Complete Payment Requested', amount: 100000 }] };"
+                - name: "ApplyCompletionFlag"
+                  type: { blueId: "FtHZJzH4hqAoGxFBjsmy1svfT4BwEBB4aHpFSZycZLLa" }
+                  changeset:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "${steps.BuildCompletion.changeset}"
+          completeWhenOrdersConfirmedFromRestaurantEvent:
+            type: { blueId: "7X3LkN54Yp88JgZbppPhP6hM3Jqiqv8Z2i4kS7phXtQe" }
+            channel:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "embeddedRestaurantOrderEvents"
+            event:
+              type: { blueId: "5Wz4G9qcnBJnntYRkz4dgLK5bSuoMpYJZj4j5M59z4we" }
+              kind:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "Order Confirmed"
+            steps:
+              items:
+                - name: "BuildCompletion"
+                  type: { blueId: "ExZxT61PSpWHpEAtP2WKMXXqxEYN7Z13j7Zv36Dp99kS" }
+                  code:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "const hotel = document('/embeddedDocs/hotelOrder/confirmation/status'); const restaurant = document('/embeddedDocs/restaurantOrder/confirmation/status'); if (hotel !== 'confirmed' || restaurant !== 'confirmed' || document('/completionRequested')) return { changeset: [], events: [] }; return { changeset: [{ op: 'replace', path: '/completionRequested', val: true }], events: [{ type: 'PayNote/Complete Payment Requested', amount: 100000 }] };"
+                - name: "ApplyCompletionFlag"
+                  type: { blueId: "FtHZJzH4hqAoGxFBjsmy1svfT4BwEBB4aHpFSZycZLLa" }
+                  changeset:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "${steps.BuildCompletion.changeset}"
+          initialized:
+            type: { blueId: "EVguxFmq5iFtMZaBQgHfjWDojaoesQ1vEXCQFZ59yL28" }
+            documentId:
+              type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              value: "CxSx6ELb64NzbBE5pw5dYpJdQz7JMdtYnLAT25QXuuNa"
+          checkpoint:
+            type: { blueId: "B7YQeYdQzUNuzaDQ4tNTd2iJqgd4YnVQkgz4QgymDWWU" }
+            lastEvents:
+              guarantorChannel:
+                type: { blueId: "F3mQaGQ1B48yMedKZojFTxeKxtee4xU66QBbiyEMvGeZ" }
+                actor:
+                  type: { blueId: "5GB8C22LsZGR3kkEmP5j5Zye7SR173ojzzUK99tUcoP" }
+                  accountId:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "0"
+                message:
+                  type: { blueId: "HM4Ku4LFcjC5MxnhPMRwQ8w3BbHmJKKZfHTTzsd4jbJq" }
+                  operation:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "recordTransactionInitiated"
+                  request:
+                    type: { blueId: "14UHCXtf9XLpi3Z3n4xbo1dmXRzfXnDEH23iVaechxzh" }
+                    initiatedAmount:
+                      type: { blueId: "5WNMiV9Knz63B4dVY5JtMyh3FB4FSGqv7ceScvuapdE1" }
+                      value: 100000
+                    providerReference:
+                      type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                      value: "harness:customer-paynote-a"
+                    railType:
+                      type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                      value: "fake-payment-rail"
+                timeline:
+                  timelineId:
+                    type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                    value: "admin-timeline"
+                timestamp:
+                  type: { blueId: "5WNMiV9Knz63B4dVY5JtMyh3FB4FSGqv7ceScvuapdE1" }
+                  value: 1700000000000
+            lastSignatures:
+              guarantorChannel:
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+                value: "9SJyYbjfPUCxAL26f6GQdriqXKuDZnXJhpPVezN5mMjK"
+        currency:
+          type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+          value: "USD"
+        payNoteInitialStateDescription:
+          details:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "This PayNote secures the customer's package payment to Boutique Travel Agency. The payment is completed only after both included merchant orders are confirmed: Hotel Aurora confirms the weekend stay order and Restaurant Lumi confirms the wine dinner order. Once both confirmations are present, the package payment is completed and the package becomes ready to use."
+          summary:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "Payment for the Weekend Stay + Wine Dinner package."
+        status:
+          type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+          value: "Initiated"
+        transactionDetails:
+          description: |
+            Payload for the operation. Shape MUST match the target Operation’s `request` contract (scalars or structured nodes).
+          railType:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "fake-payment-rail"
+          inResponseTo:
+            type:
+              name: "Correlation"
+              description: "A structured reference linking this response back to the original action and trigger."
+              requestId:
+                description: "The 'requestId' from the specific Request event this is a response to."
+                type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+              incomingEvent:
+                description: "An event which initiated the entire workflow. Normally just blueId of it."
+          attachmentPoint:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+          initiatedAmount:
+            type: { blueId: "5WNMiV9Knz63B4dVY5JtMyh3FB4FSGqv7ceScvuapdE1" }
+            value: 100000
+          providerReference:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "harness:customer-paynote-a"
+        state:
+          type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+          value: "not_started"
+        context:
+          scenario:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "reseller-weekend-package"
+          paymentKind:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "customer_package_purchase"
+          packageOrderDocumentId:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "zzimVxhnKLL5SwMkS9kmF8p5g7pyxPWBu664HxGbszB"
+          packagePayNoteSessionId:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "customer-paynote-a"
+          packagePayNoteDocumentId:
+            type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+            value: "customer-paynote-doc-a"
+        completionRequested:
+          type: { blueId: "4EzhSubEimSQD3zrYHRtobfPPWntUuhEz8YcdxHsi12u" }
+          value: false
+      targetSessionId:
+        type: { blueId: "DLRQwz7MQeCrzjy9bohPNwtCxKEBbKaMK65KBrwjfG6K" }
+        value: "customer-paynote-a"

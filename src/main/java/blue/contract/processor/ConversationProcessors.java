@@ -1,15 +1,20 @@
 package blue.contract.processor;
 
+import blue.bex.api.BexEngine;
 import blue.contract.processor.conversation.CompositeTimelineChannelProcessor;
+import blue.contract.processor.conversation.ConversationRepositoryCompatibilityNodeProvider;
 import blue.contract.processor.conversation.OperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowOperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowProcessor;
+import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
+import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.contract.processor.expression.ExpressionAwareMerging;
 import blue.language.Blue;
+import blue.language.NodeProvider;
 import blue.language.processor.DocumentProcessor;
 import blue.language.utils.TypeClassResolver;
-import blue.repo.v1_3_0.BlueRepositoryV1_3_0;
+import blue.repo.BlueRepositoryModels;
 
 public final class ConversationProcessors {
     private ConversationProcessors() {
@@ -24,7 +29,8 @@ public final class ConversationProcessors {
             throw new IllegalArgumentException("blue must not be null");
         }
         SequentialWorkflowRunner runner = workflowRunner(options);
-        BlueRepositoryV1_3_0.registerAll(blue.getDocumentProcessor().getContractTypeResolver());
+        installRepositoryCompatibility(blue);
+        BlueRepositoryModels.registerAll(blue.getDocumentProcessor().getContractTypeResolver());
         blue.registerContractProcessor(new CompositeTimelineChannelProcessor());
         blue.registerContractProcessor(new OperationProcessor());
         blue.registerContractProcessor(runner != null
@@ -37,6 +43,13 @@ public final class ConversationProcessors {
         return blue;
     }
 
+    private static void installRepositoryCompatibility(Blue blue) {
+        NodeProvider current = blue.getNodeProvider();
+        if (!ConversationRepositoryCompatibilityNodeProvider.isInstalled(current)) {
+            blue.nodeProvider(new ConversationRepositoryCompatibilityNodeProvider(current));
+        }
+    }
+
     public static DocumentProcessor.Builder configure(DocumentProcessor.Builder builder) {
         return configure(builder, null);
     }
@@ -47,7 +60,7 @@ public final class ConversationProcessors {
             throw new IllegalArgumentException("builder must not be null");
         }
         SequentialWorkflowRunner runner = workflowRunner(options);
-        TypeClassResolver resolver = BlueRepositoryV1_3_0.registerAll(
+        TypeClassResolver resolver = BlueRepositoryModels.registerAll(
                 new TypeClassResolver("blue.language.processor.model"));
         return builder
                 .withContractTypeResolver(resolver)
@@ -68,9 +81,16 @@ public final class ConversationProcessors {
         if (options.sequentialWorkflowRunner() != null) {
             return options.sequentialWorkflowRunner();
         }
-        if (options.javaScriptRuntime() != null) {
-            return SequentialWorkflowRunner.withJavaScriptRuntime(options.javaScriptRuntime());
-        }
-        return null;
+        JavaScriptRuntime javaScriptRuntime = options.javaScriptRuntime() != null
+                ? options.javaScriptRuntime()
+                : new NodeQuickJsRuntime();
+        BexEngine bexEngine = options.bexEngine() != null
+                ? options.bexEngine()
+                : BexEngine.builder().build();
+        return SequentialWorkflowRunner.withRuntimes(javaScriptRuntime,
+                bexEngine,
+                options.defaultComputeGasLimit(),
+                options.defaultBexExpressionGasLimit(),
+                options.processingMetrics());
     }
 }

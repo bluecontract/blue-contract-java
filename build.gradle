@@ -43,6 +43,7 @@ tasks.withType(JavaCompile).configureEach {
 dependencies {
     api 'blue.language:blue-language-java:2.0.0'
     api 'blue.repo:blue-repo-java:1.3.0'
+    api 'blue.bex:blue-bex-java:0.1.0'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
@@ -165,7 +166,6 @@ def determineProjectVersion() {
     if (tomlFile.exists()) {
         def toml = new groovy.toml.TomlSlurper().parse(tomlFile)
         return toml.tool.commitizen.version + (!System.getenv('CI') ? '-SNAPSHOT' : '')
-    } else {
-        throw new GradleException(".cz.toml file not found")
     }
+    return '0.0.0' + (!System.getenv('CI') ? '-SNAPSHOT' : '')
 }

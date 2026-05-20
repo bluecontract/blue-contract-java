@@ -1,12 +1,18 @@
 package blue.contract.processor.expression;
 
+import blue.contract.processor.conversation.bex.BexExpressionEnabledFields;
 import blue.language.NodeProvider;
 import blue.language.merge.MergingProcessor;
 import blue.language.merge.NodeResolver;
 import blue.language.model.Node;
+import blue.language.utils.NodePathAccessor;
+import blue.language.utils.NodePathEditor;
+
+import java.util.List;
 
 public final class ExpressionPreservingMergingProcessor implements MergingProcessor {
     private final MergingProcessor delegate;
+    private final BexExpressionEnabledFields expressionEnabledFields = new BexExpressionEnabledFields();
 
     public ExpressionPreservingMergingProcessor(MergingProcessor delegate) {
         if (delegate == null) {
@@ -21,6 +27,7 @@ public final class ExpressionPreservingMergingProcessor implements MergingProces
             target.replaceWith(new Node().value(source.getRawValue()));
             return;
         }
+        preserveExpressionEnabledFields(target, source);
         delegate.process(target, source, nodeProvider, nodeResolver);
     }
 
@@ -32,6 +39,7 @@ public final class ExpressionPreservingMergingProcessor implements MergingProces
             }
             return;
         }
+        preserveExpressionEnabledFields(target, source);
         delegate.postProcess(target, source, nodeProvider, nodeResolver);
         preserveAuthoredMetadata(target, source);
     }
@@ -56,6 +64,19 @@ public final class ExpressionPreservingMergingProcessor implements MergingProces
         }
         if (source.getDescription() != null && target.getDescription() == null) {
             target.description(source.getDescription());
+        }
+    }
+
+    private void preserveExpressionEnabledFields(Node target, Node source) {
+        List<String> paths = expressionEnabledFields.preservedPathsForStep(source);
+        if (paths.isEmpty()) {
+            return;
+        }
+        for (String path : paths) {
+            Node preserved = NodePathAccessor.getNode(source, path);
+            if (preserved != null) {
+                NodePathEditor.put(target, path, preserved.clone());
+            }
         }
     }
 }

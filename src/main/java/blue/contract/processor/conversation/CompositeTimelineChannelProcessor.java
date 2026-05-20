@@ -9,7 +9,7 @@ import blue.language.processor.ChannelProcessor;
 import blue.language.processor.model.ChannelEventCheckpoint;
 import blue.language.processor.model.ChannelContract;
 import blue.language.processor.model.MarkerContract;
-import blue.repo.v1_3_0.conversation.CompositeTimelineChannel;
+import blue.repo.conversation.CompositeTimelineChannel;
 import java.util.ArrayList;
 import java.util.List;
 

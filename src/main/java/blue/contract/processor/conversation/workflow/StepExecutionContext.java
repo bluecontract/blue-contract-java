@@ -2,8 +2,9 @@ package blue.contract.processor.conversation.workflow;
 
 import blue.language.model.Node;
 import blue.language.processor.ProcessorExecutionContext;
-import blue.repo.v1_3_0.conversation.SequentialWorkflow;
-import blue.repo.v1_3_0.conversation.SequentialWorkflowStep;
+import blue.language.snapshot.FrozenNode;
+import blue.repo.conversation.SequentialWorkflow;
+import blue.repo.conversation.SequentialWorkflowStep;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,11 +13,13 @@ public final class StepExecutionContext {
     private final ProcessorExecutionContext processorContext;
     private final SequentialWorkflow workflow;
     private final SequentialWorkflowStep step;
-    private final Node stepNode;
-    private final Node currentContractNode;
+    private Node stepNodeRef;
+    private Node currentContractNodeRef;
+    private final FrozenNode stepFrozenNode;
+    private final FrozenNode currentContractFrozenNode;
     private final int stepIndex;
     private final Map<String, Object> stepResults;
-    private final Node event;
+    private final Node eventRef;
 
     public StepExecutionContext(ProcessorExecutionContext processorContext,
                                 SequentialWorkflow workflow,
@@ -25,6 +28,44 @@ public final class StepExecutionContext {
                                 Node currentContractNode,
                                 int stepIndex,
                                 Map<String, Object> stepResults) {
+        this(processorContext,
+                workflow,
+                step,
+                stepNode,
+                currentContractNode,
+                null,
+                null,
+                stepIndex,
+                stepResults);
+    }
+
+    public StepExecutionContext(ProcessorExecutionContext processorContext,
+                                SequentialWorkflow workflow,
+                                SequentialWorkflowStep step,
+                                FrozenNode stepFrozenNode,
+                                FrozenNode currentContractFrozenNode,
+                                int stepIndex,
+                                Map<String, Object> stepResults) {
+        this(processorContext,
+                workflow,
+                step,
+                null,
+                null,
+                stepFrozenNode,
+                currentContractFrozenNode,
+                stepIndex,
+                stepResults);
+    }
+
+    private StepExecutionContext(ProcessorExecutionContext processorContext,
+                                 SequentialWorkflow workflow,
+                                 SequentialWorkflowStep step,
+                                 Node stepNode,
+                                 Node currentContractNode,
+                                 FrozenNode stepFrozenNode,
+                                 FrozenNode currentContractFrozenNode,
+                                 int stepIndex,
+                                 Map<String, Object> stepResults) {
         if (processorContext == null) {
             throw new IllegalArgumentException("processorContext must not be null");
         }
@@ -34,13 +75,14 @@ public final class StepExecutionContext {
         this.processorContext = processorContext;
         this.workflow = workflow;
         this.step = step;
-        this.stepNode = stepNode != null ? stepNode.clone() : null;
-        this.currentContractNode = currentContractNode != null ? currentContractNode.clone() : null;
+        this.stepNodeRef = stepNode;
+        this.currentContractNodeRef = currentContractNode;
+        this.stepFrozenNode = stepFrozenNode;
+        this.currentContractFrozenNode = currentContractFrozenNode;
         this.stepIndex = stepIndex;
         this.stepResults = Collections.unmodifiableMap(new LinkedHashMap<String, Object>(
                 stepResults != null ? stepResults : Collections.<String, Object>emptyMap()));
-        Node currentEvent = processorContext.event();
-        this.event = currentEvent != null ? currentEvent.clone() : null;
+        this.eventRef = processorContext.event();
     }
 
     public ProcessorExecutionContext processorContext() {
@@ -55,12 +97,43 @@ public final class StepExecutionContext {
         return step;
     }
 
+    public Node stepNodeRef() {
+        if (stepNodeRef == null && stepFrozenNode != null) {
+            stepNodeRef = stepFrozenNode.toNode();
+        }
+        return stepNodeRef;
+    }
+
+    public Node currentContractNodeRef() {
+        if (currentContractNodeRef == null && currentContractFrozenNode != null) {
+            currentContractNodeRef = currentContractFrozenNode.toNode();
+        }
+        return currentContractNodeRef;
+    }
+
+    public FrozenNode stepFrozenNode() {
+        return stepFrozenNode;
+    }
+
+    public FrozenNode currentContractFrozenNode() {
+        return currentContractFrozenNode;
+    }
+
+    public Node eventRef() {
+        return eventRef;
+    }
+
+    /**
+     * Compatibility getter. Existing JavaScript paths rely on clone semantics.
+     */
     public Node stepNode() {
-        return stepNode != null ? stepNode.clone() : null;
+        Node ref = stepNodeRef();
+        return ref != null ? ref.clone() : null;
     }
 
     public Node currentContractNode() {
-        return currentContractNode != null ? currentContractNode.clone() : null;
+        Node ref = currentContractNodeRef();
+        return ref != null ? ref.clone() : null;
     }
 
     public int stepIndex() {
@@ -72,6 +145,6 @@ public final class StepExecutionContext {
     }
 
     public Node event() {
-        return event != null ? event.clone() : null;
+        return eventRef != null ? eventRef.clone() : null;
     }
 }

@@ -1,0 +1,765 @@
+name: Reduced Package Fulfillment Resale Flow
+status: active
+investorChannel: investorChannel
+componentOrderRefsBySessionId:
+  hotel-order-session-a:
+    packageOrderSessionId: ''
+    component: ''
+  restaurant-order-session-a:
+    packageOrderSessionId: ''
+    component: ''
+resaleOrderRequests:
+  hotel-request-a:
+    status: requested
+    agreementSessionId: hotel-agreement-session
+    kind: hotel
+    packageOrderSessionId: package-order-a
+    orderSessionId: ''
+  restaurant-request-a:
+    status: requested
+    agreementSessionId: restaurant-agreement-session
+    kind: restaurant
+    packageOrderSessionId: package-order-a
+    orderSessionId: ''
+orders:
+  package-order-a:
+    packageOrder:
+      observed: true
+      confirmed: true
+      sessionId: package-order-a
+      documentId: package-order-doc-a
+      subscriptionId: package-linked:package-order-a
+      customerAccountId: customer-a-uid
+    customerPayment:
+      tokenRequestId: reseller-weekend-package-customer-token:package-order-a
+      tokenRequested: true
+      tokenAttached: true
+    customerPayNote:
+      sessionId: customer-paynote-a
+      snapshotRequestId: snapshot:customer-paynote:customer-paynote-a
+      subscriptionId: package-linked:customer-paynote-a
+      attachedToPackageOrder: true
+      secured: false
+      securedAmount: 0
+      completed: false
+    hotelOrder:
+      sessionId: ''
+      documentId: ''
+      resaleRequestId: hotel-request-a
+      resaleRequested: true
+      resalePlaced: false
+      snapshotRequestId: ''
+      subscriptionId: ''
+      attachedToPackageOrder: false
+      attachedToPayNote: false
+      merchantPaymentInitiated: false
+      confirmed: false
+    restaurantOrder:
+      sessionId: ''
+      documentId: ''
+      resaleRequestId: restaurant-request-a
+      resaleRequested: true
+      resalePlaced: false
+      snapshotRequestId: ''
+      subscriptionId: ''
+      attachedToPackageOrder: false
+      attachedToPayNote: false
+      merchantPaymentInitiated: false
+      confirmed: false
+state:
+  grantsReady: true
+contracts:
+  hotelParticipantChannel:
+    type:
+      blueId: test-simple-timeline-channel
+    timelineId: hotel-participant
+  restaurantParticipantChannel:
+    type:
+      blueId: test-simple-timeline-channel
+    timelineId: restaurant-participant
+  triggeredEventChannel:
+    type: Core/Triggered Event Channel
+  hotelResaleOrderPlaced:
+    type: Conversation/Operation
+    channel: hotelParticipantChannel
+  restaurantResaleOrderPlaced:
+    type: Conversation/Operation
+    channel: restaurantParticipantChannel
+  hotelResaleOrderPlacedImpl:
+    type: Conversation/Sequential Workflow Operation
+    operation: hotelResaleOrderPlaced
+    steps:
+      - name: ForwardHotelResaleOrderPlaced
+        type: Conversation/Trigger Event
+        event:
+          $binding:
+            name: event
+            path: /message/request
+  restaurantResaleOrderPlacedImpl:
+    type: Conversation/Sequential Workflow Operation
+    operation: restaurantResaleOrderPlaced
+    steps:
+      - name: ForwardRestaurantResaleOrderPlaced
+        type: Conversation/Trigger Event
+        event:
+          $binding:
+            name: event
+            path: /message/request
+  processPackageHotelResaleOrderPlaced:
+    type: Conversation/Sequential Workflow
+    channel: triggeredEventChannel
+    event:
+      type: MyOS/Subscription Update
+      subscriptionId: hotel-resale-agreement
+      targetSessionId: hotel-agreement-session
+      update:
+        kind: Resale Order Placed
+    steps:
+      - name: ProcessPackageHotelResaleOrderPlaced
+        type: Conversation/Compute
+        definition: packageFulfillmentComputeDefinition
+        entry: processHotelResaleOrderPlaced
+        emitEvents: true
+        returnResult: true
+      - name: ApplyProcessPackageHotelResaleOrderPlaced
+        type: Conversation/Update Document
+        changeset:
+          $binding:
+            name: steps
+            path: /ProcessPackageHotelResaleOrderPlaced/changeset
+  processPackageRestaurantResaleOrderPlaced:
+    type: Conversation/Sequential Workflow
+    channel: triggeredEventChannel
+    event:
+      type: MyOS/Subscription Update
+      subscriptionId: restaurant-resale-agreement
+      targetSessionId: restaurant-agreement-session
+      update:
+        kind: Resale Order Placed
+    steps:
+      - name: ProcessPackageRestaurantResaleOrderPlaced
+        type: Conversation/Compute
+        definition: packageFulfillmentComputeDefinition
+        entry: processRestaurantResaleOrderPlaced
+        emitEvents: true
+        returnResult: true
+      - name: ApplyProcessPackageRestaurantResaleOrderPlaced
+        type: Conversation/Update Document
+        changeset:
+          $binding:
+            name: steps
+            path: /ProcessPackageRestaurantResaleOrderPlaced/changeset
+  packageFulfillmentComputeDefinition:
+    type: Conversation/Compute Definition
+    constants:
+      packageLinkedSubscriptionPrefix: 'package-linked:'
+      agreementLinkedSubscriptionPrefix: 'agreement-linked:'
+    functions:
+      emptyComponentOrderState:
+        do:
+          - $return:
+              sessionId: ''
+              documentId: ''
+              resaleRequestId: ''
+              resaleRequested: false
+              resalePlaced: false
+              snapshotRequestId: ''
+              subscriptionId: ''
+              attachedToPackageOrder: false
+              attachedToPayNote: false
+              merchantPaymentInitiated: false
+              confirmed: false
+      defaultOrderState:
+        args:
+          sessionId:
+            type: Text
+        do:
+          - $let:
+              name: sessionId
+              expr:
+                $text:
+                  $var: sessionId
+          - $return:
+              packageOrder:
+                sessionId:
+                  $var: sessionId
+                documentId: ''
+                customerAccountId: ''
+                subscriptionId:
+                  $concat:
+                    - $const: packageLinkedSubscriptionPrefix
+                    - $var: sessionId
+                observed: false
+                confirmed: false
+              customerPayment:
+                tokenRequestId:
+                  $concat:
+                    - 'reseller-weekend-package-customer-token:'
+                    - $var: sessionId
+                tokenRequested: false
+                tokenAttached: false
+              customerPayNote:
+                sessionId: ''
+                snapshotRequestId: ''
+                subscriptionId: ''
+                attachedToPackageOrder: false
+                secured: false
+                securedAmount: 0
+                completed: false
+              hotelOrder:
+                $call:
+                  function: emptyComponentOrderState
+                  args: {}
+              restaurantOrder:
+                $call:
+                  function: emptyComponentOrderState
+                  args: {}
+      appendChangeIfChanged:
+        args:
+          path:
+            type: Text
+          val:
+            description: Value to compare and append.
+        do:
+          - $let:
+              name: pathText
+              expr:
+                $text:
+                  $var: path
+          - $let:
+              name: current
+              expr:
+                $resultValue:
+                  path:
+                    $var: pathText
+          - $if:
+              cond:
+                $ne:
+                  - $var: current
+                  - $var: val
+              then:
+                - $appendChange:
+                    op: replace
+                    path:
+                      $var: pathText
+                    val:
+                      $var: val
+          - $return: {}
+      ensureOrderLedger:
+        args:
+          sessionId:
+            type: Text
+        do:
+          - $let:
+              name: sessionId
+              expr:
+                $text:
+                  $var: sessionId
+          - $if:
+              cond:
+                $empty:
+                  $var: sessionId
+              then:
+                - $return: false
+          - $let:
+              name: pkg
+              expr:
+                $resultValue:
+                  path:
+                    $concat:
+                      - /orders/
+                      - $var: sessionId
+                      - /packageOrder
+          - $if:
+              cond:
+                $empty:
+                  $object:
+                    $var: pkg
+              then:
+                - $appendChange:
+                    op: add
+                    path:
+                      $concat:
+                        - /orders/
+                        - $var: sessionId
+                    val:
+                      $call:
+                        function: defaultOrderState
+                        args:
+                          sessionId:
+                            $var: sessionId
+          - $return: {}
+      orderObjectFieldRelativePath:
+        args:
+          field:
+            type: Text
+          kind:
+            type: Text
+        do:
+          - $return:
+              $pointerGet:
+                object:
+                  componentOrderSessions:
+                    hotel: /hotelOrder/sessionId
+                    restaurant: /restaurantOrder/sessionId
+                  componentOrderDocumentIds:
+                    hotel: /hotelOrder/documentId
+                    restaurant: /restaurantOrder/documentId
+                  componentOrderAttached:
+                    hotel: /hotelOrder/attachedToPackageOrder
+                    restaurant: /restaurantOrder/attachedToPackageOrder
+                  componentOrderAttachedToPayNote:
+                    hotel: /hotelOrder/attachedToPayNote
+                    restaurant: /restaurantOrder/attachedToPayNote
+                  componentOrderConfirmed:
+                    hotel: /hotelOrder/confirmed
+                    restaurant: /restaurantOrder/confirmed
+                  merchantPaymentInitiated:
+                    hotel: /hotelOrder/merchantPaymentInitiated
+                    restaurant: /restaurantOrder/merchantPaymentInitiated
+                  resaleOrderPlaced:
+                    hotel: /hotelOrder/resalePlaced
+                    restaurant: /restaurantOrder/resalePlaced
+                  resaleOrderRequested:
+                    hotel: /hotelOrder/resaleRequested
+                    restaurant: /restaurantOrder/resaleRequested
+                  resaleOrderRequestIds:
+                    hotel: /hotelOrder/resaleRequestId
+                    restaurant: /restaurantOrder/resaleRequestId
+                  componentSnapshotRequestIds:
+                    hotel: /hotelOrder/snapshotRequestId
+                    restaurant: /restaurantOrder/snapshotRequestId
+                  componentSubscriptionIds:
+                    hotel: /hotelOrder/subscriptionId
+                    restaurant: /restaurantOrder/subscriptionId
+                path:
+                  $concat:
+                    - /
+                    - $text:
+                        $var: field
+                    - /
+                    - $text:
+                        $var: kind
+                default: ''
+      setOrderPath:
+        args:
+          sessionId:
+            type: Text
+          relativePath:
+            type: Text
+          val:
+            description: Value to write.
+        do:
+          - $let:
+              name: sessionId
+              expr:
+                $text:
+                  $var: sessionId
+          - $if:
+              cond:
+                $empty:
+                  $var: sessionId
+              then:
+                - $return: false
+          - $call:
+              function: ensureOrderLedger
+              args:
+                sessionId:
+                  $var: sessionId
+          - $let:
+              name: pathText
+              expr:
+                $concat:
+                  - /orders/
+                  - $var: sessionId
+                  - $text:
+                      $var: relativePath
+          - $if:
+              cond:
+                $ne:
+                  - $resultValue:
+                      path:
+                        $var: pathText
+                  - $var: val
+              then:
+                - $appendChange:
+                    op: add
+                    path:
+                      $var: pathText
+                    val:
+                      $var: val
+          - $return: {}
+      mergeOrderObjectField:
+        args:
+          sessionId:
+            type: Text
+          key:
+            type: Text
+          patch:
+            description: Object patch keyed by component kind.
+        do:
+          - $let:
+              name: sessionId
+              expr:
+                $text:
+                  $var: sessionId
+          - $forEach:
+              in:
+                $entries:
+                  $object:
+                    $var: patch
+              item: entry
+              do:
+                - $let:
+                    name: kind
+                    expr:
+                      $text:
+                        $pointerGet:
+                          object:
+                            $var: entry
+                          path: /key
+                          default: ''
+                - $let:
+                    name: relativePath
+                    expr:
+                      $call:
+                        function: orderObjectFieldRelativePath
+                        args:
+                          field:
+                            $var: key
+                          kind:
+                            $var: kind
+                - $if:
+                    cond:
+                      $not:
+                        $empty:
+                          $var: relativePath
+                    then:
+                      - $call:
+                          function: setOrderPath
+                          args:
+                            sessionId:
+                              $var: sessionId
+                            relativePath:
+                              $var: relativePath
+                            val:
+                              $pointerGet:
+                                object:
+                                  $var: entry
+                                path: /val
+          - $return: {}
+      requestComponentOrderDelivery:
+        args:
+          packageOrderSessionId:
+            type: Text
+          agreementKind:
+            type: Text
+          orderSessionId:
+            type: Text
+        do:
+          - $let:
+              name: packageOrderSessionId
+              expr:
+                $text:
+                  $var: packageOrderSessionId
+          - $let:
+              name: agreementKind
+              expr:
+                $text:
+                  $var: agreementKind
+          - $let:
+              name: orderSessionId
+              expr:
+                $text:
+                  $var: orderSessionId
+          - $if:
+              cond:
+                $or:
+                  - $empty:
+                      $var: packageOrderSessionId
+                  - $empty:
+                      $var: agreementKind
+                  - $empty:
+                      $var: orderSessionId
+              then:
+                - $return: false
+          - $let:
+              name: snapshotRequestId
+              expr:
+                $concat:
+                  - 'snapshot:component:'
+                  - $var: agreementKind
+                  - ':'
+                  - $var: orderSessionId
+          - $let:
+              name: subscriptionId
+              expr:
+                $concat:
+                  - $const: agreementLinkedSubscriptionPrefix
+                  - $var: agreementKind
+                  - ':'
+                  - $var: orderSessionId
+          - $let:
+              name: componentPathPrefix
+              expr:
+                $choose:
+                  cond:
+                    $eq:
+                      - $var: agreementKind
+                      - hotel
+                  then: /hotelOrder
+                  else: /restaurantOrder
+          - $if:
+              cond:
+                $empty:
+                  $text:
+                    $resultValue:
+                      path:
+                        $concat:
+                          - /orders/
+                          - $var: packageOrderSessionId
+                          - $var: componentPathPrefix
+                          - /snapshotRequestId
+              then:
+                - $call:
+                    function: setOrderPath
+                    args:
+                      sessionId:
+                        $var: packageOrderSessionId
+                      relativePath:
+                        $call:
+                          function: orderObjectFieldRelativePath
+                          args:
+                            field: componentSnapshotRequestIds
+                            kind:
+                              $var: agreementKind
+                      val:
+                        $var: snapshotRequestId
+                - $appendEvent:
+                    $pointerSet:
+                      object:
+                        onBehalfOf: investorChannel
+                        requestId:
+                          $var: snapshotRequestId
+                        sourceSessionId:
+                          $var: orderSessionId
+                      path: /type
+                      val: MyOS/Document Initial Snapshot Requested
+          - $if:
+              cond:
+                $empty:
+                  $text:
+                    $resultValue:
+                      path:
+                        $concat:
+                          - /orders/
+                          - $var: packageOrderSessionId
+                          - $var: componentPathPrefix
+                          - /subscriptionId
+              then:
+                - $call:
+                    function: setOrderPath
+                    args:
+                      sessionId:
+                        $var: packageOrderSessionId
+                      relativePath:
+                        $call:
+                          function: orderObjectFieldRelativePath
+                          args:
+                            field: componentSubscriptionIds
+                            kind:
+                              $var: agreementKind
+                      val:
+                        $var: subscriptionId
+                - $appendEvent:
+                    $pointerSet:
+                      object:
+                        onBehalfOf: investorChannel
+                        targetSessionId:
+                          $var: orderSessionId
+                        subscription:
+                          id:
+                            $var: subscriptionId
+                          events:
+                            - type: Conversation/Event
+                              kind: Payment Token Attached
+                            - type: Conversation/Event
+                              kind: Order Confirmed
+                      path: /type
+                      val: MyOS/Subscribe to Session Requested
+          - $return: {}
+      recordPlacedResaleOrder:
+        args:
+          agreementKind:
+            type: Text
+          responseRequestId:
+            type: Text
+          orderSessionId:
+            type: Text
+        do:
+          - $let:
+              name: agreementKind
+              expr:
+                $text:
+                  $var: agreementKind
+          - $let:
+              name: responseRequestId
+              expr:
+                $text:
+                  $var: responseRequestId
+          - $let:
+              name: orderSessionId
+              expr:
+                $text:
+                  $var: orderSessionId
+          - $if:
+              cond:
+                $or:
+                  - $empty:
+                      $var: agreementKind
+                  - $empty:
+                      $var: responseRequestId
+                  - $empty:
+                      $var: orderSessionId
+              then:
+                - $return: false
+          - $let:
+              name: existingRequest
+              expr:
+                $object:
+                  $resultValue:
+                    path:
+                      $concat:
+                        - /resaleOrderRequests/
+                        - $var: responseRequestId
+          - $let:
+              name: nextRequest1
+              expr:
+                $merge:
+                  - $var: existingRequest
+                  - kind:
+                      $coalesce:
+                        - $text:
+                            $pointerGet:
+                              object:
+                                $var: existingRequest
+                              path: /kind
+                              default: ''
+                        - $var: agreementKind
+                    orderSessionId:
+                      $var: orderSessionId
+                    status: placed
+          - $if:
+              cond:
+                $ne:
+                  - $var: existingRequest
+                  - $var: nextRequest1
+              then:
+                - $appendChange:
+                    op: add
+                    path:
+                      $concat:
+                        - /resaleOrderRequests/
+                        - $var: responseRequestId
+                    val:
+                      $var: nextRequest1
+          - $let:
+              name: packageOrderSessionId
+              expr:
+                $text:
+                  $pointerGet:
+                    object:
+                      $var: nextRequest1
+                    path: /packageOrderSessionId
+                    default: ''
+          - $if:
+              cond:
+                $not:
+                  $empty:
+                    $var: packageOrderSessionId
+              then:
+                - $call:
+                    function: setOrderPath
+                    args:
+                      sessionId:
+                        $var: packageOrderSessionId
+                      relativePath:
+                        $call:
+                          function: orderObjectFieldRelativePath
+                          args:
+                            field: resaleOrderPlaced
+                            kind:
+                              $var: agreementKind
+                      val: true
+                - $call:
+                    function: setOrderPath
+                    args:
+                      sessionId:
+                        $var: packageOrderSessionId
+                      relativePath:
+                        $call:
+                          function: orderObjectFieldRelativePath
+                          args:
+                            field: componentOrderSessions
+                            kind:
+                              $var: agreementKind
+                      val:
+                        $var: orderSessionId
+                - $call:
+                    function: appendChangeIfChanged
+                    args:
+                      path:
+                        $concat:
+                          - /componentOrderRefsBySessionId/
+                          - $var: orderSessionId
+                      val:
+                        packageOrderSessionId:
+                          $var: packageOrderSessionId
+                        component:
+                          $concat:
+                            - $var: agreementKind
+                            - Order
+                - $call:
+                    function: requestComponentOrderDelivery
+                    args:
+                      packageOrderSessionId:
+                        $var: packageOrderSessionId
+                      agreementKind:
+                        $var: agreementKind
+                      orderSessionId:
+                        $var: orderSessionId
+          - $return: {}
+      processHotelResaleOrderPlaced:
+        do:
+          - $call:
+              function: recordPlacedResaleOrder
+              args:
+                agreementKind: hotel
+                responseRequestId:
+                  $text:
+                    $event: /update/inResponseTo/requestId
+                orderSessionId:
+                  $text:
+                    $event: /update/orderSessionId
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+      processRestaurantResaleOrderPlaced:
+        do:
+          - $call:
+              function: recordPlacedResaleOrder
+              args:
+                agreementKind: restaurant
+                responseRequestId:
+                  $text:
+                    $event: /update/inResponseTo/requestId
+                orderSessionId:
+                  $text:
+                    $event: /update/orderSessionId
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true

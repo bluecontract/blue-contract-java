@@ -1,11 +1,12 @@
 package blue.contract.processor.conversation;
 
 import blue.language.model.Node;
-import blue.repo.v1_3_0.conversation.ChatMessage;
-import blue.repo.v1_3_0.conversation.OperationRequest;
-import blue.repo.v1_3_0.conversation.StatusCompleted;
-import blue.repo.v1_3_0.conversation.Timeline;
-import blue.repo.v1_3_0.conversation.TimelineEntry;
+import blue.repo.conversation.ChatMessage;
+import blue.repo.conversation.OperationRequest;
+import blue.repo.conversation.StatusCompleted;
+import blue.repo.conversation.Timeline;
+import blue.repo.conversation.TimelineEntry;
+import blue.repo.myos.MyOSTimelineEntry;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -37,11 +38,13 @@ final class ConversationEventNodes {
         }
         String typeBlueId = typeBlueId(node);
         if (typeBlueId != null) {
-            return TimelineEntry.blueId().equals(typeBlueId);
+            return TimelineEntry.blueId().equals(typeBlueId)
+                    || MyOSTimelineEntry.blueId().equals(typeBlueId);
         }
         String typeName = typeInlineValue(node);
         if (typeName != null) {
-            return TimelineEntry.qualifiedName().equals(typeName);
+            return TimelineEntry.qualifiedName().equals(typeName)
+                    || MyOSTimelineEntry.qualifiedName().equals(typeName);
         }
         return hasTimelineEntryShape(node);
     }

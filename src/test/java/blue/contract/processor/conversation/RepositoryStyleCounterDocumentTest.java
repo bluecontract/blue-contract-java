@@ -5,7 +5,7 @@ import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.repo.BlueRepository;
-import blue.repo.v1_3_0.conversation.OperationRequest;
+import blue.repo.conversation.OperationRequest;
 import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
