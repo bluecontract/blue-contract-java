@@ -4,7 +4,7 @@ import blue.contract.processor.BlueDocumentProcessors;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
-import blue.language.processor.ProcessorFatalException;
+import blue.language.processor.ProcessorStatus;
 import blue.repo.BlueRepository;
 import blue.repo.conversation.ChatMessage;
 import blue.repo.conversation.StatusCompleted;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TriggerEventStepExecutorTest {
@@ -128,10 +127,12 @@ class TriggerEventStepExecutorTest {
 
         DocumentProcessingResult result = processChat(fixture, document);
         Node event = result.triggeredEvents().get(0);
+        Node embeddedDocument = event.getProperties().get("document");
+        Node nestedWorkflow = embeddedDocument.getContracts().getProperties().get("nestedWorkflow");
 
         assertEquals("Launching Worker", event.get("/message"));
         assertEquals("${steps.Prepare.secret}",
-                event.get("/document/contracts/nestedWorkflow/steps/0/changeset/0/val"));
+                nestedWorkflow.get("/steps/0/changeset/0/val"));
     }
 
     @Test
@@ -141,10 +142,9 @@ class TriggerEventStepExecutorTest {
                 0,
                 new Node().type("Conversation/Trigger Event")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processChat(fixture, document));
+        DocumentProcessingResult result = processChat(fixture, document);
 
-        assertTrue(ex.getMessage().contains("Trigger Event step must declare event payload"));
+        assertRuntimeFatal(result, "Trigger Event step must declare event payload");
     }
 
     @Test
@@ -154,12 +154,11 @@ class TriggerEventStepExecutorTest {
                 0,
                 triggerEventStep(new Node().name("Named Event Only"))));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processChat(fixture, document));
+        DocumentProcessingResult result = processChat(fixture, document);
 
         // Trigger Event requires semantic payload content such as type, value,
         // properties, items, or a blueId; name/description-only metadata is not emitted.
-        assertTrue(ex.getMessage().contains("Trigger Event step must declare event payload"));
+        assertRuntimeFatal(result, "Trigger Event step must declare event payload");
     }
 
     @Test
@@ -310,7 +309,7 @@ class TriggerEventStepExecutorTest {
                         .properties("timelineId", new Node().value("owner")))
                 .properties("timestamp", new Node().value(1))
                 .properties("message", chatMessageEvent("run"));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node initializedDocument(Fixture fixture, Node document) {
@@ -319,8 +318,7 @@ class TriggerEventStepExecutorTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);
@@ -353,6 +351,12 @@ class TriggerEventStepExecutorTest {
     private static void assertEventType(Node event, String qualifiedName, String blueId) {
         assertTrue(isEventType(event, qualifiedName, blueId),
                 "Expected event type " + qualifiedName + " but was " + event);
+    }
+
+    private static void assertRuntimeFatal(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null && result.failureReason().contains(expectedMessage),
+                result.failureReason());
     }
 
     private static boolean isEventType(Node event, String qualifiedName, String blueId) {

@@ -2,7 +2,6 @@ package blue.contract.processor.conversation.bex;
 
 import blue.bex.api.BexExecutionContext;
 import blue.bex.api.BexStepResults;
-import blue.bex.api.ProcessorExecutionContextBexDocumentView;
 import blue.bex.result.BexExecutionResult;
 import blue.bex.value.BexValue;
 import blue.bex.value.BexValues;
@@ -12,12 +11,26 @@ import blue.language.model.Node;
 import java.util.Map;
 
 public final class BexWorkflowContextFactory {
+    private final BexProcessingMetrics metrics;
+
+    public BexWorkflowContextFactory() {
+        this(null);
+    }
+
+    public BexWorkflowContextFactory(BexProcessingMetrics metrics) {
+        this.metrics = metrics;
+    }
+
+    BexProcessingMetrics metrics() {
+        return metrics;
+    }
+
     public BexExecutionContext create(StepExecutionContext context, long gasLimit) {
         BexValue event = BexValues.nodeCursorTrustedImmutable(context.eventRef());
         BexValue currentContract = currentContractBinding(context);
         BexStepResults steps = stepResults(context.stepResults());
         return BexExecutionContext.builder()
-                .document(new ProcessorExecutionContextBexDocumentView(context.processorContext()))
+                .document(new ScopedProcessorExecutionContextBexDocumentView(context, metrics))
                 .event(event)
                 .currentContract(currentContract)
                 .steps(steps)
@@ -56,7 +69,7 @@ public final class BexWorkflowContextFactory {
             return base;
         }
         BexValue existing = base.get("channel");
-        if (!existing.isUndefined() && !existing.asText().trim().isEmpty()) {
+        if (!existing.isUndefined() && existing.isScalar() && !existing.asText().trim().isEmpty()) {
             return base;
         }
         return BexValues.overlay(base, "channel", BexValues.scalar(channel.trim()));

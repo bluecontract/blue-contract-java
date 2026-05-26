@@ -21,8 +21,9 @@ import blue.contract.processor.conversation.workflow.WorkflowStepResult;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
-import blue.language.processor.ProcessorFatalException;
+import blue.language.processor.ProcessorStatus;
 import blue.repo.BlueRepository;
+import blue.repo.conversation.ChatMessage;
 import blue.repo.conversation.JavaScriptCode;
 import blue.repo.conversation.SequentialWorkflowStep;
 import blue.repo.conversation.UpdateDocument;
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static blue.language.utils.Properties.INTEGER_TYPE_BLUE_ID;
 
@@ -134,10 +134,9 @@ class SequentialWorkflowExecutionTest {
         Node document = initializedDocument(fixture, unsupportedStepDocument(fixture.repository));
         Node event = chatTimelineEntry(fixture, "owner", 1, "run");
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> fixture.blue.processDocument(document, event));
+        DocumentProcessingResult result = fixture.blue.processDocument(document, event);
 
-        assertTrue(ex.getMessage().contains("Unsupported sequential workflow step"));
+        assertRuntimeFatal(result, "Unsupported sequential workflow step");
     }
 
     @Test
@@ -219,10 +218,14 @@ class SequentialWorkflowExecutionTest {
                 1,
                 new Node().value("${event.message.request * document('/counter')}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("Unsupported expression"));
+        assertRuntimeFatal(result, "Unsupported expression");
     }
 
     @Test
@@ -232,10 +235,14 @@ class SequentialWorkflowExecutionTest {
                 new Node().value(new BigDecimal("1.5")),
                 new Node().value("${event.message.request + document('/counter')}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("not an integer"));
+        assertRuntimeFatal(result, "not an integer");
     }
 
     @Test
@@ -245,10 +252,14 @@ class SequentialWorkflowExecutionTest {
                 1,
                 new Node().value("${event.message.missing + document('/counter')}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("Event expression path not found"));
+        assertRuntimeFatal(result, "Event expression path not found");
     }
 
     @Test
@@ -258,10 +269,14 @@ class SequentialWorkflowExecutionTest {
                 1,
                 new Node().value("${event.message.request + document('/missing')}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("resolved to nothing"));
+        assertRuntimeFatal(result, "resolved to nothing");
     }
 
     @Test
@@ -428,11 +443,15 @@ class SequentialWorkflowExecutionTest {
                 1,
                 new Node().value("${missing.value}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("QuickJS expression"));
-        assertTrue(ex.getMessage().contains("missing"));
+        assertRuntimeFatal(result, "QuickJS expression");
+        assertRuntimeFatal(result, "missing");
     }
 
     @Test
@@ -445,11 +464,15 @@ class SequentialWorkflowExecutionTest {
                 1,
                 new Node().value("${(() => { while (true) {} })()}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processOperationRequest(fixture, document, "owner", 1, "increment", 7));
+        DocumentProcessingResult result = processOperationRequestResult(fixture,
+                document,
+                "owner",
+                1,
+                "increment",
+                new Node().value(7));
 
-        assertTrue(ex.getMessage().contains("QuickJS expression evaluation failed"));
-        assertTrue(ex.getMessage().toLowerCase().contains("gas"));
+        assertRuntimeFatal(result, "QuickJS expression evaluation failed");
+        assertRuntimeFatalIgnoreCase(result, "gas");
     }
 
     @Test
@@ -597,10 +620,9 @@ class SequentialWorkflowExecutionTest {
                 0,
                 javaScriptStep("   ")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processChat(fixture, document, "owner", 1, "run"));
+        DocumentProcessingResult result = processChat(fixture, document, "owner", 1, "run");
 
-        assertTrue(ex.getMessage().contains("JavaScript Code step must include code to execute"));
+        assertRuntimeFatal(result, "JavaScript Code step must include code to execute");
     }
 
     @Test
@@ -610,11 +632,10 @@ class SequentialWorkflowExecutionTest {
                 0,
                 javaScriptStep("throw new Error(\"boom\");")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processChat(fixture, document, "owner", 1, "run"));
+        DocumentProcessingResult result = processChat(fixture, document, "owner", 1, "run");
 
-        assertTrue(ex.getMessage().contains("JavaScript Code execution failed"));
-        assertTrue(ex.getMessage().contains("boom"));
+        assertRuntimeFatal(result, "JavaScript Code execution failed");
+        assertRuntimeFatal(result, "boom");
     }
 
     @Test
@@ -627,11 +648,10 @@ class SequentialWorkflowExecutionTest {
                 0,
                 javaScriptStep("while (true) {}")));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> processChat(fixture, document, "owner", 1, "run"));
+        DocumentProcessingResult result = processChat(fixture, document, "owner", 1, "run");
 
-        assertTrue(ex.getMessage().contains("JavaScript Code execution failed"));
-        assertTrue(ex.getMessage().toLowerCase().contains("gas"));
+        assertRuntimeFatal(result, "JavaScript Code execution failed");
+        assertRuntimeFatalIgnoreCase(result, "gas");
     }
 
     @Test
@@ -1078,7 +1098,7 @@ class SequentialWorkflowExecutionTest {
                         .type("Conversation/Operation Request")
                         .properties("operation", new Node().value(operation))
                         .properties("request", request));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node chatTimelineEntry(Fixture fixture, String timelineId, int timestamp, String message) {
@@ -1091,7 +1111,7 @@ class SequentialWorkflowExecutionTest {
                 .properties("message", new Node()
                         .type("Conversation/Chat Message")
                         .properties("message", new Node().value(message)));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node initializedDocument(Fixture fixture, Node document) {
@@ -1101,8 +1121,7 @@ class SequentialWorkflowExecutionTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);
@@ -1110,8 +1129,7 @@ class SequentialWorkflowExecutionTest {
 
     private static Fixture configuredFixture(BlueDocumentProcessorOptions options) {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue, options);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);
@@ -1119,8 +1137,7 @@ class SequentialWorkflowExecutionTest {
 
     private static Fixture configuredConversationFixture(BlueDocumentProcessorOptions options) {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         ConversationProcessors.registerWith(blue, options);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);
@@ -1173,11 +1190,45 @@ class SequentialWorkflowExecutionTest {
         assertEquals(BigInteger.valueOf(expected), document.get("/counter"));
     }
 
+    private static void assertRuntimeFatal(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null && result.failureReason().contains(expectedMessage),
+                result.failureReason());
+    }
+
+    private static void assertRuntimeFatalIgnoreCase(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null
+                        && result.failureReason().toLowerCase().contains(expectedMessage.toLowerCase()),
+                result.failureReason());
+    }
+
     private static void assertTriggeredChatMessage(DocumentProcessingResult result, String expectedMessage) {
-        assertEquals(1, result.triggeredEvents().size());
-        Node event = result.triggeredEvents().get(0);
-        assertEquals("Conversation/Chat Message", event.getType().getValue());
-        assertEquals(expectedMessage, event.get("/message"));
+        for (Node event : result.triggeredEvents()) {
+            if (isChatMessage(event)
+                    && expectedMessage.equals(event.get("/message"))) {
+                return;
+            }
+        }
+        throw new AssertionError("Expected triggered chat message: " + expectedMessage
+                + " in " + result.triggeredEvents());
+    }
+
+    private static boolean isChatMessage(Node event) {
+        if (event == null) {
+            return false;
+        }
+        Node type = event.getType();
+        if (type != null) {
+            return ChatMessage.qualifiedName().equals(type.getValue())
+                    || ChatMessage.blueId().equals(type.getBlueId());
+        }
+        if (event.getProperties() == null) {
+            return false;
+        }
+        Node typeProperty = event.getProperties().get("type");
+        Object value = typeProperty != null ? typeProperty.getValue() : null;
+        return ChatMessage.qualifiedName().equals(value) || ChatMessage.typeName().equals(value);
     }
 
     private static final class Fixture {

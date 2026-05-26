@@ -198,7 +198,6 @@ class CoreRuntimeChannelsTest {
         Node checkpoint = nodeAt(afterSecond, "/contracts/checkpoint");
         assertNotNull(checkpoint);
         assertNotNull(nodeAt(checkpoint, "/lastEvents/owner"));
-        assertNotNull(checkpoint.get("/lastSignatures/owner"));
     }
 
     @Test
@@ -218,12 +217,11 @@ class CoreRuntimeChannelsTest {
         Fixture fixture = configuredFixture();
         Map<String, Node> contracts = ownerChannelContracts();
         Node initialized = initializedDocument(fixture, document(fixture.repository, 0, contracts));
-        initialized.getProperties().get("contracts").properties("checkpoint", new Node()
-                .type("Core/Channel Event Checkpoint")
-                .properties("lastEvents", new Node().properties(new LinkedHashMap<String, Node>()))
-                .properties("lastSignatures", new Node().properties(new LinkedHashMap<String, Node>())));
-        initialized.getProperties().get("contracts").properties("extraCheckpoint", new Node()
-                .type("Core/Channel Event Checkpoint"));
+        initialized.getContracts().properties("checkpoint", new Node()
+                .type(new Node().blueId(blue.repo.core.ChannelEventCheckpoint.blueId()))
+                .properties("lastEvents", new Node().properties(new LinkedHashMap<String, Node>())));
+        initialized.getContracts().properties("extraCheckpoint", new Node()
+                .type(new Node().blueId(blue.repo.core.ChannelEventCheckpoint.blueId())));
 
         assertThrows(RuntimeException.class,
                 () -> fixture.blue.processDocument(fixture.blue.preprocess(initialized), chatTimelineEntry(fixture, 1)));
@@ -377,7 +375,7 @@ class CoreRuntimeChannelsTest {
                         .properties("timelineId", new Node().value("owner")))
                 .properties("timestamp", new Node().value(timestamp))
                 .properties("message", chatMessageEvent("run"));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node operationRequestEvent(Fixture fixture,
@@ -394,7 +392,7 @@ class CoreRuntimeChannelsTest {
                         .type("Conversation/Operation Request")
                         .properties("operation", new Node().value(operation))
                         .properties("request", request));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node nodeAt(Node node, String pointer) {
@@ -408,8 +406,7 @@ class CoreRuntimeChannelsTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);

@@ -15,6 +15,9 @@ public final class BlueDocumentProcessors {
         if (blue == null) {
             throw new IllegalArgumentException("blue must not be null");
         }
+        if (options != null && options.processingMetrics() != null) {
+            blue.getDocumentProcessor().processingMetricsSink(options.processingMetrics());
+        }
         ConversationProcessors.registerWith(blue, options);
         MyOSProcessors.registerWith(blue);
         return blue;
@@ -28,6 +31,9 @@ public final class BlueDocumentProcessors {
                                                       BlueDocumentProcessorOptions options) {
         if (builder == null) {
             throw new IllegalArgumentException("builder must not be null");
+        }
+        if (options != null && options.processingMetrics() != null) {
+            builder.withProcessingMetricsSink(options.processingMetrics());
         }
         return MyOSProcessors.configure(ConversationProcessors.configure(builder, options));
     }

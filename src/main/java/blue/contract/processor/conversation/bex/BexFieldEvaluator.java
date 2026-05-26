@@ -32,24 +32,27 @@ public final class BexFieldEvaluator {
     }
 
     public BexValue evaluateField(Node fieldNode, StepExecutionContext context, long gasLimit) {
-        return executeProgram(FrozenNode.fromResolvedNode(syntheticProgram(fieldNode)), context, gasLimit);
+        BexProcessingMetrics metrics = contextFactory.metrics();
+        if (metrics != null) {
+            metrics.incrementBexSyntheticProgramMaterializations();
+        }
+        return executeProgram(BexProgramSource.inline(FrozenNode.fromResolvedNode(syntheticProgram(fieldNode))), context, gasLimit);
     }
 
     public BexValue evaluateField(FrozenNode fieldNode, StepExecutionContext context, long gasLimit) {
-        Node node = fieldNode != null ? fieldNode.toNode() : null;
-        return executeProgram(FrozenNode.fromResolvedNode(syntheticProgram(node)), context, gasLimit);
+        return executeProgram(BexProgramSource.expression(fieldNode != null ? fieldNode : FrozenNode.empty()), context, gasLimit);
     }
 
     public BexValue evaluateField(Node fieldNode, StepExecutionContext context) {
         return evaluateField(fieldNode, context, defaultGasLimit);
     }
 
-    private BexValue executeProgram(FrozenNode syntheticProgram, StepExecutionContext context, long gasLimit) {
+    private BexValue executeProgram(BexProgramSource source, StepExecutionContext context, long gasLimit) {
         if (gasLimit <= 0L) {
             throw new IllegalArgumentException("gasLimit must be positive");
         }
         BexExecutionContext bexContext = contextFactory.create(context, gasLimit);
-        BexExecutionResult result = bexEngine.compileAndExecute(BexProgramSource.inline(syntheticProgram), bexContext);
+        BexExecutionResult result = bexEngine.compileAndExecute(source, bexContext);
         if (result.gasUsed() > 0L) {
             context.processorContext().consumeGas(result.gasUsed());
         }

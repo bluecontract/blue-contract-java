@@ -2,7 +2,6 @@ package blue.contract.processor.conversation;
 
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.model.TypeBlueId;
 import blue.language.processor.ChannelCheckpointContext;
 import blue.language.processor.ChannelEvaluation;
 import blue.language.processor.ChannelEvaluationContext;
@@ -16,13 +15,13 @@ import blue.repo.conversation.TimelineEntry;
 import java.math.BigInteger;
 
 public final class TestTimelineProvider {
-    public static final String SIMPLE_TIMELINE_CHANNEL_BLUE_ID = "test-simple-timeline-channel";
+    public static final String SIMPLE_TIMELINE_CHANNEL_BLUE_ID = TimelineChannel.blueId();
 
     private TestTimelineProvider() {
     }
 
     public static Blue registerWith(Blue blue) {
-        blue.registerContractProcessor(new SimpleTimelineChannelProcessor());
+        blue.registerContractProcessor(SIMPLE_TIMELINE_CHANNEL_BLUE_ID, new SimpleTimelineChannelProcessor());
         return blue;
     }
 
@@ -50,7 +49,7 @@ public final class TestTimelineProvider {
                 .properties("timeline", blue.objectToNode(entry.getTimeline()))
                 .properties("timestamp", new Node().value(entry.getTimestamp()))
                 .properties("message", entry.getMessage());
-        return blue.preprocess(event);
+        return blue.preprocess(event).blue(null);
     }
 
     public static Node chatMessage(String message) {
@@ -60,28 +59,24 @@ public final class TestTimelineProvider {
                 .properties("message", new Node().value(chatMessage.getMessage()));
     }
 
-    @TypeBlueId(TestTimelineProvider.SIMPLE_TIMELINE_CHANNEL_BLUE_ID)
-    public static final class SimpleTimelineChannel extends TimelineChannel {
-    }
-
-    public static final class SimpleTimelineChannelProcessor implements ChannelProcessor<SimpleTimelineChannel> {
+    public static final class SimpleTimelineChannelProcessor implements ChannelProcessor<TimelineChannel> {
         @Override
-        public Class<SimpleTimelineChannel> contractType() {
-            return SimpleTimelineChannel.class;
+        public Class<TimelineChannel> contractType() {
+            return TimelineChannel.class;
         }
 
         @Override
-        public ChannelEvaluation evaluate(SimpleTimelineChannel contract, ChannelEvaluationContext context) {
+        public ChannelEvaluation evaluate(TimelineChannel contract, ChannelEvaluationContext context) {
             return TimelineProviderSupport.evaluateTimelineEntry(contract, context);
         }
 
         @Override
-        public String eventId(SimpleTimelineChannel contract, ChannelEvaluationContext context) {
+        public String eventId(TimelineChannel contract, ChannelEvaluationContext context) {
             return TimelineProviderSupport.eventId(context.event());
         }
 
         @Override
-        public boolean isNewerEvent(SimpleTimelineChannel contract, ChannelCheckpointContext context) {
+        public boolean isNewerEvent(TimelineChannel contract, ChannelCheckpointContext context) {
             return TimelineProviderSupport.isNewerOrSameTimelineEvent(context);
         }
     }

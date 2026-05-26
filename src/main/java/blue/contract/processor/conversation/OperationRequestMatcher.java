@@ -46,10 +46,25 @@ final class OperationRequestMatcher {
         if (requestPattern == null) {
             return true;
         }
+        if (isEmptyRequestPattern(requestPattern)) {
+            return true;
+        }
         if (requestEvent.request() == null) {
             return false;
         }
         return context.matchesEventPattern(requestEvent.patternFor(requestPattern));
+    }
+
+    private boolean isEmptyRequestPattern(Node requestPattern) {
+        return requestPattern.getType() == null
+                && requestPattern.getItemType() == null
+                && requestPattern.getKeyType() == null
+                && requestPattern.getValueType() == null
+                && requestPattern.getValue() == null
+                && requestPattern.getItems() == null
+                && (requestPattern.getProperties() == null || requestPattern.getProperties().isEmpty())
+                && requestPattern.getBlueId() == null
+                && requestPattern.getSchema() == null;
     }
 
     private boolean channelsCompatible(SequentialWorkflowOperation contract, Operation operation) {

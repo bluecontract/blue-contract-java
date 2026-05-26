@@ -1,9 +1,23 @@
 package blue.contract.processor.conversation.workflow;
 
+import blue.contract.processor.conversation.bex.BexProcessingMetrics;
 import blue.language.model.Node;
 import blue.language.snapshot.FrozenNode;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 final class ComputeDefinitionResolver {
+    private final BexProcessingMetrics metrics;
+    private final ConcurrentMap<String, FrozenNode> cache = new ConcurrentHashMap<String, FrozenNode>();
+
+    ComputeDefinitionResolver() {
+        this(null);
+    }
+
+    ComputeDefinitionResolver(BexProcessingMetrics metrics) {
+        this.metrics = metrics;
+    }
+
     FrozenNode resolve(FrozenNode stepNode, StepExecutionContext context) {
         FrozenNode definition = FrozenNodeUtil.property(stepNode, "definition");
         if (definition == null || FrozenNodeUtil.isEmpty(definition)) {
@@ -12,7 +26,7 @@ final class ComputeDefinitionResolver {
         String text = FrozenNodeUtil.text(definition);
         if (text != null && !text.trim().isEmpty()) {
             String pointer = resolvePointer(text.trim(), context);
-            FrozenNode frozen = context.processorContext().canonicalFrozenAt(pointer);
+            FrozenNode frozen = cachedFrozenAt(pointer, context);
             if (frozen == null) {
                 context.processorContext().throwFatal("Compute definition not found: " + text);
                 return null;
@@ -30,7 +44,7 @@ final class ComputeDefinitionResolver {
         String text = NodeUtil.text(definition);
         if (text != null && !text.trim().isEmpty()) {
             String pointer = resolvePointer(text.trim(), context);
-            FrozenNode frozen = context.processorContext().canonicalFrozenAt(pointer);
+            FrozenNode frozen = cachedFrozenAt(pointer, context);
             if (frozen == null) {
                 context.processorContext().throwFatal("Compute definition not found: " + text);
                 return null;
@@ -49,6 +63,33 @@ final class ComputeDefinitionResolver {
             parent = "/";
         }
         return appendPointer(parent, reference);
+    }
+
+    private FrozenNode cachedFrozenAt(String pointer, StepExecutionContext context) {
+        String key = cacheKey(pointer, context);
+        FrozenNode cached = cache.get(key);
+        if (cached != null) {
+            if (metrics != null) {
+                metrics.incrementComputeDefinitionResolveHits();
+            }
+            return cached;
+        }
+        FrozenNode frozen = context.processorContext().canonicalFrozenAt(pointer);
+        if (frozen != null) {
+            cache.putIfAbsent(key, frozen);
+        }
+        if (metrics != null) {
+            metrics.incrementComputeDefinitionResolveMisses();
+        }
+        return frozen;
+    }
+
+    private String cacheKey(String pointer, StepExecutionContext context) {
+        FrozenNode contract = context.currentContractFrozenNode();
+        String contractId = contract != null && contract.blueId() != null
+                ? contract.blueId()
+                : String.valueOf(context.processorContext().scopePath()) + ":" + String.valueOf(context.processorContext().contractKey());
+        return contractId + "|" + pointer;
     }
 
     private String currentContractPointer(StepExecutionContext context) {

@@ -87,14 +87,13 @@ public final class CompositeTimelineChannelProcessor implements ChannelProcessor
                 ? (ChannelEventCheckpoint) marker
                 : null;
         Node lastEvent = checkpoint != null ? checkpoint.lastEvent(checkpointKey) : null;
-        String lastSignature = checkpoint != null ? checkpoint.lastSignature(checkpointKey) : null;
         ChannelCheckpointContext checkpointContext = ChannelCheckpointContext.of(
                 context.scopePath(),
                 checkpointKey,
                 context.event(),
                 childEvaluation.eventId(),
                 lastEvent,
-                lastSignature,
+                null,
                 context.markers());
         return processor.isNewerEvent(child, checkpointContext);
     }

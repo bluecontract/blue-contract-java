@@ -4,7 +4,7 @@ import blue.bex.api.BexEngine;
 import blue.bex.api.BexMetricsSink;
 import blue.bex.result.BexMetrics;
 import blue.contract.processor.BlueDocumentProcessorOptions;
-import blue.contract.processor.conversation.TestTimelineProvider;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationRequest;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationResult;
 import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
@@ -14,7 +14,7 @@ import blue.contract.processor.conversation.workflow.WorkflowStepExecutor;
 import blue.contract.processor.conversation.workflow.WorkflowStepResult;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
-import blue.language.processor.ProcessorFatalException;
+import blue.language.processor.ProcessorStatus;
 import blue.repo.conversation.Compute;
 import blue.repo.conversation.SequentialWorkflowStep;
 
@@ -31,6 +31,24 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Scenario:
+ * Core {@code Conversation/Compute} behavior is verified independently from document mutation.
+ *
+ * Main flow:
+ * 1. Execute inline Compute programs and Compute Definition backed programs.
+ * 2. Prove Compute can read {@code $document}, {@code $event}, {@code $steps}, and
+ *    {@code $currentContract}.
+ * 3. Prove Compute can emit events, return step results, use constants/functions, and consume gas.
+ * 4. Prove Compute changesets remain data until a later Update Document step applies them.
+ * 5. Keep JavaScript Code, Trigger Event, and literal Update Document compatibility intact.
+ *
+ * Actors and operations:
+ * - The owner timeline calls {@code run}.
+ * - Compute steps build data and events.
+ * - Later Compute steps read prior named step results.
+ * - Compatibility cases ensure existing non-BEX workflow executors still work.
+ */
 class ComputeWorkflowExecutionTest {
     @Test
     void inlineComputeEmitsEventAndDoesNotMutateDocument() {
@@ -297,10 +315,7 @@ class ComputeWorkflowExecutionTest {
                 "name: Compute Authored Channel Test",
                 "status: idle",
                 "contracts:",
-                "  manualChannel:",
-                "    type:",
-                "      blueId: " + TestTimelineProvider.SIMPLE_TIMELINE_CHANNEL_BLUE_ID,
-                "    timelineId: owner",
+                ConversationTestResources.simpleTimelineChannelYaml("manualChannel", "owner", 2),
                 "  run:",
                 "    type: Conversation/Operation",
                 "    channel: manualChannel",
@@ -433,10 +448,9 @@ class ComputeWorkflowExecutionTest {
                 "        definition: missingCompute",
                 "        entry: build"));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
+        DocumentProcessingResult result = support.processRun(document);
 
-        assertTrue(ex.getMessage().contains("Compute definition not found"));
+        assertRuntimeFatal(result, "Compute definition not found");
     }
 
     @Test
@@ -456,10 +470,9 @@ class ComputeWorkflowExecutionTest {
                 "        definition: computeLogic",
                 "        entry: missing")))).document();
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
+        DocumentProcessingResult result = support.processRun(document);
 
-        assertTrue(ex.getMessage().contains("Unknown entry function"));
+        assertRuntimeFatal(result, "Unknown entry function");
     }
 
     @Test
@@ -550,9 +563,8 @@ class ComputeWorkflowExecutionTest {
                 "          - $return:",
                 "              ok: true"));
 
-        ProcessorFatalException explicit = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
-        assertTrue(explicit.getMessage().toLowerCase().contains("gas"));
+        DocumentProcessingResult explicit = support.processRun(document);
+        assertRuntimeFatalIgnoreCase(explicit, "gas");
 
         ComputeWorkflowTestSupport lowDefault = ComputeWorkflowTestSupport.create(
                 BlueDocumentProcessorOptions.builder().defaultComputeGasLimit(1L).build());
@@ -563,9 +575,8 @@ class ComputeWorkflowExecutionTest {
                 "        do:",
                 "          - $return:",
                 "              ok: true"));
-        ProcessorFatalException defaultFailure = assertThrows(ProcessorFatalException.class,
-                () -> lowDefault.processRun(lowDefaultDocument));
-        assertTrue(defaultFailure.getMessage().toLowerCase().contains("gas"));
+        DocumentProcessingResult defaultFailure = lowDefault.processRun(lowDefaultDocument);
+        assertRuntimeFatalIgnoreCase(defaultFailure, "gas");
 
         ComputeWorkflowTestSupport normalDefault = ComputeWorkflowTestSupport.create(
                 BlueDocumentProcessorOptions.builder().defaultComputeGasLimit(100_000L).build());
@@ -631,10 +642,9 @@ class ComputeWorkflowExecutionTest {
                 "          - $return:",
                 "              events: not-a-list"));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
+        DocumentProcessingResult result = support.processRun(document);
 
-        assertTrue(ex.getMessage().contains("Compute result events must be a list"));
+        assertRuntimeFatal(result, "Compute result events must be a list");
     }
 
     @Test
@@ -649,10 +659,9 @@ class ComputeWorkflowExecutionTest {
                 "              events:",
                 "                - hello"));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
+        DocumentProcessingResult result = support.processRun(document);
 
-        assertTrue(ex.getMessage().contains("Compute result events must contain object entries"));
+        assertRuntimeFatal(result, "Compute result events must contain object entries");
     }
 
     @Test
@@ -667,10 +676,9 @@ class ComputeWorkflowExecutionTest {
                 "              events:",
                 "                - null"));
 
-        ProcessorFatalException ex = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(document));
+        DocumentProcessingResult result = support.processRun(document);
 
-        assertTrue(ex.getMessage().contains("Compute result events cannot contain undefined/null entries"));
+        assertRuntimeFatal(result, "Compute result events must contain object entries");
     }
 
     @Test
@@ -801,5 +809,18 @@ class ComputeWorkflowExecutionTest {
     private static Node onlyEvent(DocumentProcessingResult result) {
         assertEquals(1, result.triggeredEvents().size());
         return result.triggeredEvents().get(0);
+    }
+
+    private static void assertRuntimeFatal(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null && result.failureReason().contains(expectedMessage),
+                result.failureReason());
+    }
+
+    private static void assertRuntimeFatalIgnoreCase(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null
+                        && result.failureReason().toLowerCase().contains(expectedMessage.toLowerCase()),
+                result.failureReason());
     }
 }

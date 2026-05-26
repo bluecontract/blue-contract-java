@@ -3,7 +3,6 @@ package blue.contract.processor.conversation;
 import blue.contract.processor.BlueDocumentProcessors;
 import blue.language.Blue;
 import blue.language.model.Node;
-import blue.language.model.TypeBlueId;
 import blue.language.processor.DocumentProcessingResult;
 import blue.language.processor.HandlerProcessor;
 import blue.language.processor.ProcessorExecutionContext;
@@ -34,13 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CounterSnapshotRoundTripStressTest {
     private static final int STRESS_ITERATIONS = 100;
-    private static final String COUNTER_INCREMENT_HANDLER_BLUE_ID = "test-counter-increment-handler";
 
     @Test
     void noJsCounterUpdatesSurviveCanonicalSnapshotRoundTrips() {
         Fixture fixture = configuredFixture();
         DocumentProcessingResult initialized = fixture.blue.initializeDocument(
-                fixture.blue.preprocess(noJsCounterDocument()));
+                fixture.blue.preprocess(noJsCounterDocument(fixture.counterIncrementHandlerBlueId)));
         ResolvedSnapshot currentSnapshot = initialized.snapshot();
         assertNotNull(currentSnapshot);
 
@@ -164,11 +162,11 @@ class CounterSnapshotRoundTripStressTest {
         }
     }
 
-    private static Node noJsCounterDocument() {
+    private static Node noJsCounterDocument(String counterIncrementHandlerBlueId) {
         Map<String, Node> contracts = new LinkedHashMap<String, Node>();
         contracts.put("ownerChannel", TestTimelineProvider.channel("counter"));
         contracts.put("incrementImpl", new Node()
-                .type(new Node().blueId(COUNTER_INCREMENT_HANDLER_BLUE_ID))
+                .type(new Node().blueId(counterIncrementHandlerBlueId))
                 .properties("channel", new Node().value("ownerChannel")));
 
         return new Node()
@@ -270,15 +268,17 @@ class CounterSnapshotRoundTripStressTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
-        blue.registerContractProcessor(new CounterIncrementHandlerProcessor());
-        return new Fixture(repository, blue);
+        Node counterIncrementHandlerType = new Node().name("Counter Increment Handler");
+        String counterIncrementHandlerBlueId = blue.calculateBlueId(counterIncrementHandlerType);
+        blue.registerExternalContractType(counterIncrementHandlerBlueId,
+                counterIncrementHandlerType,
+                new CounterIncrementHandlerProcessor());
+        return new Fixture(repository, blue, counterIncrementHandlerBlueId);
     }
 
-    @TypeBlueId(CounterSnapshotRoundTripStressTest.COUNTER_INCREMENT_HANDLER_BLUE_ID)
     public static final class CounterIncrementHandler extends HandlerContract {
     }
 
@@ -301,7 +301,7 @@ class CounterSnapshotRoundTripStressTest {
                     new Node().value(next)));
 
             context.emitEvent(new Node()
-                    .type("Conversation/Chat Message")
+                    .type(new Node().blueId(ChatMessage.blueId()))
                     .properties("message", new Node().value("Counter is now " + next)));
         }
     }
@@ -309,10 +309,12 @@ class CounterSnapshotRoundTripStressTest {
     private static final class Fixture {
         private final BlueRepository repository;
         private final Blue blue;
+        private final String counterIncrementHandlerBlueId;
 
-        private Fixture(BlueRepository repository, Blue blue) {
+        private Fixture(BlueRepository repository, Blue blue, String counterIncrementHandlerBlueId) {
             this.repository = repository;
             this.blue = blue;
+            this.counterIncrementHandlerBlueId = counterIncrementHandlerBlueId;
         }
     }
 }

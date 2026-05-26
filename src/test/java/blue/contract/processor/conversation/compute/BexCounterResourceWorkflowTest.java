@@ -1,38 +1,50 @@
 package blue.contract.processor.conversation.compute;
 
 import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.TestTimelineProvider;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.repo.BlueRepository;
-import blue.repo.conversation.OperationRequest;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Scenario:
+ * A small YAML counter document proves the resource-based BEX workflow used by examples and smoke tests.
+ *
+ * Main flow:
+ * 1. Load {@code conversation/counter-bex.yaml} from test resources.
+ * 2. Initialize the document.
+ * 3. Send one {@code increment} operation request with value 1 through a simple timeline channel.
+ * 4. Assert that the document counter is incremented and a chat message is emitted.
+ *
+ * Actors and operations:
+ * - The owner timeline calls {@code increment}.
+ * - BEX compute produces the counter update and chat-message data.
+ * - Update Document mutates {@code /counter}; Trigger Event emits the chat message.
+ */
 class BexCounterResourceWorkflowTest {
     private static final String COUNTER_RESOURCE = "/conversation/counter-bex.yaml";
     private static final String TIMELINE_ID = "counter-timeline";
 
     @Test
-    void counterBexWorkflowProcessesTimelineIncrementOperation() throws IOException {
+    void counterBexWorkflowProcessesTimelineIncrementOperation() {
         Fixture fixture = configuredFixture();
-        Node document = loadYaml(fixture, COUNTER_RESOURCE);
+        Node document = ConversationTestResources.yamlResource(fixture.blue, fixture.repository, COUNTER_RESOURCE);
         DocumentProcessingResult initialized = fixture.blue.initializeDocument(document);
-        Node event = TestTimelineProvider.timelineEntry(fixture.blue,
+        Node event = ConversationTestResources.operationRequestEvent(fixture.blue,
                 fixture.repository,
                 TIMELINE_ID,
                 1700000001,
-                operationRequest("increment", 1));
+                "increment",
+                new Node().value(1));
 
         DocumentProcessingResult result = fixture.blue.processDocument(initialized.document(), event);
 
@@ -44,41 +56,9 @@ class BexCounterResourceWorkflowTest {
                 result.triggeredEvents().get(0).getAsText("/message"));
     }
 
-    private static Node loadYaml(Fixture fixture, String resourcePath) throws IOException {
-        Node node = fixture.blue.yamlToNode(readResource(resourcePath));
-        node.blue(fixture.repository.typeAliasBlue());
-        return fixture.blue.preprocess(node);
-    }
-
-    private static String readResource(String resourcePath) throws IOException {
-        InputStream stream = BexCounterResourceWorkflowTest.class.getResourceAsStream(resourcePath);
-        if (stream == null) {
-            throw new IOException("Missing test resource: " + resourcePath);
-        }
-        try (InputStream input = stream; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = input.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-            return new String(output.toByteArray(), StandardCharsets.UTF_8);
-        }
-    }
-
-    private static Node operationRequest(String operation, int request) {
-        OperationRequest operationRequest = new OperationRequest()
-                .operation(operation)
-                .request(new Node().value(request));
-        return new Node()
-                .type(OperationRequest.qualifiedName())
-                .properties("operation", new Node().value(operationRequest.getOperation()))
-                .properties("request", operationRequest.getRequest());
-    }
-
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);

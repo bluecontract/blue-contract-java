@@ -1,6 +1,7 @@
 package blue.contract.processor.conversation.compute;
 
 import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
@@ -8,16 +9,28 @@ import blue.repo.BlueRepository;
 import blue.repo.myos.DocumentInitialSnapshotResolved;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Scenario:
+ * The large customer Paynote snapshot fixture is processed through the BEX-based document path.
+ *
+ * Main flow:
+ * 1. Load the latest Compute/BEX Paynote document fixture and its snapshot event fixture.
+ * 2. Assert the fixtures are pure BEX, with no legacy dollar-brace steps expressions,
+ *    dollar-brace document expressions, or JavaScript workflow steps.
+ * 3. Initialize the document, process the supplied event, and time the processing call.
+ * 4. Verify the expected package-fulfillment document remains active and emits snapshot events.
+ *
+ * Actors and operations:
+ * - The incoming fixture event represents the external snapshot/update being processed.
+ * - Admin/update workflows emit snapshot-related events.
+ * - Compute and BEX expression fields handle data construction without QuickJS expressions.
+ */
 class CustomerPaynoteLatestBexFixtureTest {
     private static final String DOCUMENT_RESOURCE =
             "/processor-delay/customer-paynote-snapshot.document.compute.latest-bex.yaml";
@@ -25,7 +38,9 @@ class CustomerPaynoteLatestBexFixtureTest {
             "/processor-delay/customer-paynote-snapshot.event.yaml";
 
     @Test
-    void customerPaynoteLatestBexDocumentProcessesSnapshotEvent() throws IOException {
+    void customerPaynoteLatestBexDocumentProcessesSnapshotEvent() {
+        assertPureBexFixture(ConversationTestResources.readResource(DOCUMENT_RESOURCE), DOCUMENT_RESOURCE);
+        assertPureBexFixture(ConversationTestResources.readResource(EVENT_RESOURCE), EVENT_RESOURCE);
         Fixture fixture = configuredFixture();
         Node document = loadYaml(fixture, DOCUMENT_RESOURCE);
         Node event = loadYaml(fixture, EVENT_RESOURCE);
@@ -49,11 +64,13 @@ class CustomerPaynoteLatestBexFixtureTest {
         assertEquals("active", result.document().get("/status"));
     }
 
-    private static Node loadYaml(Fixture fixture, String resourcePath) throws IOException {
-        String yaml = readResource(resourcePath);
-        Node node = fixture.blue.yamlToNode(yaml);
-        node.blue(fixture.repository.typeAliasBlue());
-        Node preprocessed = fixture.blue.preprocess(node);
+    private static Node loadYaml(Fixture fixture, String resourcePath) {
+        Node parsed = fixture.blue.parseSourceYaml(ConversationTestResources.readResource(resourcePath));
+        parsed.blue(fixture.repository.typeAliasBlue());
+        if (EVENT_RESOURCE.equals(resourcePath)) {
+            stripNestedSnapshotDocuments(parsed);
+        }
+        Node preprocessed = fixture.blue.preprocess(parsed);
         normalizeInitializationMarkers(preprocessed);
         clearCheckpoint(preprocessed);
         if (DOCUMENT_RESOURCE.equals(resourcePath)) {
@@ -62,25 +79,15 @@ class CustomerPaynoteLatestBexFixtureTest {
         return preprocessed;
     }
 
-    private static String readResource(String resourcePath) throws IOException {
-        InputStream stream = CustomerPaynoteLatestBexFixtureTest.class.getResourceAsStream(resourcePath);
-        if (stream == null) {
-            throw new IOException("Missing test resource: " + resourcePath);
-        }
-        try (InputStream input = stream; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = input.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-            return new String(output.toByteArray(), StandardCharsets.UTF_8);
-        }
+    private static void assertPureBexFixture(String yaml, String resourcePath) {
+        assertFalse(yaml.contains("${steps."), resourcePath + " must not contain legacy steps expressions");
+        assertFalse(yaml.contains("${document("), resourcePath + " must not contain legacy document expressions");
+        assertFalse(yaml.contains("Conversation/JavaScript Code"), resourcePath + " must not contain JavaScript steps");
     }
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         return new Fixture(repository, blue);
     }
@@ -169,17 +176,23 @@ class CustomerPaynoteLatestBexFixtureTest {
     }
 
     private static void clearCheckpoint(Node node) {
-        if (node == null || node.getProperties() == null) {
+        if (node == null) {
             return;
         }
-        Node contracts = node.getProperties().get("contracts");
+        Node contracts = property(node, "contracts");
         if (contracts != null && contracts.getProperties() != null) {
             contracts.getProperties().remove("checkpoint");
         }
     }
 
     private static Node property(Node node, String key) {
-        return node != null && node.getProperties() != null ? node.getProperties().get(key) : null;
+        if (node == null) {
+            return null;
+        }
+        if ("contracts".equals(key)) {
+            return node.getContracts();
+        }
+        return node.getProperties() != null ? node.getProperties().get(key) : null;
     }
 
     private static void stripNestedSnapshotDocuments(Node event) {
@@ -203,7 +216,7 @@ class CustomerPaynoteLatestBexFixtureTest {
         // Keep the workflow under test from the attached document while avoiding
         // unrelated generated contracts whose historical schema metadata is not
         // needed for this event path.
-        Node contracts = document.getProperties().get("contracts");
+        Node contracts = property(document, "contracts");
         Map<String, Node> all = contracts.getProperties();
         Node channel = all.get("myOsAdminChannel");
         Node operation = all.get("myOsAdminUpdate");

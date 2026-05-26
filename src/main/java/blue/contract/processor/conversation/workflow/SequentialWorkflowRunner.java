@@ -9,6 +9,7 @@ import blue.contract.processor.conversation.expression.QuickJsExpressionResolver
 import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
 import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.language.processor.ProcessorExecutionContext;
+import blue.language.processor.WorkingDocument;
 import blue.language.snapshot.FrozenNode;
 import blue.repo.conversation.Compute;
 import blue.repo.conversation.JavaScriptCode;
@@ -44,22 +45,30 @@ public final class SequentialWorkflowRunner {
     }
 
     public void execute(SequentialWorkflow workflow, ProcessorExecutionContext context) {
-        if (workflow.getSteps() == null) {
-            return;
-        }
-        Map<String, Object> stepResults = new LinkedHashMap<String, Object>();
-        FrozenNode contractNode = rawContractNode(context);
-        List<FrozenNode> stepNodes = stepNodes(contractNode);
-        List<SequentialWorkflowStep> steps = workflow.getSteps();
-        for (int i = 0; i < steps.size(); i++) {
-            SequentialWorkflowStep step = steps.get(i);
-            FrozenNode stepNode = i < stepNodes.size() ? stepNodes.get(i) : null;
-            if (metrics != null) {
-                metrics.incrementWorkflowStepsExecuted();
+        long start = System.nanoTime();
+        try {
+            if (workflow.getSteps() == null) {
+                return;
             }
-            WorkflowStepResult result = executeStep(workflow, step, stepNode, contractNode, i, stepResults, context);
-            if (result != null && result.hasValue()) {
-                stepResults.put(stepKey(stepNode, i), result.value());
+            Map<String, Object> stepResults = new LinkedHashMap<String, Object>();
+            FrozenNode contractNode = rawContractNode(context);
+            List<FrozenNode> stepNodes = stepNodes(contractNode);
+            List<SequentialWorkflowStep> steps = workflow.getSteps();
+            WorkingDocument workingDocument = rootWorkingDocument(context);
+            for (int i = 0; i < steps.size(); i++) {
+                SequentialWorkflowStep step = steps.get(i);
+                FrozenNode stepNode = i < stepNodes.size() ? stepNodes.get(i) : null;
+                if (metrics != null) {
+                    metrics.incrementWorkflowStepsExecuted();
+                }
+                WorkflowStepResult result = executeStep(workflow, step, stepNode, contractNode, i, stepResults, context, workingDocument);
+                if (result != null && result.hasValue()) {
+                    stepResults.put(stepKey(stepNode, i), result.value());
+                }
+            }
+        } finally {
+            if (metrics != null) {
+                metrics.addWorkflowRunnerNanos(System.nanoTime() - start);
             }
         }
     }
@@ -70,7 +79,8 @@ public final class SequentialWorkflowRunner {
                                            FrozenNode contractNode,
                                            int stepIndex,
                                            Map<String, Object> stepResults,
-                                           ProcessorExecutionContext context) {
+                                           ProcessorExecutionContext context,
+                                           WorkingDocument workingDocument) {
         if (step == null) {
             context.throwFatal("Unsupported null sequential workflow step");
             return WorkflowStepResult.none();
@@ -83,7 +93,8 @@ public final class SequentialWorkflowRunner {
                         stepNode,
                         contractNode,
                         stepIndex,
-                        stepResults);
+                        stepResults,
+                        workingDocument);
                 return executeSupported(executor, step, stepContext);
             }
         }
@@ -176,14 +187,14 @@ public final class SequentialWorkflowRunner {
                                                                                             long bexExpressionGasLimit,
                                                                                             BexProcessingMetrics metrics) {
         QuickJsExpressionResolver resolver = new QuickJsExpressionResolver(runtime);
-        BexWorkflowContextFactory bexContextFactory = new BexWorkflowContextFactory();
+        BexWorkflowContextFactory bexContextFactory = new BexWorkflowContextFactory(metrics);
         BexExpressionDetector bexDetector = new BexExpressionDetector();
         BexFieldEvaluator bexFieldEvaluator = new BexFieldEvaluator(bexEngine, bexContextFactory, bexExpressionGasLimit);
         return Arrays.<WorkflowStepExecutor<? extends SequentialWorkflowStep>>asList(
                 new TriggerEventStepExecutor(resolver, bexDetector, bexFieldEvaluator, bexExpressionGasLimit, metrics),
                 new ComputeStepExecutor(bexEngine,
                         computeGasLimit,
-                        new ComputeDefinitionResolver(),
+                        new ComputeDefinitionResolver(metrics),
                         bexContextFactory,
                         new ComputeResultEmitter(),
                         metrics),
@@ -216,6 +227,18 @@ public final class SequentialWorkflowRunner {
         }
         FrozenNode frozen = context.canonicalFrozenAt(pointer);
         return frozen != null ? frozen : context.frozenContractNode();
+    }
+
+    private WorkingDocument rootWorkingDocument(ProcessorExecutionContext context) {
+        WorkingDocument workingDocument = context.newWorkingDocument();
+        if (metrics != null) {
+            if (workingDocument.usedMaterializedFallback()) {
+                metrics.incrementWorkflowDocumentViewsFromDocument();
+            } else {
+                metrics.incrementWorkflowDocumentViewsFromFrozen();
+            }
+        }
+        return workingDocument;
     }
 
     private String contractPointer(ProcessorExecutionContext context) {

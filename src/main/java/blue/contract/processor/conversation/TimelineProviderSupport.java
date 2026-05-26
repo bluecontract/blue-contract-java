@@ -37,13 +37,19 @@ public final class TimelineProviderSupport {
     }
 
     public static boolean isNewerOrSameTimelineEvent(ChannelCheckpointContext context) {
-        BigInteger currentTimestamp = ConversationEventNodes.timestamp(context.event());
+        Node currentEvent = context.event();
+        Node previousEvent = context.lastEvent();
+        BigInteger currentTimestamp = ConversationEventNodes.timestamp(currentEvent);
         if (currentTimestamp == null) {
             return true;
         }
-        BigInteger previousTimestamp = ConversationEventNodes.timestamp(context.lastEvent());
+        BigInteger previousTimestamp = ConversationEventNodes.timestamp(previousEvent);
         if (previousTimestamp == null) {
             return true;
+        }
+        if (currentTimestamp.compareTo(previousTimestamp) == 0
+                && ConversationEventNodes.matchesPattern(previousEvent, currentEvent)) {
+            return false;
         }
         return currentTimestamp.compareTo(previousTimestamp) >= 0;
     }

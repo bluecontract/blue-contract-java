@@ -2,7 +2,6 @@ package blue.contract.processor;
 
 import blue.bex.api.BexEngine;
 import blue.contract.processor.conversation.CompositeTimelineChannelProcessor;
-import blue.contract.processor.conversation.ConversationRepositoryCompatibilityNodeProvider;
 import blue.contract.processor.conversation.OperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowOperationProcessor;
 import blue.contract.processor.conversation.SequentialWorkflowProcessor;
@@ -11,7 +10,6 @@ import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.contract.processor.expression.ExpressionAwareMerging;
 import blue.language.Blue;
-import blue.language.NodeProvider;
 import blue.language.processor.DocumentProcessor;
 import blue.language.utils.TypeClassResolver;
 import blue.repo.BlueRepositoryModels;
@@ -29,7 +27,6 @@ public final class ConversationProcessors {
             throw new IllegalArgumentException("blue must not be null");
         }
         SequentialWorkflowRunner runner = workflowRunner(options);
-        installRepositoryCompatibility(blue);
         BlueRepositoryModels.registerAll(blue.getDocumentProcessor().getContractTypeResolver());
         blue.registerContractProcessor(new CompositeTimelineChannelProcessor());
         blue.registerContractProcessor(new OperationProcessor());
@@ -41,13 +38,6 @@ public final class ConversationProcessors {
                 : new SequentialWorkflowOperationProcessor());
         ExpressionAwareMerging.install(blue);
         return blue;
-    }
-
-    private static void installRepositoryCompatibility(Blue blue) {
-        NodeProvider current = blue.getNodeProvider();
-        if (!ConversationRepositoryCompatibilityNodeProvider.isInstalled(current)) {
-            blue.nodeProvider(new ConversationRepositoryCompatibilityNodeProvider(current));
-        }
     }
 
     public static DocumentProcessor.Builder configure(DocumentProcessor.Builder builder) {

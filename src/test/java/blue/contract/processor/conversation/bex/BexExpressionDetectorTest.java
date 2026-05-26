@@ -9,6 +9,23 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Scenario:
+ * The BEX detector decides whether a workflow field should be preserved and evaluated by the BEX field
+ * evaluator instead of the legacy string expression path.
+ *
+ * Main flow:
+ * 1. Detect full-field BEX operator objects such as {@code $binding}.
+ * 2. Detect nested BEX expressions inside literal objects.
+ * 3. Ignore legacy dollar-brace string expressions.
+ * 4. Treat {@code $literal} as a BEX operator while not requiring recursive execution checks inside
+ *    its payload.
+ *
+ * Actors and operations:
+ * - Update Document and Trigger Event use this detector to decide whether their expression-enabled
+ *   fields should run through BEX.
+ * - Non-expression fields remain outside this detector-driven evaluation path.
+ */
 class BexExpressionDetectorTest {
     private final BexExpressionDetector detector = new BexExpressionDetector();
 

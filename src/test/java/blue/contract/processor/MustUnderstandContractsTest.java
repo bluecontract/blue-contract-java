@@ -1,5 +1,6 @@
 package blue.contract.processor;
 
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.TestTimelineProvider;
 import blue.language.Blue;
 import blue.language.model.Node;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MustUnderstandContractsTest {
@@ -19,11 +21,12 @@ class MustUnderstandContractsTest {
     void unknownContractTypeStopsInitialization() {
         Fixture fixture = configuredFixture(false);
         Node document = document(fixture.repository, contract("unknown", new Node()
-                .type(new Node().blueId("unknown-contract-blue-id"))));
+                .type(new Node().blueId("3nxchG67TRi4XrYFM2MTjj4LmuHNQzVv9NZLjATrPN19"))));
 
-        DocumentProcessingResult result = initialize(fixture, document);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> initialize(fixture, document));
 
-        assertCapabilityFailure(result, "Unsupported contract type");
+        assertTrue(ex.getMessage().contains("No content found for blueId"));
     }
 
     @Test
@@ -166,7 +169,13 @@ class MustUnderstandContractsTest {
     }
 
     private static Node property(Node node, String key) {
-        if (node == null || node.getProperties() == null) {
+        if (node == null) {
+            return null;
+        }
+        if ("contracts".equals(key)) {
+            return node.getContracts();
+        }
+        if (node.getProperties() == null) {
             return null;
         }
         return node.getProperties().get(key);
@@ -174,8 +183,7 @@ class MustUnderstandContractsTest {
 
     private static Fixture configuredFixture(boolean simpleTimelineProvider) {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         if (simpleTimelineProvider) {
             TestTimelineProvider.registerWith(blue);

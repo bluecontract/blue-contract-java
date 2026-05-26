@@ -71,11 +71,11 @@ state:
 contracts:
   hotelParticipantChannel:
     type:
-      blueId: test-simple-timeline-channel
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
     timelineId: hotel-participant
   restaurantParticipantChannel:
     type:
-      blueId: test-simple-timeline-channel
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
     timelineId: restaurant-participant
   triggeredEventChannel:
     type: Core/Triggered Event Channel
@@ -475,12 +475,15 @@ contracts:
           - $if:
               cond:
                 $or:
-                  - $empty:
-                      $var: packageOrderSessionId
-                  - $empty:
-                      $var: agreementKind
-                  - $empty:
-                      $var: orderSessionId
+                  - $not:
+                      $truthy:
+                        $var: packageOrderSessionId
+                  - $not:
+                      $truthy:
+                        $var: agreementKind
+                  - $not:
+                      $truthy:
+                        $var: orderSessionId
               then:
                 - $return: false
           - $let:
@@ -615,12 +618,15 @@ contracts:
           - $if:
               cond:
                 $or:
-                  - $empty:
-                      $var: agreementKind
-                  - $empty:
-                      $var: responseRequestId
-                  - $empty:
-                      $var: orderSessionId
+                  - $not:
+                      $truthy:
+                        $var: agreementKind
+                  - $not:
+                      $truthy:
+                        $var: responseRequestId
+                  - $not:
+                      $truthy:
+                        $var: orderSessionId
               then:
                 - $return: false
           - $let:

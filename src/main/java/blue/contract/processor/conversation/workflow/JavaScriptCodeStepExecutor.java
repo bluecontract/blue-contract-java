@@ -8,12 +8,16 @@ import blue.contract.processor.conversation.javascript.JavaScriptValues;
 import blue.contract.processor.conversation.javascript.NodeQuickJsRuntime;
 import blue.contract.processor.conversation.javascript.QuickJsGas;
 import blue.contract.processor.conversation.javascript.QuickJsStepBindings;
+import blue.language.model.Node;
+import blue.repo.BlueRepository;
 import blue.repo.conversation.JavaScriptCode;
 import blue.repo.conversation.SequentialWorkflowStep;
 import java.util.List;
 import java.util.Map;
 
 public final class JavaScriptCodeStepExecutor implements WorkflowStepExecutor<JavaScriptCode> {
+    private static final Node REPOSITORY_TYPE_ALIAS_BLUE = BlueRepository.v1_3_0().typeAliasBlue();
+
     private final JavaScriptRuntime runtime;
     private final long hostGasLimit;
 
@@ -89,7 +93,14 @@ public final class JavaScriptCodeStepExecutor implements WorkflowStepExecutor<Ja
             return;
         }
         for (Object event : (List<Object>) events) {
-            context.processorContext().emitEvent(JavaScriptValues.toNode(event));
+            context.processorContext().emitEvent(emittedEvent(JavaScriptValues.toNode(event)));
         }
+    }
+
+    private static Node emittedEvent(Node event) {
+        if (event != null && event.getBlue() == null) {
+            event.blue(REPOSITORY_TYPE_ALIAS_BLUE.clone());
+        }
+        return event;
     }
 }

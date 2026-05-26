@@ -61,9 +61,7 @@ class RepositoryStyleCounterDocumentTest {
                 resolved.getAsText("/contracts/checkpoint/lastEvents/ownerChannel/message/operation"));
         assertEquals(BigInteger.valueOf(5),
                 resolved.get("/contracts/checkpoint/lastEvents/ownerChannel/message/request"));
-        Object signature = resolved.get("/contracts/checkpoint/lastSignatures/ownerChannel");
-        assertTrue(signature instanceof String);
-        assertFalse(((String) signature).isEmpty());
+        assertNotNull(resolved.get("/contracts/checkpoint/lastEvents/ownerChannel"));
     }
 
     private static Node richCounterDocument(Fixture fixture) {
@@ -208,7 +206,13 @@ class RepositoryStyleCounterDocumentTest {
     }
 
     private static Node property(Node node, String key) {
-        if (node == null || node.getProperties() == null) {
+        if (node == null) {
+            return null;
+        }
+        if ("contracts".equals(key)) {
+            return node.getContracts();
+        }
+        if (node.getProperties() == null) {
             return null;
         }
         return node.getProperties().get(key);
@@ -216,8 +220,7 @@ class RepositoryStyleCounterDocumentTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);

@@ -1,6 +1,7 @@
 package blue.contract.processor.myos;
 
 import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
@@ -156,7 +157,13 @@ class MyOSTimelineChannelProcessorTest {
     }
 
     private static Node property(Node node, String key) {
-        if (node == null || node.getProperties() == null) {
+        if (node == null) {
+            return null;
+        }
+        if ("contracts".equals(key)) {
+            return node.getContracts();
+        }
+        if (node.getProperties() == null) {
             return null;
         }
         return node.getProperties().get(key);
@@ -164,8 +171,7 @@ class MyOSTimelineChannelProcessorTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         return new Fixture(repository, blue);
     }

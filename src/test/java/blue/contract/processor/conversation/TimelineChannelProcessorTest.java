@@ -140,8 +140,7 @@ class TimelineChannelProcessorTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);
@@ -171,7 +170,7 @@ class TimelineChannelProcessorTest {
                 .blue(fixture.repository.typeAliasBlue())
                 .type("Conversation/Chat Message")
                 .properties("message", new Node().value(message));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node misleadingChatMessageEvent(Fixture fixture) {
@@ -182,7 +181,7 @@ class TimelineChannelProcessorTest {
                         .properties("timelineId", new Node().value("owner")))
                 .properties("timestamp", new Node().value(10))
                 .properties("message", new Node().value("misleading"));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node checkpointEvent(Node document) {
@@ -208,7 +207,13 @@ class TimelineChannelProcessorTest {
     }
 
     private static Node property(Node node, String key) {
-        if (node == null || node.getProperties() == null) {
+        if (node == null) {
+            return null;
+        }
+        if ("contracts".equals(key)) {
+            return node.getContracts();
+        }
+        if (node.getProperties() == null) {
             return null;
         }
         return node.getProperties().get(key);

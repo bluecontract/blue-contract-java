@@ -67,45 +67,60 @@ public final class TriggerEventStepExecutor implements WorkflowStepExecutor<Trig
 
     @Override
     public WorkflowStepResult execute(TriggerEvent step, StepExecutionContext context) {
-        if (step == null) {
-            context.processorContext().throwFatal("Trigger Event step payload is invalid");
-            return WorkflowStepResult.none();
-        }
-        if (metrics != null) {
-            metrics.incrementTriggerEventStepsExecuted();
-        }
-        FrozenNode rawEvent = FrozenNodeUtil.property(context.stepFrozenNode(), "event");
-        if (!hasDeclaredEvent(context.stepFrozenNode())) {
-            context.processorContext().throwFatal("Trigger Event step must declare event payload");
-            return WorkflowStepResult.none();
-        }
-        Node directEvent = directBindingEvent(rawEvent, context);
-        if (directEvent != null) {
-            if (metrics != null) {
-                metrics.incrementDirectBexEventHits();
-                metrics.incrementEventsEmitted();
+        long stepStart = System.nanoTime();
+        try {
+            if (step == null) {
+                context.processorContext().throwFatal("Trigger Event step payload is invalid");
+                return WorkflowStepResult.none();
             }
-            context.processorContext().emitEvent(directEvent);
+            if (metrics != null) {
+                metrics.incrementTriggerEventStepsExecuted();
+            }
+            FrozenNode rawEvent = FrozenNodeUtil.property(context.stepFrozenNode(), "event");
+            if (!hasDeclaredEvent(context.stepFrozenNode())) {
+                context.processorContext().throwFatal("Trigger Event step must declare event payload");
+                return WorkflowStepResult.none();
+            }
+            Node directEvent = directBindingEvent(rawEvent, context);
+            if (directEvent != null) {
+                if (metrics != null) {
+                    metrics.incrementDirectBexEventHits();
+                    metrics.incrementEventsEmitted();
+                }
+                long emitStart = System.nanoTime();
+                context.processorContext().emitEvent(directEvent);
+                if (metrics != null) {
+                    metrics.addTriggerEmitEventNanos(System.nanoTime() - emitStart);
+                }
+                return WorkflowStepResult.none();
+            }
+            if (bexDetector != null && bexFieldEvaluator != null && bexDetector.containsBex(rawEvent)) {
+                emitBexEvent(rawEvent, context);
+                return WorkflowStepResult.none();
+            }
+            Node event = step.getEvent();
+            if (isEmpty(event)) {
+                context.processorContext().throwFatal("Trigger Event step must declare event payload");
+                return WorkflowStepResult.none();
+            }
+            Node resolvedEvent = resolver.resolve(event,
+                    context,
+                    includeAllPointers(),
+                    stopAtEmbeddedDocuments());
+            if (resolvedEvent == null) {
+                return WorkflowStepResult.none();
+            }
+            long emitStart = System.nanoTime();
+            context.processorContext().emitEvent(resolvedEvent.clone());
+            if (metrics != null) {
+                metrics.addTriggerEmitEventNanos(System.nanoTime() - emitStart);
+            }
             return WorkflowStepResult.none();
+        } finally {
+            if (metrics != null) {
+                metrics.addTriggerStepNanos(System.nanoTime() - stepStart);
+            }
         }
-        if (bexDetector != null && bexFieldEvaluator != null && bexDetector.containsBex(rawEvent)) {
-            emitBexEvent(rawEvent, context);
-            return WorkflowStepResult.none();
-        }
-        Node event = step.getEvent();
-        if (isEmpty(event)) {
-            context.processorContext().throwFatal("Trigger Event step must declare event payload");
-            return WorkflowStepResult.none();
-        }
-        Node resolvedEvent = resolver.resolve(event,
-                context,
-                includeAllPointers(),
-                stopAtEmbeddedDocuments());
-        if (resolvedEvent == null) {
-            return WorkflowStepResult.none();
-        }
-        context.processorContext().emitEvent(resolvedEvent.clone());
-        return WorkflowStepResult.none();
     }
 
     private void emitBexEvent(FrozenNode rawEvent, StepExecutionContext context) {
@@ -125,7 +140,16 @@ public final class TriggerEventStepExecutor implements WorkflowStepExecutor<Trig
             if (metrics != null) {
                 metrics.incrementEventsEmitted();
             }
-            context.processorContext().emitEvent(BexNodeWriter.toNode(value));
+            long writerStart = System.nanoTime();
+            Node eventNode = BexNodeWriter.toNode(value);
+            if (metrics != null) {
+                metrics.addBexNodeWriterNanos(System.nanoTime() - writerStart);
+            }
+            long emitStart = System.nanoTime();
+            context.processorContext().emitEvent(eventNode);
+            if (metrics != null) {
+                metrics.addTriggerEmitEventNanos(System.nanoTime() - emitStart);
+            }
         } catch (BexException ex) {
             context.processorContext().throwFatal("Trigger Event expression failed: " + ex.getMessage());
         } catch (RuntimeException ex) {
@@ -134,6 +158,8 @@ public final class TriggerEventStepExecutor implements WorkflowStepExecutor<Trig
     }
 
     private Node directBindingEvent(FrozenNode rawEvent, StepExecutionContext context) {
+        long start = System.nanoTime();
+        try {
         BexBindingReference reference = BexBindingReference.parse(rawEvent);
         if (reference == null) {
             return null;
@@ -164,9 +190,19 @@ public final class TriggerEventStepExecutor implements WorkflowStepExecutor<Trig
                 context.processorContext().throwFatal("Trigger Event expression must evaluate to an object");
                 return null;
             }
-            return BexNodeWriter.toNode(value);
+            long writerStart = System.nanoTime();
+            Node node = BexNodeWriter.toNode(value);
+            if (metrics != null) {
+                metrics.addBexNodeWriterNanos(System.nanoTime() - writerStart);
+            }
+            return node;
         }
         return null;
+        } finally {
+            if (metrics != null) {
+                metrics.addTriggerDirectEventNanos(System.nanoTime() - start);
+            }
+        }
     }
 
     private static Predicate<String> includeAllPointers() {
@@ -189,8 +225,8 @@ public final class TriggerEventStepExecutor implements WorkflowStepExecutor<Trig
 
     private static boolean hasContracts(Node node) {
         return node != null
-                && node.getProperties() != null
-                && node.getProperties().containsKey("contracts");
+                && (node.getContracts() != null
+                || (node.getProperties() != null && node.getProperties().containsKey("contracts")));
     }
 
     private static Node nodeAt(Node root, String pointer) {

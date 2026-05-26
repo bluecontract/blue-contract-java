@@ -2,6 +2,7 @@ package blue.contract.processor.conversation.compute;
 
 import blue.contract.processor.BlueDocumentProcessors;
 import blue.contract.processor.BlueDocumentProcessorOptions;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.bex.BexProcessingMetrics;
 import blue.contract.processor.conversation.TestTimelineProvider;
 import blue.language.Blue;
@@ -9,12 +10,11 @@ import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
 import blue.repo.BlueRepository;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,6 +22,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Scenario:
+ * A reduced Paynote resale package document exercises shared Compute Definitions, BEX field fast paths,
+ * batch patching, bundle caching, and cold/warm processing metrics.
+ *
+ * Main flow:
+ * 1. A hotel participant places a resale order through the hotel participant timeline.
+ * 2. The participant workflow forwards a subscription update event.
+ * 3. The package workflow catches that update, calls the hotel entry function from the shared
+ *    {@code packageFulfillmentComputeDefinition}, and applies the computed changeset.
+ * 4. A restaurant participant repeats the same pattern through a different operation and different
+ *    definition entry function.
+ * 5. Tests print cold, warm, same-path, and event-only timing so setup, compilation, bundle loading,
+ *    handler matching, BEX execution, and patch application costs are visible.
+ *
+ * Actors and operations:
+ * - {@code hotel-participant} calls {@code hotelResaleOrderPlaced}.
+ * - {@code restaurant-participant} calls {@code restaurantResaleOrderPlaced}.
+ * - Both operations share one Compute Definition but enter different functions.
+ * - Update Document consumes computed changesets through BEX {@code $binding} direct paths.
+ */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PaynoteReducedDefinitionWorkflowTest {
     private static final String DOCUMENT_RESOURCE = "/processor-delay/paynote-resale-reduced-bex.yaml";
     private static Fixture fixture;
@@ -36,7 +58,8 @@ class PaynoteReducedDefinitionWorkflowTest {
     private static double buildRestaurantEventMs;
 
     @BeforeAll
-    static void prepareFixture() throws IOException {
+    static void prepareFixture() {
+        assertPureBexFixture(ConversationTestResources.readResource(DOCUMENT_RESOURCE), DOCUMENT_RESOURCE);
         long start = System.nanoTime();
         metrics = new BexProcessingMetrics();
         fixture = configuredFixture(metrics);
@@ -74,8 +97,57 @@ class PaynoteReducedDefinitionWorkflowTest {
     }
 
     @Test
-    void twoParticipantsCallDifferentOperationsBackedBySharedComputeDefinition() throws IOException {
+    @Order(1)
+    void eventProcessingOnlyTimingColdAndWarm() {
+        BexProcessingMetrics.Snapshot beforeCold = metrics.snapshot();
+        long start = System.nanoTime();
+        DocumentProcessingResult coldHotel = fixture.blue.processDocument(initializedDocument, hotelEvent);
+        double coldHotelMs = elapsedMs(start);
+
+        start = System.nanoTime();
+        DocumentProcessingResult coldRestaurant = fixture.blue.processDocument(coldHotel.document(), restaurantEvent);
+        double coldRestaurantMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterCold = metrics.snapshot();
+
+        assertFalse(coldHotel.capabilityFailure(), coldHotel.failureReason());
+        assertFalse(coldRestaurant.capabilityFailure(), coldRestaurant.failureReason());
+        assertEquals(Boolean.TRUE, coldRestaurant.document().get("/orders/package-order-a/hotelOrder/resalePlaced"));
+        assertEquals(Boolean.TRUE, coldRestaurant.document().get("/orders/package-order-a/restaurantOrder/resalePlaced"));
+
+        start = System.nanoTime();
+        DocumentProcessingResult warmHotel = fixture.blue.processDocument(initializedDocument, hotelEvent);
+        double warmHotelMs = elapsedMs(start);
+
+        start = System.nanoTime();
+        DocumentProcessingResult warmRestaurant = fixture.blue.processDocument(warmHotel.document(), restaurantEvent);
+        double warmRestaurantMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterWarm = metrics.snapshot();
+
+        assertFalse(warmHotel.capabilityFailure(), warmHotel.failureReason());
+        assertFalse(warmRestaurant.capabilityFailure(), warmRestaurant.failureReason());
+        assertEquals(Boolean.TRUE, warmRestaurant.document().get("/orders/package-order-a/hotelOrder/resalePlaced"));
+        assertEquals(Boolean.TRUE, warmRestaurant.document().get("/orders/package-order-a/restaurantOrder/resalePlaced"));
+
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX cold/warm timing - coldHotelMs: %.3fms, coldRestaurantMs: %.3fms, " +
+                        "warmHotelMs: %.3fms, warmRestaurantMs: %.3fms%n",
+                coldHotelMs,
+                coldRestaurantMs,
+                warmHotelMs,
+                warmRestaurantMs);
+        printMetricsDelta("cold event-only metrics delta", beforeCold, afterCold);
+        printMetricsDelta("warm event-only metrics delta", afterCold, afterWarm);
+        assertEquals(2L, afterCold.updateBatchPatchApplications - beforeCold.updateBatchPatchApplications);
+        assertEquals(0L, afterCold.updateIndividualPatchApplications - beforeCold.updateIndividualPatchApplications);
+        assertEquals(2L, afterWarm.updateBatchPatchApplications - afterCold.updateBatchPatchApplications);
+        assertEquals(0L, afterWarm.updateIndividualPatchApplications - afterCold.updateIndividualPatchApplications);
+    }
+
+    @Test
+    @Order(2)
+    void twoParticipantsCallDifferentOperationsBackedBySharedComputeDefinition() {
         long totalStart = System.nanoTime();
+        BexProcessingMetrics.Snapshot before = metrics.snapshot();
         printSetupTimings();
 
         long start = System.nanoTime();
@@ -124,10 +196,53 @@ class PaynoteReducedDefinitionWorkflowTest {
         assertContainsType(restaurantResult.triggeredEvents(), "MyOS/Document Initial Snapshot Requested");
         assertContainsType(restaurantResult.triggeredEvents(), "MyOS/Subscribe to Session Requested");
         printTiming("total reduced paynote flow", totalStart);
-        printMetrics("reduced paynote flow metrics", metrics.snapshot());
+        printMetricsDelta("reduced paynote flow metrics", before, metrics.snapshot());
     }
 
     @Test
+    @Order(3)
+    void sameEventPathColdAndWarmTiming() {
+        BexProcessingMetrics.Snapshot beforeHotelCold = metrics.snapshot();
+        long start = System.nanoTime();
+        DocumentProcessingResult coldHotel = fixture.blue.processDocument(initializedDocument, hotelEvent);
+        double coldHotelMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterHotelCold = metrics.snapshot();
+        assertFalse(coldHotel.capabilityFailure(), coldHotel.failureReason());
+
+        start = System.nanoTime();
+        DocumentProcessingResult warmHotel = fixture.blue.processDocument(initializedDocument, hotelEvent);
+        double warmHotelMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterHotelWarm = metrics.snapshot();
+        assertFalse(warmHotel.capabilityFailure(), warmHotel.failureReason());
+
+        BexProcessingMetrics.Snapshot beforeRestaurantCold = metrics.snapshot();
+        start = System.nanoTime();
+        DocumentProcessingResult coldRestaurant = fixture.blue.processDocument(initializedDocument, restaurantEvent);
+        double coldRestaurantMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterRestaurantCold = metrics.snapshot();
+        assertFalse(coldRestaurant.capabilityFailure(), coldRestaurant.failureReason());
+
+        start = System.nanoTime();
+        DocumentProcessingResult warmRestaurant = fixture.blue.processDocument(initializedDocument, restaurantEvent);
+        double warmRestaurantMs = elapsedMs(start);
+        BexProcessingMetrics.Snapshot afterRestaurantWarm = metrics.snapshot();
+        assertFalse(warmRestaurant.capabilityFailure(), warmRestaurant.failureReason());
+
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX same-path cold/warm timing - coldHotelMs: %.3fms, warmHotelMs: %.3fms, " +
+                        "coldRestaurantMs: %.3fms, warmRestaurantMs: %.3fms%n",
+                coldHotelMs,
+                warmHotelMs,
+                coldRestaurantMs,
+                warmRestaurantMs);
+        printMetricsDelta("same-path hotel cold delta", beforeHotelCold, afterHotelCold);
+        printMetricsDelta("same-path hotel warm delta", afterHotelCold, afterHotelWarm);
+        printMetricsDelta("same-path restaurant cold delta", beforeRestaurantCold, afterRestaurantCold);
+        printMetricsDelta("same-path restaurant warm delta", afterRestaurantCold, afterRestaurantWarm);
+    }
+
+    @Test
+    @Order(4)
     void eventProcessingOnlyTimingAfterWarmup() {
         DocumentProcessingResult warmHotel = fixture.blue.processDocument(initializedDocument, hotelEvent);
         assertFalse(warmHotel.capabilityFailure(), warmHotel.failureReason());
@@ -154,6 +269,8 @@ class PaynoteReducedDefinitionWorkflowTest {
                 processHotelMs,
                 processRestaurantMs);
         printMetricsDelta("event-only metrics delta", before, after);
+        assertEquals(2L, after.updateBatchPatchApplications - before.updateBatchPatchApplications);
+        assertEquals(0L, after.updateIndividualPatchApplications - before.updateIndividualPatchApplications);
     }
 
     private static Node participantOperation(Fixture fixture,
@@ -161,11 +278,12 @@ class PaynoteReducedDefinitionWorkflowTest {
                                              int timestamp,
                                              String operation,
                                              Node request) {
-        Node message = new Node()
-                .type("Conversation/Operation Request")
-                .properties("operation", new Node().value(operation))
-                .properties("request", request);
-        return TestTimelineProvider.timelineEntry(fixture.blue, fixture.repository, timelineId, timestamp, message);
+        return ConversationTestResources.operationRequestEvent(fixture.blue,
+                fixture.repository,
+                timelineId,
+                timestamp,
+                operation,
+                request);
     }
 
     private static Node subscriptionUpdate(String subscriptionId,
@@ -183,25 +301,14 @@ class PaynoteReducedDefinitionWorkflowTest {
                         .properties("orderSessionId", new Node().value(orderSessionId)));
     }
 
-    private static Node loadYaml(Fixture fixture, String resourcePath) throws IOException {
-        Node node = fixture.blue.yamlToNode(readResource(resourcePath));
-        node.blue(fixture.repository.typeAliasBlue());
-        return fixture.blue.preprocess(node);
+    private static Node loadYaml(Fixture fixture, String resourcePath) {
+        return ConversationTestResources.yamlResource(fixture.blue, fixture.repository, resourcePath);
     }
 
-    private static String readResource(String resourcePath) throws IOException {
-        InputStream stream = PaynoteReducedDefinitionWorkflowTest.class.getResourceAsStream(resourcePath);
-        if (stream == null) {
-            throw new IOException("Missing test resource: " + resourcePath);
-        }
-        try (InputStream input = stream; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = input.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-            return new String(output.toByteArray(), StandardCharsets.UTF_8);
-        }
+    private static void assertPureBexFixture(String yaml, String resourcePath) {
+        assertFalse(yaml.contains("${steps."), resourcePath + " must not contain legacy steps expressions");
+        assertFalse(yaml.contains("${document("), resourcePath + " must not contain legacy document expressions");
+        assertFalse(yaml.contains("Conversation/JavaScript Code"), resourcePath + " must not contain JavaScript steps");
     }
 
     private static void assertContainsType(List<Node> events, String expectedType) {
@@ -255,9 +362,12 @@ class PaynoteReducedDefinitionWorkflowTest {
                 snapshot.directBexEventHits,
                 snapshot.genericBexEventEvaluations,
                 snapshot.patchesApplied,
+                snapshot.updateBatchPatchApplications,
+                snapshot.updateIndividualPatchApplications,
                 snapshot.eventsEmitted,
                 snapshot.computeProgramNormalizations,
                 snapshot.computeDefinitionNormalizations);
+        printTimingMetrics(label, snapshot);
     }
 
     private static void printMetrics(String label,
@@ -271,13 +381,16 @@ class PaynoteReducedDefinitionWorkflowTest {
                                      long directBexEventHits,
                                      long genericBexEventEvaluations,
                                      long patchesApplied,
+                                     long updateBatchPatchApplications,
+                                     long updateIndividualPatchApplications,
                                      long eventsEmitted,
                                      long computeProgramNormalizations,
                                      long computeDefinitionNormalizations) {
         System.out.printf(Locale.ROOT,
                 "Paynote reduced BEX %s - workflowSteps=%d, computeSteps=%d, updateSteps=%d, triggerSteps=%d, " +
                         "bexFieldEvals=%d, directChangesetHits=%d, genericChangesetEvals=%d, " +
-                        "directEventHits=%d, genericEventEvals=%d, patchesApplied=%d, eventsEmitted=%d, " +
+                        "directEventHits=%d, genericEventEvals=%d, patchesApplied=%d, " +
+                        "batchPatchApplications=%d, individualPatchApplications=%d, eventsEmitted=%d, " +
                         "programNormalizations=%d, definitionNormalizations=%d%n",
                 label,
                 workflowStepsExecuted,
@@ -290,6 +403,8 @@ class PaynoteReducedDefinitionWorkflowTest {
                 directBexEventHits,
                 genericBexEventEvaluations,
                 patchesApplied,
+                updateBatchPatchApplications,
+                updateIndividualPatchApplications,
                 eventsEmitted,
                 computeProgramNormalizations,
                 computeDefinitionNormalizations);
@@ -309,15 +424,285 @@ class PaynoteReducedDefinitionWorkflowTest {
                 after.directBexEventHits - before.directBexEventHits,
                 after.genericBexEventEvaluations - before.genericBexEventEvaluations,
                 after.patchesApplied - before.patchesApplied,
+                after.updateBatchPatchApplications - before.updateBatchPatchApplications,
+                after.updateIndividualPatchApplications - before.updateIndividualPatchApplications,
                 after.eventsEmitted - before.eventsEmitted,
                 after.computeProgramNormalizations - before.computeProgramNormalizations,
                 after.computeDefinitionNormalizations - before.computeDefinitionNormalizations);
+        printTimingMetricsDelta(label, before, after);
+    }
+
+    private static void printTimingMetrics(String label, BexProcessingMetrics.Snapshot snapshot) {
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX %s timing metrics - workflowRunnerMs=%.3f, computeStepMs=%.3f, " +
+                        "definitionResolveMs=%.3f, contextBuildMs=%.3f, programSourceBuildMs=%.3f, " +
+                        "compileExecuteMs=%.3f, bexCompileMs=%.3f, bexExecuteMs=%.3f, " +
+                        "updateStepMs=%.3f, directChangesetMs=%.3f, patchConversionMs=%.3f, " +
+                        "patchApplyMs=%.3f, triggerStepMs=%.3f, directEventMs=%.3f, " +
+                        "emitEventMs=%.3f, bexNodeWriterMs=%.3f, compileCacheHits=%d, " +
+                        "compileCacheMisses=%d, compiledExecutions=%d, definitionResolveHits=%d, " +
+                        "definitionResolveMisses=%d, directPatchEntryConversions=%d%n",
+                label,
+                nanosToMs(snapshot.workflowRunnerNanos),
+                nanosToMs(snapshot.computeStepNanos),
+                nanosToMs(snapshot.computeDefinitionResolveNanos),
+                nanosToMs(snapshot.computeContextBuildNanos),
+                nanosToMs(snapshot.computeProgramSourceBuildNanos),
+                nanosToMs(snapshot.computeCompileExecuteNanos),
+                nanosToMs(snapshot.bexCompileNanos),
+                nanosToMs(snapshot.bexExecuteNanos),
+                nanosToMs(snapshot.updateStepNanos),
+                nanosToMs(snapshot.updateDirectChangesetNanos),
+                nanosToMs(snapshot.updatePatchConversionNanos),
+                nanosToMs(snapshot.updatePatchApplyNanos),
+                nanosToMs(snapshot.triggerStepNanos),
+                nanosToMs(snapshot.triggerDirectEventNanos),
+                nanosToMs(snapshot.triggerEmitEventNanos),
+                nanosToMs(snapshot.bexNodeWriterNanos),
+                snapshot.bexCompileCacheHits,
+                snapshot.bexCompileCacheMisses,
+                snapshot.bexCompiledExecutions,
+                snapshot.computeDefinitionResolveHits,
+                snapshot.computeDefinitionResolveMisses,
+                snapshot.directBexPatchEntryConversions);
+        printOuterProcessingMetrics(label,
+                snapshot.blueProcessDocumentNanos,
+                snapshot.processDocumentNanos,
+                snapshot.eventPreprocessNanos,
+                snapshot.resultSnapshotAttachNanos,
+                snapshot.blueIdCalculationNanos,
+                snapshot.bundleLoadNanos,
+                snapshot.bundleLoadCacheKeyBuildNanos,
+                snapshot.bundleLoadActualBuildNanos,
+                snapshot.bundleLoadReuseNanos,
+                snapshot.bundleLoadCacheHits,
+                snapshot.bundleLoadCacheMisses,
+                snapshot.bundlesBuilt,
+                snapshot.bundlesReused,
+                snapshot.channelDiscoveryNanos,
+                snapshot.channelMatchNanos,
+                snapshot.channelEvaluations,
+                snapshot.handlerDiscoveryNanos,
+                snapshot.handlerMatchNanos,
+                snapshot.handlerMatchAttempts,
+                snapshot.handlerExecutionNanos,
+                snapshot.handlersExecuted,
+                snapshot.triggeredEventRoutingNanos,
+                snapshot.triggeredEventsRouted,
+                snapshot.checkpointUpdateNanos,
+                snapshot.snapshotCommitNanos,
+                snapshot.postProcessingNanos);
+        printPatchBatchMetrics(label,
+                snapshot.patchBoundaryNanos,
+                snapshot.patchGasNanos,
+                snapshot.documentUpdateRoutingNanos,
+                snapshot.documentUpdateEventsBuilt,
+                snapshot.documentUpdateEventsSkippedNoChannel,
+                snapshot.batchPatchPlanningNanos,
+                snapshot.batchPatchConformanceNanos,
+                snapshot.batchPatchBuildUpdatesNanos,
+                snapshot.batchPatchCommitNanos,
+                snapshot.documentUpdateBeforeMaterializations,
+                snapshot.documentUpdateAfterMaterializations);
+    }
+
+    private static void printTimingMetricsDelta(String label,
+                                                BexProcessingMetrics.Snapshot before,
+                                                BexProcessingMetrics.Snapshot after) {
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX %s timing metrics - workflowRunnerMs=%.3f, computeStepMs=%.3f, " +
+                        "definitionResolveMs=%.3f, contextBuildMs=%.3f, programSourceBuildMs=%.3f, " +
+                        "compileExecuteMs=%.3f, bexCompileMs=%.3f, bexExecuteMs=%.3f, " +
+                        "updateStepMs=%.3f, directChangesetMs=%.3f, patchConversionMs=%.3f, " +
+                        "patchApplyMs=%.3f, triggerStepMs=%.3f, directEventMs=%.3f, " +
+                        "emitEventMs=%.3f, bexNodeWriterMs=%.3f, compileCacheHits=%d, " +
+                        "compileCacheMisses=%d, compiledExecutions=%d, definitionResolveHits=%d, " +
+                        "definitionResolveMisses=%d, directPatchEntryConversions=%d%n",
+                label,
+                nanosToMs(after.workflowRunnerNanos - before.workflowRunnerNanos),
+                nanosToMs(after.computeStepNanos - before.computeStepNanos),
+                nanosToMs(after.computeDefinitionResolveNanos - before.computeDefinitionResolveNanos),
+                nanosToMs(after.computeContextBuildNanos - before.computeContextBuildNanos),
+                nanosToMs(after.computeProgramSourceBuildNanos - before.computeProgramSourceBuildNanos),
+                nanosToMs(after.computeCompileExecuteNanos - before.computeCompileExecuteNanos),
+                nanosToMs(after.bexCompileNanos - before.bexCompileNanos),
+                nanosToMs(after.bexExecuteNanos - before.bexExecuteNanos),
+                nanosToMs(after.updateStepNanos - before.updateStepNanos),
+                nanosToMs(after.updateDirectChangesetNanos - before.updateDirectChangesetNanos),
+                nanosToMs(after.updatePatchConversionNanos - before.updatePatchConversionNanos),
+                nanosToMs(after.updatePatchApplyNanos - before.updatePatchApplyNanos),
+                nanosToMs(after.triggerStepNanos - before.triggerStepNanos),
+                nanosToMs(after.triggerDirectEventNanos - before.triggerDirectEventNanos),
+                nanosToMs(after.triggerEmitEventNanos - before.triggerEmitEventNanos),
+                nanosToMs(after.bexNodeWriterNanos - before.bexNodeWriterNanos),
+                after.bexCompileCacheHits - before.bexCompileCacheHits,
+                after.bexCompileCacheMisses - before.bexCompileCacheMisses,
+                after.bexCompiledExecutions - before.bexCompiledExecutions,
+                after.computeDefinitionResolveHits - before.computeDefinitionResolveHits,
+                after.computeDefinitionResolveMisses - before.computeDefinitionResolveMisses,
+                after.directBexPatchEntryConversions - before.directBexPatchEntryConversions);
+        printOuterProcessingMetrics(label,
+                after.blueProcessDocumentNanos - before.blueProcessDocumentNanos,
+                after.processDocumentNanos - before.processDocumentNanos,
+                after.eventPreprocessNanos - before.eventPreprocessNanos,
+                after.resultSnapshotAttachNanos - before.resultSnapshotAttachNanos,
+                after.blueIdCalculationNanos - before.blueIdCalculationNanos,
+                after.bundleLoadNanos - before.bundleLoadNanos,
+                after.bundleLoadCacheKeyBuildNanos - before.bundleLoadCacheKeyBuildNanos,
+                after.bundleLoadActualBuildNanos - before.bundleLoadActualBuildNanos,
+                after.bundleLoadReuseNanos - before.bundleLoadReuseNanos,
+                after.bundleLoadCacheHits - before.bundleLoadCacheHits,
+                after.bundleLoadCacheMisses - before.bundleLoadCacheMisses,
+                after.bundlesBuilt - before.bundlesBuilt,
+                after.bundlesReused - before.bundlesReused,
+                after.channelDiscoveryNanos - before.channelDiscoveryNanos,
+                after.channelMatchNanos - before.channelMatchNanos,
+                after.channelEvaluations - before.channelEvaluations,
+                after.handlerDiscoveryNanos - before.handlerDiscoveryNanos,
+                after.handlerMatchNanos - before.handlerMatchNanos,
+                after.handlerMatchAttempts - before.handlerMatchAttempts,
+                after.handlerExecutionNanos - before.handlerExecutionNanos,
+                after.handlersExecuted - before.handlersExecuted,
+                after.triggeredEventRoutingNanos - before.triggeredEventRoutingNanos,
+                after.triggeredEventsRouted - before.triggeredEventsRouted,
+                after.checkpointUpdateNanos - before.checkpointUpdateNanos,
+                after.snapshotCommitNanos - before.snapshotCommitNanos,
+                after.postProcessingNanos - before.postProcessingNanos);
+        printPatchBatchMetrics(label,
+                after.patchBoundaryNanos - before.patchBoundaryNanos,
+                after.patchGasNanos - before.patchGasNanos,
+                after.documentUpdateRoutingNanos - before.documentUpdateRoutingNanos,
+                after.documentUpdateEventsBuilt - before.documentUpdateEventsBuilt,
+                after.documentUpdateEventsSkippedNoChannel - before.documentUpdateEventsSkippedNoChannel,
+                after.batchPatchPlanningNanos - before.batchPatchPlanningNanos,
+                after.batchPatchConformanceNanos - before.batchPatchConformanceNanos,
+                after.batchPatchBuildUpdatesNanos - before.batchPatchBuildUpdatesNanos,
+                after.batchPatchCommitNanos - before.batchPatchCommitNanos,
+                after.documentUpdateBeforeMaterializations - before.documentUpdateBeforeMaterializations,
+                after.documentUpdateAfterMaterializations - before.documentUpdateAfterMaterializations);
+    }
+
+    private static void printOuterProcessingMetrics(String label,
+                                                    long blueProcessDocumentNanos,
+                                                    long processDocumentNanos,
+                                                    long eventPreprocessNanos,
+                                                    long resultSnapshotAttachNanos,
+                                                    long blueIdCalculationNanos,
+                                                    long bundleLoadNanos,
+                                                    long bundleLoadCacheKeyBuildNanos,
+                                                    long bundleLoadActualBuildNanos,
+                                                    long bundleLoadReuseNanos,
+                                                    long bundleLoadCacheHits,
+                                                    long bundleLoadCacheMisses,
+                                                    long bundlesBuilt,
+                                                    long bundlesReused,
+                                                    long channelDiscoveryNanos,
+                                                    long channelMatchNanos,
+                                                    long channelEvaluations,
+                                                    long handlerDiscoveryNanos,
+                                                    long handlerMatchNanos,
+                                                    long handlerMatchAttempts,
+                                                    long handlerExecutionNanos,
+                                                    long handlersExecuted,
+                                                    long triggeredEventRoutingNanos,
+                                                    long triggeredEventsRouted,
+                                                    long checkpointUpdateNanos,
+                                                    long snapshotCommitNanos,
+                                                    long postProcessingNanos) {
+        long attributed = eventPreprocessNanos
+                + bundleLoadNanos
+                + channelDiscoveryNanos
+                + channelMatchNanos
+                + handlerDiscoveryNanos
+                + handlerMatchNanos
+                + handlerExecutionNanos
+                + checkpointUpdateNanos
+                + postProcessingNanos;
+        long processorUnattributed = Math.max(0L, processDocumentNanos - attributed);
+        long blueUnattributed = Math.max(0L,
+                blueProcessDocumentNanos - processDocumentNanos - resultSnapshotAttachNanos);
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX %s outer processing metrics - blueProcessDocumentMs=%.3f, " +
+                        "processorProcessDocumentMs=%.3f, resultSnapshotAttachMs=%.3f, " +
+                        "blueIdCalculationMs=%.3f, eventPreprocessMs=%.3f, bundleLoadMs=%.3f, " +
+                        "bundleKeyBuildMs=%.3f, bundleActualBuildMs=%.3f, bundleReuseMs=%.3f, " +
+                        "bundleCacheHits=%d, bundleCacheMisses=%d, bundlesBuilt=%d, bundlesReused=%d, " +
+                        "channelDiscoveryMs=%.3f, " +
+                        "channelMatchMs=%.3f, channelEvaluations=%d, handlerDiscoveryMs=%.3f, " +
+                        "handlerMatchMs=%.3f, handlerMatchAttempts=%d, handlerExecutionMs=%.3f, " +
+                        "handlersExecuted=%d, triggeredEventRoutingMs=%.3f, triggeredEventsRouted=%d, " +
+                        "checkpointUpdateMs=%.3f, snapshotCommitMs=%.3f, postProcessingMs=%.3f, " +
+                        "processorUnattributedMs=%.3f, blueUnattributedMs=%.3f%n",
+                label,
+                nanosToMs(blueProcessDocumentNanos),
+                nanosToMs(processDocumentNanos),
+                nanosToMs(resultSnapshotAttachNanos),
+                nanosToMs(blueIdCalculationNanos),
+                nanosToMs(eventPreprocessNanos),
+                nanosToMs(bundleLoadNanos),
+                nanosToMs(bundleLoadCacheKeyBuildNanos),
+                nanosToMs(bundleLoadActualBuildNanos),
+                nanosToMs(bundleLoadReuseNanos),
+                bundleLoadCacheHits,
+                bundleLoadCacheMisses,
+                bundlesBuilt,
+                bundlesReused,
+                nanosToMs(channelDiscoveryNanos),
+                nanosToMs(channelMatchNanos),
+                channelEvaluations,
+                nanosToMs(handlerDiscoveryNanos),
+                nanosToMs(handlerMatchNanos),
+                handlerMatchAttempts,
+                nanosToMs(handlerExecutionNanos),
+                handlersExecuted,
+                nanosToMs(triggeredEventRoutingNanos),
+                triggeredEventsRouted,
+                nanosToMs(checkpointUpdateNanos),
+                nanosToMs(snapshotCommitNanos),
+                nanosToMs(postProcessingNanos),
+                nanosToMs(processorUnattributed),
+                nanosToMs(blueUnattributed));
+    }
+
+    private static void printPatchBatchMetrics(String label,
+                                               long patchBoundaryNanos,
+                                               long patchGasNanos,
+                                               long documentUpdateRoutingNanos,
+                                               long documentUpdateEventsBuilt,
+                                               long documentUpdateEventsSkippedNoChannel,
+                                               long batchPatchPlanningNanos,
+                                               long batchPatchConformanceNanos,
+                                               long batchPatchBuildUpdatesNanos,
+                                               long batchPatchCommitNanos,
+                                               long documentUpdateBeforeMaterializations,
+                                               long documentUpdateAfterMaterializations) {
+        System.out.printf(Locale.ROOT,
+                "Paynote reduced BEX %s batch patch metrics - patchBoundaryMs=%.3f, patchGasMs=%.3f, " +
+                        "documentUpdateRoutingMs=%.3f, documentUpdateEventsBuilt=%d, " +
+                        "documentUpdateEventsSkippedNoChannel=%d, batchPlanningMs=%.3f, " +
+                        "batchConformanceMs=%.3f, batchBuildUpdatesMs=%.3f, batchCommitMs=%.3f, " +
+                        "documentUpdateBeforeMaterializations=%d, documentUpdateAfterMaterializations=%d%n",
+                label,
+                nanosToMs(patchBoundaryNanos),
+                nanosToMs(patchGasNanos),
+                nanosToMs(documentUpdateRoutingNanos),
+                documentUpdateEventsBuilt,
+                documentUpdateEventsSkippedNoChannel,
+                nanosToMs(batchPatchPlanningNanos),
+                nanosToMs(batchPatchConformanceNanos),
+                nanosToMs(batchPatchBuildUpdatesNanos),
+                nanosToMs(batchPatchCommitNanos),
+                documentUpdateBeforeMaterializations,
+                documentUpdateAfterMaterializations);
+    }
+
+    private static double nanosToMs(long nanos) {
+        return nanos / 1_000_000.0d;
     }
 
     private static Fixture configuredFixture(BexProcessingMetrics metrics) {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue, BlueDocumentProcessorOptions.builder()
                 .processingMetrics(metrics)
                 .build());

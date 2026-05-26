@@ -4,6 +4,7 @@ import blue.contract.processor.BlueDocumentProcessors;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
+import blue.language.processor.ProcessorStatus;
 import blue.repo.BlueRepository;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompositeTimelineChannelProcessorTest {
@@ -76,16 +76,18 @@ class CompositeTimelineChannelProcessorTest {
         Node event = chatTimelineEntry(fixture, "owner", 1, "hello");
 
         DocumentProcessingResult first = fixture.blue.processDocument(initialized, event);
-        Object firstA = first.document().get("/contracts/checkpoint/lastSignatures/inbox::childA");
-        Object firstB = first.document().get("/contracts/checkpoint/lastSignatures/inbox::childB");
+        Node firstA = nodeAt(first.document(), "/contracts/checkpoint/lastEvents/inbox::childA");
+        Node firstB = nodeAt(first.document(), "/contracts/checkpoint/lastEvents/inbox::childB");
         DocumentProcessingResult second = fixture.blue.processDocument(first.document(), event);
 
         assertChatCount(first.triggeredEvents(), "composite saw childA", 1);
         assertChatCount(first.triggeredEvents(), "composite saw childB", 1);
         assertChatCount(second.triggeredEvents(), "composite saw childA", 0);
         assertChatCount(second.triggeredEvents(), "composite saw childB", 0);
-        assertEquals(firstA, second.document().get("/contracts/checkpoint/lastSignatures/inbox::childA"));
-        assertEquals(firstB, second.document().get("/contracts/checkpoint/lastSignatures/inbox::childB"));
+        assertEquals(firstA.get("/timestamp"),
+                nodeAt(second.document(), "/contracts/checkpoint/lastEvents/inbox::childA/timestamp").getValue());
+        assertEquals(firstB.get("/timestamp"),
+                nodeAt(second.document(), "/contracts/checkpoint/lastEvents/inbox::childB/timestamp").getValue());
     }
 
     @Test
@@ -117,11 +119,10 @@ class CompositeTimelineChannelProcessorTest {
                 timelineChannel("owner"),
                 timelineChannel("support")));
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> processChat(fixture, initialized, "owner", 1, "hello"));
+        DocumentProcessingResult result = processChat(fixture, initialized, "owner", 1, "hello");
 
-        assertTrue(ex.getMessage().contains("Composite Timeline Channel"));
-        assertTrue(ex.getMessage().contains("missing"));
+        assertRuntimeFatal(result, "Composite Timeline Channel");
+        assertRuntimeFatal(result, "missing");
     }
 
     @Test
@@ -134,10 +135,9 @@ class CompositeTimelineChannelProcessorTest {
         contracts.put("handler", compositeHandler());
         Node initialized = initializedDocument(fixture, document(fixture.repository, contracts));
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> processChat(fixture, initialized, "owner", 1, "hello"));
+        DocumentProcessingResult result = processChat(fixture, initialized, "owner", 1, "hello");
 
-        assertTrue(ex.getMessage().contains("No processor registered"));
+        assertRuntimeFatal(result, "No processor registered");
     }
 
     @Test
@@ -148,10 +148,9 @@ class CompositeTimelineChannelProcessorTest {
                 timelineChannel("owner"),
                 timelineChannel("support")));
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> processChat(fixture, initialized, "owner", 1, "hello"));
+        DocumentProcessingResult result = processChat(fixture, initialized, "owner", 1, "hello");
 
-        assertTrue(ex.getMessage().contains("cannot include itself"));
+        assertRuntimeFatal(result, "cannot include itself");
     }
 
     @Test
@@ -242,7 +241,7 @@ class CompositeTimelineChannelProcessorTest {
                         .properties("timelineId", new Node().value(timelineId)))
                 .properties("timestamp", new Node().value(timestamp))
                 .properties("message", chatMessageEvent(message));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static DocumentProcessingResult processChat(Fixture fixture,
@@ -258,12 +257,43 @@ class CompositeTimelineChannelProcessorTest {
     }
 
     private static Node nodeAt(Node node, String pointer) {
-        try {
-            Object value = node.get(pointer);
-            return value instanceof Node ? (Node) value : null;
-        } catch (IllegalArgumentException ex) {
+        if (node == null) {
             return null;
         }
+        if ("/".equals(pointer)) {
+            return node;
+        }
+        Node current = node;
+        String[] segments = pointer.substring(1).split("/");
+        for (String rawSegment : segments) {
+            String segment = rawSegment.replace("~1", "/").replace("~0", "~");
+            if ("contracts".equals(segment)) {
+                current = current.getContracts();
+            } else if (current.getProperties() != null && current.getProperties().containsKey(segment)) {
+                current = current.getProperties().get(segment);
+            } else if (current.getItems() != null && isArrayIndex(segment)) {
+                int index = Integer.parseInt(segment);
+                current = index < current.getItems().size() ? current.getItems().get(index) : null;
+            } else {
+                return null;
+            }
+            if (current == null) {
+                return null;
+            }
+        }
+        return current;
+    }
+
+    private static boolean isArrayIndex(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void assertChatCount(List<Node> events, String message, int expected) {
@@ -279,10 +309,15 @@ class CompositeTimelineChannelProcessorTest {
         assertEquals(expected, count);
     }
 
+    private static void assertRuntimeFatal(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null && result.failureReason().contains(expectedMessage),
+                result.failureReason());
+    }
+
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);

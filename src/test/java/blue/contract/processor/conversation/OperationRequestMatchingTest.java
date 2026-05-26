@@ -234,7 +234,7 @@ class OperationRequestMatchingTest {
                 sequentialWorkflowOperation("increment",
                         updateDocumentStep("replace", "/counter", new Node().value("${event.message.request + document('/counter')}"))));
         Node initialized = initializedDocument(fixture, original);
-        Node stale = new Node().blueId("stale-document-blue-id");
+        Node stale = new Node().blueId("2vz831ZwzhpUefTb5XkodBRANKpFMbj1F4CN33kf38Hw");
 
         Node processed = processOperationRequest(fixture, initialized, "owner", 1,
                 operationRequestEventNode("increment", new Node().value(7))
@@ -281,7 +281,7 @@ class OperationRequestMatchingTest {
                 sequentialWorkflowOperation("increment",
                         updateDocumentStep("replace", "/counter", new Node().value("${event.message.request + document('/counter')}"))));
         Node initialized = initializedDocument(fixture, original);
-        Node stale = new Node().blueId("stale-document-blue-id");
+        Node stale = new Node().blueId("2vz831ZwzhpUefTb5XkodBRANKpFMbj1F4CN33kf38Hw");
 
         Node processed = processOperationRequest(fixture, initialized, "owner", 1,
                 operationRequestEventNode("increment", new Node().value(7))
@@ -453,7 +453,7 @@ class OperationRequestMatchingTest {
             event.properties("source", new Node()
                     .properties("value", new Node().value(sourceValue)));
         }
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node chatTimelineEntry(Fixture fixture, String timelineId, int timestamp) {
@@ -466,7 +466,7 @@ class OperationRequestMatchingTest {
                 .properties("message", new Node()
                         .type("Conversation/Chat Message")
                         .properties("message", new Node().value("run")));
-        return fixture.blue.preprocess(event);
+        return fixture.blue.preprocess(event).blue(null);
     }
 
     private static Node largePayloadBranch() {
@@ -494,8 +494,7 @@ class OperationRequestMatchingTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         TestTimelineProvider.registerWith(blue);
         return new Fixture(repository, blue);

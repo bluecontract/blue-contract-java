@@ -212,6 +212,7 @@ public final class QuickJsExpressionResolver {
                 .previousBlueId(source.getPreviousBlueId())
                 .position(source.getPosition())
                 .blue(source.getBlue() != null ? source.getBlue().clone() : null)
+                .contracts(source.getContracts() != null ? source.getContracts().clone() : null)
                 .inlineValue(source.isInlineValue());
     }
 

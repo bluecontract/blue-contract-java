@@ -18,8 +18,8 @@ public final class ComputeStepExecutor implements WorkflowStepExecutor<Compute> 
     private final ComputeDefinitionResolver definitionResolver;
     private final BexWorkflowContextFactory contextFactory;
     private final ComputeResultEmitter resultEmitter;
+    private final ComputeProgramNormalizer normalizer;
     private final BexProcessingMetrics metrics;
-    private final ComputeProgramNormalizer programNormalizer = new ComputeProgramNormalizer();
 
     public ComputeStepExecutor() {
         this(BexEngine.builder().build(), 100_000L);
@@ -60,6 +60,7 @@ public final class ComputeStepExecutor implements WorkflowStepExecutor<Compute> 
         this.definitionResolver = definitionResolver;
         this.contextFactory = contextFactory;
         this.resultEmitter = resultEmitter;
+        this.normalizer = new ComputeProgramNormalizer();
         this.metrics = metrics;
     }
 
@@ -70,35 +71,44 @@ public final class ComputeStepExecutor implements WorkflowStepExecutor<Compute> 
 
     @Override
     public WorkflowStepResult execute(Compute step, StepExecutionContext context) {
+        long stepStart = System.nanoTime();
         try {
             if (metrics != null) {
                 metrics.incrementComputeStepsExecuted();
             }
-            FrozenNode programNode = context.stepFrozenNode();
-            if (programNode == null) {
-                Node fallback = context.stepNodeRef();
-                programNode = fallback != null ? FrozenNode.fromResolvedNode(fallback) : null;
-            }
-            if (programNode == null) {
+            Node rawStepNode = context.stepNodeRef();
+            if (rawStepNode == null) {
                 context.processorContext().throwFatal("Compute step must have a raw step node");
                 return WorkflowStepResult.none();
             }
+            FrozenNode programNode = FrozenNode.fromResolvedNode(normalizer.program(rawStepNode));
+            long resolveStart = System.nanoTime();
             FrozenNode definitionNode = definitionResolver.resolve(programNode, context);
-            if (requiresMaterializedProgram(programNode, definitionNode)) {
-                Node stepNode = context.stepNodeRef();
-                programNode = stepNode != null
-                        ? FrozenNode.fromResolvedNode(programNormalizer.program(stepNode))
-                        : programNode;
-                if (metrics != null) {
-                    metrics.incrementComputeProgramNormalizations();
-                }
+            if (definitionNode != null) {
+                definitionNode = FrozenNode.fromResolvedNode(normalizer.definition(definitionNode.toNode()));
+            }
+            if (metrics != null) {
+                metrics.addComputeDefinitionResolveNanos(System.nanoTime() - resolveStart);
             }
             String entry = FrozenNodeUtil.textProperty(programNode, "entry");
+            long sourceStart = System.nanoTime();
             BexProgramSource source = definitionNode != null
                     ? BexProgramSource.withDefinition(programNode, definitionNode, entry)
                     : BexProgramSource.inline(programNode);
+            if (metrics != null) {
+                metrics.addComputeProgramSourceBuildNanos(System.nanoTime() - sourceStart);
+            }
+            long contextStart = System.nanoTime();
             BexExecutionContext bexContext = contextFactory.create(context, computeGasLimit(programNode));
+            if (metrics != null) {
+                metrics.addComputeContextBuildNanos(System.nanoTime() - contextStart);
+            }
+            long executeStart = System.nanoTime();
             BexExecutionResult result = bexEngine.compileAndExecute(source, bexContext);
+            if (metrics != null) {
+                metrics.addComputeCompileExecuteNanos(System.nanoTime() - executeStart);
+                metrics.addBexMetrics(result.metrics());
+            }
             if (result.gasUsed() > 0L) {
                 context.processorContext().consumeGas(result.gasUsed());
             }
@@ -120,6 +130,10 @@ public final class ComputeStepExecutor implements WorkflowStepExecutor<Compute> 
         } catch (RuntimeException ex) {
             context.processorContext().throwFatal("Compute failed: " + ex.getMessage());
             return WorkflowStepResult.none();
+        } finally {
+            if (metrics != null) {
+                metrics.addComputeStepNanos(System.nanoTime() - stepStart);
+            }
         }
     }
 
@@ -134,16 +148,4 @@ public final class ComputeStepExecutor implements WorkflowStepExecutor<Compute> 
         return parsed.longValue();
     }
 
-    private boolean requiresMaterializedProgram(FrozenNode programNode, FrozenNode definitionNode) {
-        if (programNode == null) {
-            return true;
-        }
-        if (definitionNode == null) {
-            return true;
-        }
-        return FrozenNodeUtil.property(programNode, "do") != null
-                || FrozenNodeUtil.property(programNode, "expr") != null
-                || FrozenNodeUtil.property(programNode, "functions") != null
-                || FrozenNodeUtil.property(programNode, "constants") != null;
-    }
 }

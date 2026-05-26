@@ -12,6 +12,7 @@ final class ComputeProgramNormalizer {
         Map<String, Node> properties = new LinkedHashMap<String, Node>();
         putIfMeaningful(properties, "expr", NodeUtil.property(stepNode, "expr"));
         putIfMeaningful(properties, "do", normalizeDo(NodeUtil.property(stepNode, "do")));
+        putIfMeaningful(properties, "definition", NodeUtil.property(stepNode, "definition"));
         putIfMeaningful(properties, "entry", NodeUtil.property(stepNode, "entry"));
         putIfMeaningful(properties, "constants", authoredMap(NodeUtil.property(stepNode, "constants")));
         putIfMeaningful(properties, "functions", normalizeFunctions(NodeUtil.property(stepNode, "functions")));
@@ -80,7 +81,11 @@ final class ComputeProgramNormalizer {
         if (node == null || node.getProperties() == null || node.getProperties().isEmpty()) {
             return null;
         }
-        return node.clone();
+        Map<String, Node> properties = new LinkedHashMap<String, Node>();
+        for (Map.Entry<String, Node> entry : node.getProperties().entrySet()) {
+            properties.put(entry.getKey(), entry.getValue().clone());
+        }
+        return new Node().properties(properties);
     }
 
     private void putIfMeaningful(Map<String, Node> properties, String key, Node value) {

@@ -1,0 +1,190 @@
+name: Weekend Package Order
+package:
+  id: weekend-badura-cud-malina
+  title: 20-21 June weekend
+  description: Deluxe Room in Hotel Badura plus 250zl Dinner for Two at Restaurant Cud Malina
+  hotelName: Hotel Badura
+  roomType: Deluxe Room
+  restaurantName: Restaurant Cud Malina
+  dinnerDescription: 250zl Dinner for Two
+  startDate: 2026-06-20
+  endDate: 2026-06-21
+  price:
+    amount: 499
+    currency: PLN
+order:
+  status: Awaiting PayNote
+  customer: Customer
+  travelAgency: Travel Agency
+  paynoteDelivered: false
+contracts:
+  # Customer and Travel Agency are the package-order participants.
+  customerChannel:
+    type:
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
+    timelineId: customer
+  travelAgencyChannel:
+    type:
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
+    timelineId: travel-agency
+  packageParticipants:
+    type: Conversation/Composite Timeline Channel
+    channels:
+      - customerChannel
+      - travelAgencyChannel
+
+  # Deliver PayNote embeds the exact PayNote document supplied in the operation request.
+  # Fixed document shape belongs on the Operation request pattern. Stateful checks, such as
+  # "the order is still waiting for a PayNote", stay in the workflow.
+  # Illegal examples:
+  # - A request with amount 498 PLN does not match this operation.
+  # - A request for another package id does not match this operation.
+  # - A second PayNote reaches the workflow and fails because /paynote is already present.
+  deliverPaynote:
+    type: Conversation/Operation
+    channel: packageParticipants
+    request:
+      name: Package PayNote
+      packageId: weekend-badura-cud-malina
+      status: Pending authorization
+      amount: 499
+      currency: PLN
+      startDate: 2026-06-20
+      endDate: 2026-06-21
+      customer: Customer
+      travelAgency: Travel Agency
+      cardProcessor: Card Processor
+      restaurantOrderProvided: false
+      hotelOrderProvided: false
+      restaurantConfirmed: false
+      hotelConfirmed: false
+      captureRequested: false
+      captured: false
+      contracts:
+        travelAgencyChannel:
+          timelineId: travel-agency
+        cardProcessorChannel:
+          timelineId: card-processor
+        confirmAuthorization:
+          channel: cardProcessorChannel
+        confirmAuthorizationImpl:
+          operation: confirmAuthorization
+        provideRestaurantOrder:
+          channel: travelAgencyChannel
+        provideRestaurantOrderImpl:
+          operation: provideRestaurantOrder
+        provideHotelOrder:
+          channel: travelAgencyChannel
+        provideHotelOrderImpl:
+          operation: provideHotelOrder
+        restaurantOrderEvents:
+          childPath: /restaurantOrder
+        hotelOrderEvents:
+          childPath: /hotelOrder
+        restaurantOrderConfirmed:
+          channel: restaurantOrderEvents
+        hotelOrderConfirmed:
+          channel: hotelOrderEvents
+        confirmCapture:
+          channel: cardProcessorChannel
+        confirmCaptureImpl:
+          operation: confirmCapture
+  deliverPaynoteImpl:
+    type: Conversation/Sequential Workflow Operation
+    operation: deliverPaynote
+    steps:
+      - name: BuildDeliverPaynotePatch
+        type: Conversation/Compute
+        do:
+          - $if:
+              cond:
+                $ne:
+                  - $document: /order/status
+                  - Awaiting PayNote
+              then:
+                - $fail: Package order is not waiting for a PayNote
+          - $if:
+              cond:
+                $not:
+                  $empty:
+                    $document: /paynote
+              then:
+                - $fail: PayNote is already delivered
+          - $appendChange:
+              op: add
+              path: /paynote
+              val:
+                $binding:
+                  name: event
+                  path: /message/request
+          - $appendChange:
+              op: add
+              path: /contracts/embeddedPaynotes/paths/-
+              val: /paynote
+          - $appendChange:
+              op: replace
+              path: /order/paynoteDelivered
+              val: true
+          - $appendChange:
+              op: replace
+              path: /order/status
+              val: Waiting for PayNote capture
+          - $appendEvent:
+              type: Conversation/Event
+              kind: PayNote Authorization Requested
+              packageId:
+                $document: /package/id
+              amount: 499
+              currency: PLN
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+      - name: ApplyDeliverPaynotePatch
+        type: Conversation/Update Document
+        changeset:
+          $binding:
+            name: steps
+            path: /BuildDeliverPaynotePatch/changeset
+
+  # The embedded PayNote and its nested component orders are processed through this embedded scope.
+  embeddedPaynotes:
+    type: Core/Process Embedded
+    paths: []
+
+  # The package order becomes Ready to use only when the embedded PayNote writes captured=true.
+  paynoteCapturedUpdate:
+    type: Core/Document Update Channel
+    path: /paynote/captured
+  paynoteCaptured:
+    type: Conversation/Sequential Workflow
+    channel: paynoteCapturedUpdate
+    event:
+      type: Core/Document Update
+      path: /paynote/captured
+      after: true
+    steps:
+      - name: BuildReadyToUsePatch
+        type: Conversation/Compute
+        do:
+          - $appendChange:
+              op: replace
+              path: /order/status
+              val: Ready to use
+          - $appendEvent:
+              type: Conversation/Event
+              kind: Package Order Ready to Use
+              packageId:
+                $document: /package/id
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+      - name: ApplyReadyToUsePatch
+        type: Conversation/Update Document
+        changeset:
+          $binding:
+            name: steps
+            path: /BuildReadyToUsePatch/changeset

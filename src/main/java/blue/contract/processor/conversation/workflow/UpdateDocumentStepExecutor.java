@@ -1,10 +1,11 @@
 package blue.contract.processor.conversation.workflow;
 
 import blue.bex.BexException;
+import blue.bex.result.BexChangeset;
 import blue.bex.result.BexExecutionResult;
+import blue.bex.result.BexPatchEntry;
 import blue.bex.value.BexNodeWriter;
 import blue.bex.value.BexValue;
-import blue.bex.value.BexValues;
 import blue.contract.processor.conversation.bex.BexBindingReference;
 import blue.contract.processor.conversation.bex.BexExpressionDetector;
 import blue.contract.processor.conversation.bex.BexFieldEvaluator;
@@ -12,6 +13,7 @@ import blue.contract.processor.conversation.bex.BexProcessingMetrics;
 import blue.contract.processor.conversation.expression.ExpressionEvaluator;
 import blue.contract.processor.conversation.expression.QuickJsExpressionResolver;
 import blue.language.model.Node;
+import blue.language.processor.WorkingDocument;
 import blue.language.processor.model.JsonPatch;
 import blue.language.snapshot.FrozenNode;
 import blue.language.utils.JsonPointer;
@@ -81,32 +83,41 @@ public final class UpdateDocumentStepExecutor implements WorkflowStepExecutor<Up
 
     @Override
     public WorkflowStepResult execute(UpdateDocument step, StepExecutionContext context) {
-        if (metrics != null) {
-            metrics.incrementUpdateDocumentStepsExecuted();
-        }
-        List<JsonPatchEntry> changeset = changeset(step, context);
-        if (changeset.isEmpty()) {
+        long stepStart = System.nanoTime();
+        try {
+            if (metrics != null) {
+                metrics.incrementUpdateDocumentStepsExecuted();
+            }
+            FrozenNode rawFrozenChangeset = FrozenNodeUtil.property(context.stepFrozenNode(), "changeset");
+            List<JsonPatch> directPatches = directStepChangesetPatches(rawFrozenChangeset, context);
+            if (directPatches != null) {
+                applyPatches(directPatches, context);
+                return WorkflowStepResult.none();
+            }
+            List<JsonPatchEntry> changeset = changeset(step, context, rawFrozenChangeset);
+            if (changeset.isEmpty()) {
+                return WorkflowStepResult.none();
+            }
+            long conversionStart = System.nanoTime();
+            List<JsonPatch> patches = new ArrayList<JsonPatch>(changeset.size());
+            for (JsonPatchEntry entry : changeset) {
+                patches.add(toPatch(entry, context, resolver == null));
+            }
+            if (metrics != null) {
+                metrics.addUpdatePatchConversionNanos(System.nanoTime() - conversionStart);
+            }
+            applyPatches(patches, context);
             return WorkflowStepResult.none();
+        } finally {
+            if (metrics != null) {
+                metrics.addUpdateStepNanos(System.nanoTime() - stepStart);
+            }
         }
-        List<JsonPatch> patches = new ArrayList<JsonPatch>(changeset.size());
-        for (JsonPatchEntry entry : changeset) {
-            patches.add(toPatch(entry, context, resolver == null));
-        }
-        for (JsonPatch patch : patches) {
-            context.processorContext().applyPatch(patch);
-        }
-        if (metrics != null) {
-            metrics.addPatchesApplied(patches.size());
-        }
-        return WorkflowStepResult.none();
     }
 
-    private List<JsonPatchEntry> changeset(UpdateDocument step, StepExecutionContext context) {
-        FrozenNode rawFrozenChangeset = FrozenNodeUtil.property(context.stepFrozenNode(), "changeset");
-        List<JsonPatchEntry> direct = directStepChangeset(rawFrozenChangeset, context);
-        if (direct != null) {
-            return direct;
-        }
+    private List<JsonPatchEntry> changeset(UpdateDocument step,
+                                           StepExecutionContext context,
+                                           FrozenNode rawFrozenChangeset) {
         if (bexDetector != null && bexFieldEvaluator != null && bexDetector.containsBex(rawFrozenChangeset)) {
             return bexChangeset(rawFrozenChangeset, context);
         }
@@ -136,35 +147,52 @@ public final class UpdateDocumentStepExecutor implements WorkflowStepExecutor<Up
         }
     }
 
-    private List<JsonPatchEntry> directStepChangeset(FrozenNode rawChangeset, StepExecutionContext context) {
-        BexBindingReference reference = BexBindingReference.parse(rawChangeset);
-        if (reference == null || !"steps".equals(reference.name())) {
-            return null;
+    private List<JsonPatch> directStepChangesetPatches(FrozenNode rawChangeset, StepExecutionContext context) {
+        long start = System.nanoTime();
+        try {
+            BexBindingReference reference = BexBindingReference.parse(rawChangeset);
+            if (reference == null || !"steps".equals(reference.name())) {
+                return null;
+            }
+            StepPath stepPath = StepPath.parse(reference.path());
+            if (stepPath == null || !"changeset".equals(stepPath.field) || stepPath.remainingPath != null) {
+                return null;
+            }
+            Object result = context.stepResults().get(stepPath.stepName);
+            if (!(result instanceof BexExecutionResult)) {
+                return null;
+            }
+            BexChangeset changeset = ((BexExecutionResult) result).changeset();
+            if (changeset == null || changeset.entries().isEmpty()) {
+                return null;
+            }
+            if (metrics != null) {
+                metrics.incrementDirectBexChangesetHits();
+            }
+            return patchesFromBexChangeset(changeset, context);
+        } finally {
+            if (metrics != null) {
+                metrics.addUpdateDirectChangesetNanos(System.nanoTime() - start);
+            }
         }
-        StepPath stepPath = StepPath.parse(reference.path());
-        if (stepPath == null || !"changeset".equals(stepPath.field) || stepPath.remainingPath != null) {
-            return null;
+    }
+
+    private List<JsonPatch> patchesFromBexChangeset(BexChangeset changeset, StepExecutionContext context) {
+        long conversionStart = System.nanoTime();
+        try {
+            List<JsonPatch> patches = new ArrayList<JsonPatch>(changeset.entries().size());
+            for (BexPatchEntry entry : changeset.entries()) {
+                patches.add(toPatch(entry, context));
+                if (metrics != null) {
+                    metrics.incrementDirectBexPatchEntryConversions();
+                }
+            }
+            return patches;
+        } finally {
+            if (metrics != null) {
+                metrics.addUpdatePatchConversionNanos(System.nanoTime() - conversionStart);
+            }
         }
-        Object result = context.stepResults().get(stepPath.stepName);
-        if (!(result instanceof BexExecutionResult)) {
-            return null;
-        }
-        BexExecutionResult executionResult = (BexExecutionResult) result;
-        BexValue valueChangeset = executionResult.changeset() != null && !executionResult.changeset().entries().isEmpty()
-                ? executionResult.changeset().asValue()
-                : BexValues.undefined();
-        if (valueChangeset.isUndefined() || valueChangeset.isNull() || valueChangeset.size() == 0) {
-            valueChangeset = executionResult.value() != null
-                    ? executionResult.value().get("changeset")
-                    : BexValues.undefined();
-        }
-        if (valueChangeset.isUndefined() || valueChangeset.isNull()) {
-            valueChangeset = BexValues.list(Collections.<BexValue>emptyList());
-        }
-        if (metrics != null) {
-            metrics.incrementDirectBexChangesetHits();
-        }
-        return patchEntriesFromBexValue(valueChangeset, context);
     }
 
     private List<JsonPatchEntry> legacyChangeset(UpdateDocument step) {
@@ -235,7 +263,11 @@ public final class UpdateDocumentStepExecutor implements WorkflowStepExecutor<Up
                     context.processorContext().throwFatal("Patch entry " + i + " missing val");
                     return Collections.emptyList();
                 }
+                long writerStart = System.nanoTime();
                 entry.val(BexNodeWriter.toNode(val));
+                if (metrics != null) {
+                    metrics.addBexNodeWriterNanos(System.nanoTime() - writerStart);
+                }
             }
             entries.add(entry);
         }
@@ -282,6 +314,65 @@ public final class UpdateDocumentStepExecutor implements WorkflowStepExecutor<Up
         }
         context.processorContext().throwFatal("Unsupported Update Document patch operation: " + op);
         return null;
+    }
+
+    private JsonPatch toPatch(BexPatchEntry entry, StepExecutionContext context) {
+        if (entry == null) {
+            context.processorContext().throwFatal("Update Document changeset contains a null patch entry");
+            return null;
+        }
+        String op = entry.op();
+        String path = context.processorContext().resolvePointer(entry.authoredPath());
+        if (op == null || op.trim().isEmpty()) {
+            context.processorContext().throwFatal("Update Document patch operation is required");
+            return null;
+        }
+        if (path == null || path.trim().isEmpty()) {
+            context.processorContext().throwFatal("Update Document patch path is required");
+            return null;
+        }
+        String normalizedOp = op.trim().toLowerCase();
+        if ("remove".equals(normalizedOp)) {
+            return JsonPatch.remove(path);
+        }
+        if (entry.val() == null || entry.val().isUndefined()) {
+            context.processorContext().throwFatal("Update Document patch value is required for operation: " + op);
+            return null;
+        }
+        long writerStart = System.nanoTime();
+        Node value = BexNodeWriter.toNode(entry.val());
+        if (metrics != null) {
+            metrics.addBexNodeWriterNanos(System.nanoTime() - writerStart);
+        }
+        if ("add".equals(normalizedOp)) {
+            return JsonPatch.add(path, value);
+        }
+        if ("replace".equals(normalizedOp)) {
+            return JsonPatch.replace(path, value);
+        }
+        context.processorContext().throwFatal("Unsupported Update Document patch operation: " + op);
+        return null;
+    }
+
+    private void applyPatches(List<JsonPatch> patches, StepExecutionContext context) {
+        if (patches == null || patches.isEmpty()) {
+            return;
+        }
+        long applyStart = System.nanoTime();
+        boolean applied = false;
+        try {
+            WorkingDocument.Preview preview = context.advanceWorkingDocument(patches);
+            context.processorContext().applyPreviewedPatches(patches, preview);
+            applied = true;
+        } finally {
+            if (metrics != null) {
+                metrics.addUpdatePatchApplyNanos(System.nanoTime() - applyStart);
+                if (applied) {
+                    metrics.addPatchesApplied(patches.size());
+                    metrics.incrementUpdateBatchPatchApplications();
+                }
+            }
+        }
     }
 
     private Predicate<String> changesetPointers() {

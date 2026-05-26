@@ -1,5 +1,6 @@
 package blue.contract.processor;
 
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.language.Blue;
 import blue.language.model.Node;
 import blue.language.processor.ContractProcessorRegistry;
@@ -133,8 +134,7 @@ class BlueDocumentProcessorsTest {
 
     private static Fixture configuredFixture() {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue);
         return new Fixture(repository, blue);
     }
@@ -162,7 +162,7 @@ class BlueDocumentProcessorsTest {
     }
 
     private static Map<String, Node> contracts(Node document) {
-        return document.getProperties().get("contracts").getProperties();
+        return document.getContracts().getProperties();
     }
 
     private static final class Fixture {

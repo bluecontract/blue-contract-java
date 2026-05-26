@@ -2,16 +2,16 @@ package blue.contract.processor.conversation.compute;
 
 import blue.bex.api.BexEngine;
 import blue.contract.processor.BlueDocumentProcessorOptions;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.bex.BexProcessingMetrics;
 import blue.contract.processor.conversation.bex.BexExpressionEnabledFields;
-import blue.contract.processor.conversation.TestTimelineProvider;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationRequest;
 import blue.contract.processor.conversation.javascript.JavaScriptEvaluationResult;
 import blue.contract.processor.conversation.javascript.JavaScriptRuntime;
 import blue.contract.processor.conversation.workflow.SequentialWorkflowRunner;
 import blue.language.model.Node;
 import blue.language.processor.DocumentProcessingResult;
-import blue.language.processor.ProcessorFatalException;
+import blue.language.processor.ProcessorStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -21,6 +21,25 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Scenario:
+ * Expression-enabled workflow fields use BEX object expressions without turning BEX into a global
+ * expression language for every field.
+ *
+ * Main flow:
+ * 1. Evaluate {@code Conversation/Update Document.changeset} when it contains BEX such as
+ *    {@code $binding}.
+ * 2. Evaluate {@code Conversation/Trigger Event.event} when it contains BEX.
+ * 3. Preserve existing literal and legacy behavior for fields that are not BEX expressions.
+ * 4. Reject invalid evaluated values, such as scalar events or non-list changesets.
+ *
+ * Actors and operations:
+ * - The owner timeline calls {@code run}.
+ * - Compute steps build prior results for {@code steps} bindings.
+ * - Update Document applies evaluated patch lists.
+ * - Trigger Event emits evaluated event objects.
+ * - A failing JavaScript runtime verifies pure BEX paths do not call QuickJS.
+ */
 class BexExpressionFieldWorkflowTest {
     @Test
     void updateDocumentAppliesComputeChangesetThroughBinding() {
@@ -106,9 +125,8 @@ class BexExpressionFieldWorkflowTest {
                 "        changeset:",
                 "          $document: /status"));
 
-        ProcessorFatalException scalarFailure = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(scalar));
-        assertTrue(scalarFailure.getMessage().contains("must evaluate to a list"));
+        DocumentProcessingResult scalarFailure = support.processRun(scalar);
+        assertRuntimeFatal(scalarFailure, "must evaluate to a list");
 
         Node invalidOp = support.initializedOperationWorkflow(String.join("\n",
                 "    steps:",
@@ -122,9 +140,9 @@ class BexExpressionFieldWorkflowTest {
                 "                name: event",
                 "                path: /message/request/status"));
 
-        ProcessorFatalException invalidOpFailure = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(invalidOp, new Node().properties("status", new Node().value("active"))));
-        assertTrue(invalidOpFailure.getMessage().contains("Invalid patch op"));
+        DocumentProcessingResult invalidOpFailure = support.processRun(invalidOp,
+                new Node().properties("status", new Node().value("active")));
+        assertRuntimeFatal(invalidOpFailure, "Invalid patch op");
 
         Node missingVal = support.initializedOperationWorkflow(String.join("\n",
                 "    steps:",
@@ -137,9 +155,9 @@ class BexExpressionFieldWorkflowTest {
                 "                name: event",
                 "                path: /message/request/path"));
 
-        ProcessorFatalException missingValFailure = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(missingVal, new Node().properties("path", new Node().value("/status"))));
-        assertTrue(missingValFailure.getMessage().contains("missing val"));
+        DocumentProcessingResult missingValFailure = support.processRun(missingVal,
+                new Node().properties("path", new Node().value("/status")));
+        assertRuntimeFatal(missingValFailure, "missing val");
     }
 
     @Test
@@ -243,9 +261,8 @@ class BexExpressionFieldWorkflowTest {
                 "        event:",
                 "          $document: /status"));
 
-        ProcessorFatalException scalarFailure = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(scalar));
-        assertTrue(scalarFailure.getMessage().contains("must evaluate to an object"));
+        DocumentProcessingResult scalarFailure = support.processRun(scalar);
+        assertRuntimeFatal(scalarFailure, "must evaluate to an object");
 
         Node undefined = support.initializedOperationWorkflow(String.join("\n",
                 "    steps:",
@@ -254,9 +271,8 @@ class BexExpressionFieldWorkflowTest {
                 "        event:",
                 "          $document: /missing"));
 
-        ProcessorFatalException undefinedFailure = assertThrows(ProcessorFatalException.class,
-                () -> support.processRun(undefined));
-        assertTrue(undefinedFailure.getMessage().contains("undefined/null"));
+        DocumentProcessingResult undefinedFailure = support.processRun(undefined);
+        assertRuntimeFatal(undefinedFailure, "undefined/null");
     }
 
     @Test
@@ -409,9 +425,9 @@ class BexExpressionFieldWorkflowTest {
                 "                name: event",
                 "                path: /message/request/status"));
 
-        ProcessorFatalException updateFailure = assertThrows(ProcessorFatalException.class,
-                () -> updateSupport.processRun(updateDocument, new Node().properties("status", new Node().value("active"))));
-        assertTrue(updateFailure.getMessage().toLowerCase().contains("gas"));
+        DocumentProcessingResult updateFailure = updateSupport.processRun(updateDocument,
+                new Node().properties("status", new Node().value("active")));
+        assertRuntimeFatalIgnoreCase(updateFailure, "gas");
 
         ComputeWorkflowTestSupport triggerSupport = ComputeWorkflowTestSupport.create(
                 BlueDocumentProcessorOptions.builder().defaultBexExpressionGasLimit(1L).build());
@@ -426,9 +442,9 @@ class BexExpressionFieldWorkflowTest {
                 "              name: event",
                 "              path: /message/request/kind"));
 
-        ProcessorFatalException triggerFailure = assertThrows(ProcessorFatalException.class,
-                () -> triggerSupport.processRun(triggerDocument, new Node().properties("kind", new Node().value("Ready"))));
-        assertTrue(triggerFailure.getMessage().toLowerCase().contains("gas"));
+        DocumentProcessingResult triggerFailure = triggerSupport.processRun(triggerDocument,
+                new Node().properties("kind", new Node().value("Ready")));
+        assertRuntimeFatalIgnoreCase(triggerFailure, "gas");
     }
 
     @Test
@@ -498,10 +514,7 @@ class BexExpressionFieldWorkflowTest {
                 "name: BEX Request Schema Not Global",
                 "status: idle",
                 "contracts:",
-                "  ownerChannel:",
-                "    type:",
-                "      blueId: " + TestTimelineProvider.SIMPLE_TIMELINE_CHANNEL_BLUE_ID,
-                "    timelineId: owner",
+                ConversationTestResources.simpleTimelineChannelYaml("ownerChannel", "owner", 2),
                 "  run:",
                 "    type: Conversation/Operation",
                 "    channel: ownerChannel",
@@ -563,6 +576,19 @@ class BexExpressionFieldWorkflowTest {
     private static Node onlyEvent(DocumentProcessingResult result) {
         assertEquals(1, result.triggeredEvents().size());
         return result.triggeredEvents().get(0);
+    }
+
+    private static void assertRuntimeFatal(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null && result.failureReason().contains(expectedMessage),
+                result.failureReason());
+    }
+
+    private static void assertRuntimeFatalIgnoreCase(DocumentProcessingResult result, String expectedMessage) {
+        assertEquals(ProcessorStatus.RUNTIME_FATAL, result.status(), result.failureReason());
+        assertTrue(result.failureReason() != null
+                        && result.failureReason().toLowerCase().contains(expectedMessage.toLowerCase()),
+                result.failureReason());
     }
 
     private static Node binding(String name, String path) {

@@ -1,0 +1,37 @@
+name: Persistent BEX Counter
+counter: 0
+contracts:
+  ownerChannel:
+    type:
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
+    timelineId: owner
+  increment:
+    type: Conversation/Operation
+    channel: ownerChannel
+  incrementImpl:
+    type: Conversation/Sequential Workflow Operation
+    operation: increment
+    steps:
+      - name: BuildPatch
+        type: Conversation/Compute
+        do:
+          - $appendChange:
+              op: replace
+              path: /counter
+              val:
+                $add:
+                  - $document: /counter
+                  - $binding:
+                      name: event
+                      path: /message/request
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+      - name: ApplyPatch
+        type: Conversation/Update Document
+        changeset:
+          $binding:
+            name: steps
+            path: /BuildPatch/changeset

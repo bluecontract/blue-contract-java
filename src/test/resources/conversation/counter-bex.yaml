@@ -3,7 +3,7 @@ counter: 0
 contracts:
   ownerChannel:
     type:
-      blueId: test-simple-timeline-channel
+      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
     timelineId: counter-timeline
   increment:
     description: Increment the counter by the given number

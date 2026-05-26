@@ -12,7 +12,7 @@ public final class QuickJsStepBindings {
     public static Map<String, Object> from(StepExecutionContext context) {
         Map<String, Object> bindings = new LinkedHashMap<String, Object>();
         Node event = context.event();
-        Node document = context.processorContext().documentAt(context.processorContext().resolvePointer("/"));
+        Node document = context.documentView();
         Node contractNode = context.currentContractNode();
 
         bindings.put("event", JavaScriptValues.simple(event));
@@ -34,7 +34,10 @@ public final class QuickJsStepBindings {
         }
         Map<String, Object> copy = new LinkedHashMap<String, Object>((Map<String, Object>) simple);
         String channel = context.workflow().getChannelKey();
-        if (channel != null && !channel.trim().isEmpty() && !copy.containsKey("channel")) {
+        Object existing = copy.get("channel");
+        if (channel != null
+                && !channel.trim().isEmpty()
+                && (!(existing instanceof String) || ((String) existing).trim().isEmpty())) {
             copy.put("channel", channel);
         }
         return copy;

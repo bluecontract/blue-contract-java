@@ -31,7 +31,12 @@ public final class SequentialWorkflowOperationProcessor implements HandlerProces
     @Override
     public String deriveChannel(SequentialWorkflowOperation contract, HandlerRegistrationContext context) {
         Operation operation = context.contractAs(contract.getOperation(), Operation.class);
-        return operation != null ? operation.getChannel() : null;
+        String channel = operation != null ? trimToNull(operation.getChannel()) : null;
+        if (channel != null && !context.hasContract(channel)) {
+            throw new IllegalStateException("Sequential workflow operation '" + context.handlerKey()
+                    + "' references unknown channel '" + channel + "'");
+        }
+        return channel;
     }
 
     @Override
@@ -42,5 +47,13 @@ public final class SequentialWorkflowOperationProcessor implements HandlerProces
     @Override
     public void execute(SequentialWorkflowOperation contract, ProcessorExecutionContext context) {
         runner.execute(contract, context);
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

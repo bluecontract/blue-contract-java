@@ -2,6 +2,7 @@ package blue.contract.processor.conversation.compute;
 
 import blue.contract.processor.BlueDocumentProcessorOptions;
 import blue.contract.processor.BlueDocumentProcessors;
+import blue.contract.processor.conversation.ConversationTestResources;
 import blue.contract.processor.conversation.TestTimelineProvider;
 import blue.language.Blue;
 import blue.language.model.Node;
@@ -25,17 +26,20 @@ final class ComputeWorkflowTestSupport {
 
     static ComputeWorkflowTestSupport create(BlueDocumentProcessorOptions options) {
         BlueRepository repository = BlueRepository.v1_3_0();
-        Blue blue = repository.configure(new Blue());
-        blue.nodeProvider(repository.nodeProvider());
+        Blue blue = ConversationTestResources.configuredBlue(repository);
         BlueDocumentProcessors.registerWith(blue, options);
         TestTimelineProvider.registerWith(blue);
         return new ComputeWorkflowTestSupport(repository, blue);
     }
 
     Node yaml(String source) {
-        Node node = blue.yamlToNode(source);
+        Node node = blue.parseSourceYaml(source);
         node.blue(repository.typeAliasBlue());
         return blue.preprocess(node);
+    }
+
+    Node yamlResource(String resourcePath) {
+        return ConversationTestResources.yamlResource(blue, repository, resourcePath);
     }
 
     DocumentProcessingResult initialize(Node document) {
@@ -55,11 +59,16 @@ final class ComputeWorkflowTestSupport {
     }
 
     Node operationRequest(String operation, Node request) {
-        Node message = new Node()
-                .type("Conversation/Operation Request")
-                .properties("operation", new Node().value(operation))
-                .properties("request", request);
-        return TestTimelineProvider.timelineEntry(blue, repository, "owner", timestamp++, message);
+        return operationRequest("owner", timestamp++, operation, request);
+    }
+
+    Node operationRequest(String timelineId, int timestamp, String operation, Node request) {
+        return ConversationTestResources.operationRequestEvent(blue,
+                repository,
+                timelineId,
+                timestamp,
+                operation,
+                request);
     }
 
     String operationWorkflowDocument(String body) {
@@ -72,10 +81,7 @@ final class ComputeWorkflowTestSupport {
                 "status: idle",
                 rootFields,
                 "contracts:",
-                "  ownerChannel:",
-                "    type:",
-                "      blueId: " + TestTimelineProvider.SIMPLE_TIMELINE_CHANNEL_BLUE_ID,
-                "    timelineId: owner",
+                ConversationTestResources.simpleTimelineChannelYaml("ownerChannel", "owner", 2),
                 "  run:",
                 "    type: Conversation/Operation",
                 "    channel: ownerChannel",
@@ -90,10 +96,7 @@ final class ComputeWorkflowTestSupport {
                 "name: Compute Workflow Test",
                 "status: idle",
                 "contracts:",
-                "  ownerChannel:",
-                "    type:",
-                "      blueId: " + TestTimelineProvider.SIMPLE_TIMELINE_CHANNEL_BLUE_ID,
-                "    timelineId: owner",
+                ConversationTestResources.simpleTimelineChannelYaml("ownerChannel", "owner", 2),
                 "  run:",
                 "    type: Conversation/Operation",
                 "    channel: ownerChannel",
