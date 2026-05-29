@@ -70,87 +70,81 @@ state:
   grantsReady: true
 contracts:
   hotelParticipantChannel:
-    type:
-      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
+    type: Coordination/Timeline Channel
     timelineId: hotel-participant
   restaurantParticipantChannel:
-    type:
-      blueId: EUC3rbFxhUkEwQFTLD3FUrsgQuQfnN8LUA7a74nTNRHm
+    type: Coordination/Timeline Channel
     timelineId: restaurant-participant
   triggeredEventChannel:
-    type: Core/Triggered Event Channel
+    type: Triggered Event Channel
   hotelResaleOrderPlaced:
-    type: Conversation/Operation
+    type: Coordination/Operation
     channel: hotelParticipantChannel
   restaurantResaleOrderPlaced:
-    type: Conversation/Operation
+    type: Coordination/Operation
     channel: restaurantParticipantChannel
   hotelResaleOrderPlacedImpl:
-    type: Conversation/Sequential Workflow Operation
+    type: Coordination/Sequential Workflow Operation
     operation: hotelResaleOrderPlaced
     steps:
       - name: ForwardHotelResaleOrderPlaced
-        type: Conversation/Trigger Event
-        event:
-          $binding:
-            name: event
-            path: /message/request
+        type: Coordination/Compute
+        do:
+          - $appendEvent:
+              $binding:
+                name: event
+                path: /message/request
+          - $return:
+              events:
+                $events: true
   restaurantResaleOrderPlacedImpl:
-    type: Conversation/Sequential Workflow Operation
+    type: Coordination/Sequential Workflow Operation
     operation: restaurantResaleOrderPlaced
     steps:
       - name: ForwardRestaurantResaleOrderPlaced
-        type: Conversation/Trigger Event
-        event:
-          $binding:
-            name: event
-            path: /message/request
+        type: Coordination/Compute
+        do:
+          - $appendEvent:
+              $binding:
+                name: event
+                path: /message/request
+          - $return:
+              events:
+                $events: true
   processPackageHotelResaleOrderPlaced:
-    type: Conversation/Sequential Workflow
+    type: Coordination/Sequential Workflow
     channel: triggeredEventChannel
     event:
-      type: MyOS/Subscription Update
+      type: Sample/Subscription Update
       subscriptionId: hotel-resale-agreement
       targetSessionId: hotel-agreement-session
       update:
         kind: Resale Order Placed
     steps:
       - name: ProcessPackageHotelResaleOrderPlaced
-        type: Conversation/Compute
+        type: Coordination/Compute
         definition: packageFulfillmentComputeDefinition
         entry: processHotelResaleOrderPlaced
         emitEvents: true
         returnResult: true
-      - name: ApplyProcessPackageHotelResaleOrderPlaced
-        type: Conversation/Update Document
-        changeset:
-          $binding:
-            name: steps
-            path: /ProcessPackageHotelResaleOrderPlaced/changeset
   processPackageRestaurantResaleOrderPlaced:
-    type: Conversation/Sequential Workflow
+    type: Coordination/Sequential Workflow
     channel: triggeredEventChannel
     event:
-      type: MyOS/Subscription Update
+      type: Sample/Subscription Update
       subscriptionId: restaurant-resale-agreement
       targetSessionId: restaurant-agreement-session
       update:
         kind: Resale Order Placed
     steps:
       - name: ProcessPackageRestaurantResaleOrderPlaced
-        type: Conversation/Compute
+        type: Coordination/Compute
         definition: packageFulfillmentComputeDefinition
         entry: processRestaurantResaleOrderPlaced
         emitEvents: true
         returnResult: true
-      - name: ApplyProcessPackageRestaurantResaleOrderPlaced
-        type: Conversation/Update Document
-        changeset:
-          $binding:
-            name: steps
-            path: /ProcessPackageRestaurantResaleOrderPlaced/changeset
   packageFulfillmentComputeDefinition:
-    type: Conversation/Compute Definition
+    type: Coordination/Compute Definition
     constants:
       packageLinkedSubscriptionPrefix: 'package-linked:'
       agreementLinkedSubscriptionPrefix: 'agreement-linked:'
@@ -547,7 +541,7 @@ contracts:
                         sourceSessionId:
                           $var: orderSessionId
                       path: /type
-                      val: MyOS/Document Initial Snapshot Requested
+                      val: Sample/Document Initial Snapshot Requested
           - $if:
               cond:
                 $empty:
@@ -584,12 +578,12 @@ contracts:
                           id:
                             $var: subscriptionId
                           events:
-                            - type: Conversation/Event
+                            - type: Coordination/Event
                               kind: Payment Token Attached
-                            - type: Conversation/Event
+                            - type: Coordination/Event
                               kind: Order Confirmed
                       path: /type
-                      val: MyOS/Subscribe to Session Requested
+                      val: Sample/Subscribe to Session Requested
           - $return: {}
       recordPlacedResaleOrder:
         args:

@@ -1,0 +1,281 @@
+name: Ed25519 Threshold Approval
+threshold: 2
+approvers:
+  alice:
+    publicKey: LOgXd50ECwNhvHNfK3cK3VpwioLBUR_UTqn5pL9buuA
+  bob:
+    publicKey: qEeYRYybYAbUnAFl679BmtRDfjMGBmDSMkTl0C4VaZY
+  celine:
+    publicKey: B2nXg4XITq3MNfp3by1H0DouYSAp5p4nN0Q0zhUkwic
+usedNonces:
+  alice: {}
+  bob: {}
+  celine: {}
+approvals:
+  delete-file-123: {}
+executed: {}
+contracts:
+  adminChannel:
+    type: Coordination/Timeline Channel
+    timelineId: admin
+  approveAction:
+    type: Coordination/Operation
+    channel: adminChannel
+  approveActionImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: approveAction
+    steps:
+      - name: VerifyApproval
+        type: Coordination/Compute
+        entry: handleApproval
+        functions:
+          handleApproval:
+            do:
+              - $let:
+                  order:
+                    - req
+                    - actionId
+                    - signer
+                    - nonce
+                    - publicKey
+                    - noncesBefore
+                    - approvalsBefore
+                    - approvalsAfter
+                    - approvalCount
+                    - validSignature
+                    - alreadyExecuted
+                    - approved
+                  vars:
+                    req:
+                      $event: /message/request
+                    actionId:
+                      $var:
+                        name: req
+                        path: /actionId
+                    signer:
+                      $var:
+                        name: req
+                        path: /signer
+                    nonce:
+                      $var:
+                        name: req
+                        path: /nonce
+                    publicKey:
+                      $document:
+                        path:
+                          $pointerJoin:
+                            - approvers
+                            - $var: signer
+                            - publicKey
+                    noncesBefore:
+                      $object:
+                        $document:
+                          path:
+                            $pointerJoin:
+                              - usedNonces
+                              - $var: signer
+                    approvalsBefore:
+                      $object:
+                        $document:
+                          path:
+                            $pointerJoin:
+                              - approvals
+                              - $var: actionId
+                    approvalsAfter:
+                      $objectSet:
+                        object:
+                          $var: approvalsBefore
+                        key:
+                          $var: signer
+                        val: true
+                    approvalCount:
+                      $size:
+                        $keys:
+                          $var: approvalsAfter
+                    validSignature:
+                      $and:
+                        - $exists:
+                            $var: publicKey
+                        - $not:
+                            $hasKey:
+                              object:
+                                $var: noncesBefore
+                              key:
+                                $var: nonce
+                        - $gte:
+                            - $var:
+                                name: req
+                                path: /expires
+                            - $event: /timestamp
+                        - $call:
+                            function: ed25519SignatureValid
+                            args:
+                              publicKey:
+                                $var: publicKey
+                              message:
+                                $call:
+                                  function: approvalMessage
+                                  args:
+                                    action:
+                                      $var:
+                                        name: req
+                                        path: /action
+                                    actionId:
+                                      $var: actionId
+                                    resource:
+                                      $var:
+                                        name: req
+                                        path: /resource
+                                    signer:
+                                      $var: signer
+                                    nonce:
+                                      $var: nonce
+                                    expires:
+                                      $var:
+                                        name: req
+                                        path: /expires
+                              signature:
+                                $var:
+                                  name: req
+                                  path: /signature
+                    alreadyExecuted:
+                      $hasKey:
+                        object:
+                          $object:
+                            $document: /executed
+                        key:
+                          $var: actionId
+                    approved:
+                      $gte:
+                        - $var: approvalCount
+                        - $document: /threshold
+              - $if:
+                  cond:
+                    $var: validSignature
+                  then:
+                    - $appendChange:
+                        op: add
+                        path:
+                          $pointerJoin:
+                            - usedNonces
+                            - $var: signer
+                            - $var: nonce
+                        val:
+                          true
+                    - $appendChange:
+                        op: add
+                        path:
+                          $pointerJoin:
+                            - approvals
+                            - $var: actionId
+                            - $var: signer
+                        val:
+                          true
+                    - $if:
+                        cond:
+                          $and:
+                            - $var: approved
+                            - $not:
+                                $var: alreadyExecuted
+                        then:
+                          - $appendChange:
+                              op: add
+                              path:
+                                $pointerJoin:
+                                  - executed
+                                  - $var: actionId
+                              val: true
+                          - $appendEvent:
+                              type: Coordination/Event
+                              kind: Admin Action Executed
+                              actionId:
+                                $var: actionId
+                              action:
+                                $var:
+                                  name: req
+                                  path: /action
+                              resource:
+                                $var:
+                                  name: req
+                                  path: /resource
+                              approvalCount:
+                                $var: approvalCount
+                        else:
+                          - $appendEvent:
+                              type: Coordination/Event
+                              kind: Admin Approval Recorded
+                              actionId:
+                                $var: actionId
+                              signer:
+                                $var: signer
+                              approvalCount:
+                                $var: approvalCount
+                  else:
+                    - $appendEvent:
+                        type: Coordination/Event
+                        kind: Admin Approval Rejected
+                        actionId:
+                          $var: actionId
+                        signer:
+                          $var: signer
+                        reason: request not authorized
+              - $return:
+                  changeset:
+                    $changeset: true
+                  events:
+                    $events: true
+          approvalMessage:
+            args:
+              action:
+                type: Text
+              actionId:
+                type: Text
+              resource:
+                type: Text
+              signer:
+                type: Text
+              nonce:
+                type: Text
+              expires:
+                type: Integer
+            expr:
+              $join:
+                separator: "\n"
+                list:
+                  - $concat:
+                      - action=
+                      - $var: action
+                  - $concat:
+                      - actionId=
+                      - $var: actionId
+                  - $concat:
+                      - resource=
+                      - $var: resource
+                  - $concat:
+                      - signer=
+                      - $var: signer
+                  - $concat:
+                      - nonce=
+                      - $var: nonce
+                  - $concat:
+                      - expires=
+                      - $text:
+                          $var: expires
+          ed25519SignatureValid:
+            args:
+              publicKey:
+                type: Text
+              message:
+                type: Text
+              signature:
+                type: Text
+            expr:
+              $intrinsic:
+                type:
+                  blueId: Common/Crypto Ed25519 Verify
+                publicKey:
+                  $var: publicKey
+                message:
+                  $var: message
+                signature:
+                  $var: signature

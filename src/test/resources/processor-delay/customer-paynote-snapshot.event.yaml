@@ -1,16 +1,16 @@
 # Generated from src/test/resources/processor-delay/customer-paynote-snapshot.event.json
-type: "MyOS/MyOS Timeline Entry"
+type: "Coordination/Timeline Entry"
 timeline:
   timelineId: "admin-timeline"
 timestamp: 1700000000000
 actor:
-  type: "MyOS/Principal Actor"
+  type: "Sample/Principal Actor"
   accountId: "0"
 message:
-  type: "Conversation/Operation Request"
-  operation: "myOsAdminUpdate"
+  type: "Coordination/Operation Request"
+  operation: "sampleAdminUpdate"
   request:
-    - type: "MyOS/Document Initial Snapshot Resolved"
+    - type: "Sample/Document Initial Snapshot Resolved"
       inResponseTo:
         requestId:
           type: { blueId: "GX7CFUmSDrE2MzptunLCCdZwnuwwrenRQqEnHL4x3uoC" }
@@ -88,7 +88,7 @@ message:
                   type: { blueId: "ExZxT61PSpWHpEAtP2WKMXXqxEYN7Z13j7Zv36Dp99kS" }
                   code:
                     type: { blueId: "GX7CFUmSDrE2MzptunLCCdZwnuwwrenRQqEnHL4x3uoC" }
-                    value: "const unwrap = value => value && typeof value === 'object' && value.value \u0021== undefined ? value.value : value; const readField = (object, key) => unwrap((object || {})[key]); const req = event.message.request || {}; const kind = unwrap(req.kind) || ''; const snapshot = req.initialSnapshot || {}; const expectedKind = kind === 'hotel' || kind === 'restaurant' ? 'Order' : ''; const targetPath = kind === 'hotel' ? '/embeddedDocs/hotelOrder' : kind === 'restaurant' ? '/embeddedDocs/restaurantOrder' : ''; const context = snapshot.context || {}; const existing = targetPath ? document(targetPath) || {} : {}; const snapshotOrderKind = readField(snapshot, 'orderKind') || readField(context, 'orderKind'); if (\u0021targetPath || readField(snapshot, 'kind') \u0021== expectedKind || snapshotOrderKind \u0021== kind || readField(context, 'packageOrderDocumentId') \u0021== document('/context/packageOrderDocumentId')) return { changeset: [], events: [{ type: 'Conversation/Event', kind: 'Component Order Attachment Rejected', orderKind: kind }] }; if (existing && Object.keys(existing).length > 0) return { changeset: [], events: [{ type: 'Conversation/Event', kind: 'Component Order Attachment Rejected', orderKind: kind, reason: 'component_order_already_attached' }] }; return { changeset: [{ op: 'add', path: targetPath, val: snapshot }], events: [{ type: 'Conversation/Event', kind: 'Component Order Attached', orderKind: kind }] };"
+                    value: "const unwrap = value => value && typeof value === 'object' && value.value \u0021== undefined ? value.value : value; const readField = (object, key) => unwrap((object || {})[key]); const req = event.message.request || {}; const kind = unwrap(req.kind) || ''; const snapshot = req.initialSnapshot || {}; const expectedKind = kind === 'hotel' || kind === 'restaurant' ? 'Order' : ''; const targetPath = kind === 'hotel' ? '/embeddedDocs/hotelOrder' : kind === 'restaurant' ? '/embeddedDocs/restaurantOrder' : ''; const context = snapshot.context || {}; const existing = targetPath ? document(targetPath) || {} : {}; const snapshotOrderKind = readField(snapshot, 'orderKind') || readField(context, 'orderKind'); if (\u0021targetPath || readField(snapshot, 'kind') \u0021== expectedKind || snapshotOrderKind \u0021== kind || readField(context, 'packageOrderDocumentId') \u0021== document('/context/packageOrderDocumentId')) return { changeset: [], events: [{ type: 'Coordination/Event', kind: 'Component Order Attachment Rejected', orderKind: kind }] }; if (existing && Object.keys(existing).length > 0) return { changeset: [], events: [{ type: 'Coordination/Event', kind: 'Component Order Attachment Rejected', orderKind: kind, reason: 'component_order_already_attached' }] }; return { changeset: [{ op: 'add', path: targetPath, val: snapshot }], events: [{ type: 'Coordination/Event', kind: 'Component Order Attached', orderKind: kind }] };"
                 - name: "ApplyComponentAttachment"
                   type: { blueId: "FtHZJzH4hqAoGxFBjsmy1svfT4BwEBB4aHpFSZycZLLa" }
                   changeset:
@@ -163,7 +163,7 @@ message:
                       name: "steps"
                       path: "/BuildCompletion/changeset"
           initialized:
-            type: { blueId: "EVguxFmq5iFtMZaBQgHfjWDojaoesQ1vEXCQFZ59yL28" }
+            type: "Processing Initialized Marker"
             documentId:
               type: { blueId: "GX7CFUmSDrE2MzptunLCCdZwnuwwrenRQqEnHL4x3uoC" }
               value: "CxSx6ELb64NzbBE5pw5dYpJdQz7JMdtYnLAT25QXuuNa"

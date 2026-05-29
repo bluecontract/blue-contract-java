@@ -1,0 +1,274 @@
+name: Dynamic Embedded Participants
+# Root counters. Alice creates embedded participant documents, embedded participants emit chat
+# messages, and Bob checks whether the root document has seen enough messages.
+nextEmbeddedNumber: 0
+chatMessagesSeen: 0
+embeddedTimelineEventsSeen: 0
+success: false
+# Generic embedded document template. createEmbedded copies this object and specializes the display
+# name, timeline id, and chat message for each newly created /embedded_N document.
+embeddedTemplate:
+  name: Embedded
+  displayName: Embedded
+  contracts:
+    participantChannel:
+      type: Coordination/Timeline Channel
+      timelineId: embedded
+    say:
+      type: Coordination/Operation
+      channel: participantChannel
+    sayImpl:
+      type: Coordination/Sequential Workflow Operation
+      operation: say
+      steps:
+        - type: Coordination/Trigger Event
+          event:
+            type: Coordination/Chat Message
+            message: Chat from embedded
+contractTemplates:
+  # Template for the root-level timeline channel that points at one generated embedded document.
+  embeddedTimeline:
+    type: Coordination/Timeline Channel
+    timelineId: embedded
+  # Template for the root-level embedded node channel that surfaces events from one generated child.
+  embeddedBridge:
+    type: Embedded Node Channel
+    childPath: /embedded
+  # Template for the root-level workflow that counts chat messages from one generated child.
+  embeddedChatCounter:
+    type: Coordination/Sequential Workflow
+    channel: embedded_bridge
+    event:
+      type: Coordination/Chat Message
+    steps:
+      - name: BuildChatCounterPatch
+        type: Coordination/Compute
+        do:
+          - $appendChange:
+              op: replace
+              path: /chatMessagesSeen
+              val:
+                $add:
+                  - $document: /chatMessagesSeen
+                  - 1
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+contracts:
+  # Alice is allowed to create embedded participant documents.
+  aliceChannel:
+    type: Coordination/Timeline Channel
+    timelineId: alice
+  # Bob is allowed to check whether enough embedded chat messages have been observed.
+  bobChannel:
+    type: Coordination/Timeline Channel
+    timelineId: bob
+  createEmbedded:
+    type: Coordination/Operation
+    channel: aliceChannel
+  createEmbeddedImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: createEmbedded
+    steps:
+      - name: BuildEmbedded
+        type: Coordination/Compute
+        do:
+          # createEmbedded creates exactly one new document:
+          # - /embedded_N is copied from /embeddedTemplate;
+          # - its participant channel is changed to embedded-N;
+          # - its say operation emits a unique message;
+          # - root contracts are added so the main document can route to and observe it.
+          - $let:
+              name: index
+              expr:
+                $add:
+                  - $document: /nextEmbeddedNumber
+                  - 1
+          - $let:
+              name: suffix
+              expr:
+                $text:
+                  $var: index
+          - $appendChange:
+              op: replace
+              path: /nextEmbeddedNumber
+              val:
+                $var: index
+          - $appendChange:
+              op: add
+              path:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+              val:
+                $document: /embeddedTemplate
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+                  - /displayName
+              val:
+                $concat:
+                  - Embedded
+                  - " "
+                  - $var: suffix
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+                  - /contracts/participantChannel/timelineId
+              val:
+                $concat:
+                  - embedded-
+                  - $var: suffix
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+                  - /contracts/sayImpl/steps/0/event/message
+              val:
+                $concat:
+                  - Chat from embedded
+                  - " "
+                  - $var: suffix
+          - $appendChange:
+              op: add
+              path: /contracts/embeddedDocs/paths/-
+              val:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+          - $appendChange:
+              op: add
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _timeline
+              val:
+                $document: /contractTemplates/embeddedTimeline
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _timeline/timelineId
+              val:
+                $concat:
+                  - embedded-
+                  - $var: suffix
+          - $appendChange:
+              op: add
+              path: /contracts/allEmbeddedTimelines/channels/-
+              val:
+                $concat:
+                  - embedded_
+                  - $var: suffix
+                  - _timeline
+          - $appendChange:
+              op: add
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _bridge
+              val:
+                $document: /contractTemplates/embeddedBridge
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _bridge/childPath
+              val:
+                $concat:
+                  - /embedded_
+                  - $var: suffix
+          - $appendChange:
+              op: add
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _chatCounter
+              val:
+                $document: /contractTemplates/embeddedChatCounter
+          - $appendChange:
+              op: replace
+              path:
+                $concat:
+                  - /contracts/embedded_
+                  - $var: suffix
+                  - _chatCounter/channel
+              val:
+                $concat:
+                  - embedded_
+                  - $var: suffix
+                  - _bridge
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+  embeddedDocs:
+    type: Process Embedded
+    paths: []
+  # Composite channel over all generated embedded timelines. It starts empty and createEmbedded appends
+  # one generated timeline contract key per created participant.
+  allEmbeddedTimelines:
+    type: Coordination/Composite Timeline Channel
+    channels: []
+  embeddedTimelineObserver:
+    type: Coordination/Sequential Workflow
+    channel: allEmbeddedTimelines
+    steps:
+      - name: BuildEmbeddedTimelineEventPatch
+        type: Coordination/Compute
+        do:
+          # Any operation on a generated embedded timeline increments this root-level observer counter.
+          - $appendChange:
+              op: replace
+              path: /embeddedTimelineEventsSeen
+              val:
+                $add:
+                  - $document: /embeddedTimelineEventsSeen
+                  - 1
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
+  checkChatCount:
+    type: Coordination/Operation
+    channel: bobChannel
+  checkChatCountImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: checkChatCount
+    steps:
+      - name: BuildCheck
+        type: Coordination/Compute
+        do:
+          # Bob's check is deliberately simple: success becomes true once five embedded chat messages
+          # have been bridged back to the main document.
+          - $appendChange:
+              op: replace
+              path: /success
+              val:
+                $gte:
+                  - $document: /chatMessagesSeen
+                  - 5
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
