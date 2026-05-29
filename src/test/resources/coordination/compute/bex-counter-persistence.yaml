@@ -1,0 +1,30 @@
+name: Persistent BEX Counter
+counter: 0
+contracts:
+  ownerChannel:
+    type: Coordination/Timeline Channel
+    timelineId: owner
+  increment:
+    type: Coordination/Operation
+    channel: ownerChannel
+  incrementImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: increment
+    steps:
+      - name: BuildPatch
+        type: Coordination/Compute
+        do:
+          - $appendChange:
+              op: replace
+              path: /counter
+              val:
+                $add:
+                  - $document: /counter
+                  - $binding:
+                      name: event
+                      path: /message/request
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true

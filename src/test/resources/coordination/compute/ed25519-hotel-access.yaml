@@ -1,0 +1,180 @@
+name: Ed25519 Hotel Access
+guestPublicKeys:
+  customerA: uo2WYCfAYaiRPfdHd0L3H0Um10zlss7-w1ALJo46nAQ
+usedNonces: {}
+contracts:
+  hotelChannel:
+    type: Coordination/Timeline Channel
+    timelineId: hotel
+  checkIn:
+    type: Coordination/Operation
+    channel: hotelChannel
+  checkInImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: checkIn
+    steps:
+      - name: VerifyCheckIn
+        type: Coordination/Compute
+        entry: handleCheckIn
+        functions:
+          handleCheckIn:
+            do:
+              - $let:
+                  order:
+                    - req
+                    - userId
+                    - nonce
+                    - publicKey
+                    - noncesBefore
+                    - valid
+                    - noncesAfter
+                  vars:
+                    req:
+                      $event: /message/request
+                    userId:
+                      $var:
+                        name: req
+                        path: /userId
+                    nonce:
+                      $var:
+                        name: req
+                        path: /nonce
+                    publicKey:
+                      $document:
+                        path:
+                          $pointerJoin:
+                            - guestPublicKeys
+                            - $var: userId
+                    noncesBefore:
+                      $object:
+                        $document:
+                          path:
+                            $pointerJoin:
+                              - usedNonces
+                              - $var: userId
+                    valid:
+                      $and:
+                        - $exists:
+                            $var: publicKey
+                        - $not:
+                            $hasKey:
+                              object:
+                                $var: noncesBefore
+                              key:
+                                $var: nonce
+                        - $gte:
+                            - $var:
+                                name: req
+                                path: /expires
+                            - $event: /timestamp
+                        - $call:
+                            function: ed25519SignatureValid
+                            args:
+                              publicKey:
+                                $var: publicKey
+                              message:
+                                $call:
+                                  function: checkInMessage
+                                  args:
+                                    reservationId:
+                                      $var:
+                                        name: req
+                                        path: /reservationId
+                                    userId:
+                                      $var: userId
+                                    nonce:
+                                      $var: nonce
+                                    expires:
+                                      $var:
+                                        name: req
+                                        path: /expires
+                              signature:
+                                $var:
+                                  name: req
+                                  path: /signature
+                    noncesAfter:
+                      $objectSet:
+                        object:
+                          $var: noncesBefore
+                        key:
+                          $var: nonce
+                        val: true
+              - $if:
+                  cond:
+                    $var: valid
+                  then:
+                    - $appendChange:
+                        op: add
+                        path:
+                          $pointerJoin:
+                            - usedNonces
+                            - $var: userId
+                        val:
+                          $var: noncesAfter
+                    - $appendEvent:
+                        type: Coordination/Event
+                        kind: Hotel Access Granted
+                        userId:
+                          $var: userId
+                        reservationId:
+                          $var:
+                            name: req
+                            path: /reservationId
+                  else:
+                    - $appendEvent:
+                        type: Coordination/Event
+                        kind: Hotel Access Rejected
+                        userId:
+                          $var: userId
+                        reason: request not authorized
+              - $return:
+                  changeset:
+                    $changeset: true
+                  events:
+                    $events: true
+          checkInMessage:
+            args:
+              reservationId:
+                type: Text
+              userId:
+                type: Text
+              nonce:
+                type: Text
+              expires:
+                type: Integer
+            expr:
+              $join:
+                separator: "\n"
+                list:
+                  - action=hotel.checkIn
+                  - $concat:
+                      - reservation=
+                      - $var: reservationId
+                  - $concat:
+                      - user=
+                      - $var: userId
+                  - $concat:
+                      - nonce=
+                      - $var: nonce
+                  - $concat:
+                      - expires=
+                      - $text:
+                          $var: expires
+          ed25519SignatureValid:
+            args:
+              publicKey:
+                type: Text
+              message:
+                type: Text
+              signature:
+                type: Text
+            expr:
+              $intrinsic:
+                type:
+                  blueId: Common/Crypto Ed25519 Verify
+                publicKey:
+                  $var: publicKey
+                message:
+                  $var: message
+                signature:
+                  $var: signature

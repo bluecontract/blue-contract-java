@@ -1,0 +1,51 @@
+name: Counter
+counter: 0
+contracts:
+  ownerChannel:
+    type: Coordination/Timeline Channel
+    timelineId: counter-timeline
+  increment:
+    description: Increment the counter by the given number
+    type: Coordination/Operation
+    channel: ownerChannel
+    request:
+      description: Represents a value by which counter will be incremented
+      type: Integer
+  incrementImpl:
+    type: Coordination/Sequential Workflow Operation
+    operation: increment
+    steps:
+      - name: IncrementAndEmit
+        type: Coordination/Compute
+        do:
+          - $let:
+              name: nextCounter
+              expr:
+                $add:
+                  - $document: /counter
+                  - $binding:
+                      name: event
+                      path: /message/request
+          - $appendChange:
+              op: replace
+              path: /counter
+              val:
+                $var: nextCounter
+          - $appendEvent:
+              $merge:
+                - type: Coordination/Chat Message
+                - message:
+                    $concat:
+                      - Counter was incremented by
+                      - " "
+                      - $binding:
+                          name: event
+                          path: /message/request
+                      - " and is now "
+                      - $text:
+                          $var: nextCounter
+          - $return:
+              changeset:
+                $changeset: true
+              events:
+                $events: true
